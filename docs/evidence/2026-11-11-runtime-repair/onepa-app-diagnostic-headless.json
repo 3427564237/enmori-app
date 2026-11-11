@@ -1,0 +1,106 @@
+{
+  "sourceCommit": "cb80c43595c22d166c3b87a5dd68359c436e52e9",
+  "scriptSha256": "6c4e8d007f0960033765747daae35f5fba9e09eb1dc1c15d925ad37a7cabbd82",
+  "exitCode": 5,
+  "temporaryScriptAbsent": true,
+  "safeRecords": [
+    {
+      "stage": "warm-launch",
+      "elapsedMs": 6001
+    },
+    {
+      "stage": "warm-ready",
+      "elapsedMs": 13584
+    },
+    {
+      "stage": "launch",
+      "elapsedMs": 13699
+    },
+    {
+      "stage": "context",
+      "elapsedMs": 13701
+    },
+    {
+      "stage": "page-action-0",
+      "elapsedMs": 20054
+    },
+    {
+      "navigationStatus": 403,
+      "elapsedMs": 20935
+    },
+    {
+      "stage": "response-wait-0",
+      "elapsedMs": 20974
+    },
+    {
+      "resourceFinished": {
+        "path": "/events/search",
+        "type": "document",
+        "method": "GET",
+        "status": 403,
+        "elapsedMs": 952
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/_Incapsula_Resource",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 279
+      }
+    },
+    {
+      "domContentLoaded": true
+    },
+    {
+      "resourceFailed": {
+        "path": "/_Incapsula_Resource",
+        "type": "image",
+        "reason": "net::ERR_FAILED"
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/_Incapsula_Resource",
+        "type": "document",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 432
+      }
+    },
+    {
+      "pageState": {
+        "title": "",
+        "ready": "complete",
+        "links": 0,
+        "scriptCount": 1,
+        "challenge": false
+      }
+    },
+    {
+      "deadline": true,
+      "stage": "response-wait-0"
+    },
+    {
+      "stage": "close",
+      "elapsedMs": 33803
+    },
+    {
+      "ok": false,
+      "stage": "close",
+      "errorClass": "Error",
+      "category": "deadline",
+      "elapsedMs": 34221
+    },
+    {
+      "resources": {
+        "www.onepa.gov.sg:document": 2,
+        "www.onepa.gov.sg:script": 1,
+        "www.onepa.gov.sg:image": 1,
+        "maxcdn.bootstrapcdn.com:stylesheet": 1
+      }
+    }
+  ],
+  "knownStartupError": "xvfb_error"
+}

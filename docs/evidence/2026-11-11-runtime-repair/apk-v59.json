@@ -1,0 +1,31 @@
+{
+  "sourceCommit": "469eaafe0914112ddeee8046337ee24f34a7502c",
+  "buildNumber": 59,
+  "versionName": "1.0.0-repair20261111",
+  "package": "com.enmori.app.group",
+  "debuggable": false,
+  "signerSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+  "sha256": "1d0678b4ae109f2c2f7f9b2fddcb05c814b3d8bfb14dfb7f5ab6f0c9ff6618fe",
+  "bytes": 69068160,
+  "checks": {
+    "package": true,
+    "version": true,
+    "nonDebuggable": true,
+    "sameExpectedSignature": true,
+    "samePermissions": true,
+    "sameAbis": true,
+    "sameSdkLevels": true,
+    "sameConfigSymbols": true,
+    "isolatedSourceClean": true
+  },
+  "configSymbolKeys": [
+    "ENMORI_API_BASE_URL",
+    "ENMORI_FIREBASE_API_KEY",
+    "ENMORI_FIREBASE_APP_ID",
+    "ENMORI_FIREBASE_MESSAGING_SENDER_ID",
+    "ENMORI_FIREBASE_PROJECT_ID"
+  ],
+  "historicalComparedVersionCode": 58,
+  "deviceCurrentlyVerified": false,
+  "apk": "/home/miku/.codex/worktrees/ai-admin-polish-20261105/ENMORI/build/repair-v59/ENMORI-repair-v59-release.apk"
+}

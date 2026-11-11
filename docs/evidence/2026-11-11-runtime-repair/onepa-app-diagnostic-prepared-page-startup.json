@@ -1,0 +1,473 @@
+{
+  "sourceCommit": "cb80c43595c22d166c3b87a5dd68359c436e52e9",
+  "scriptSha256": "0c7acb905f32f427cf4b5fa17dddb37c424b51ff5208b090025e38b8e24273c9",
+  "exitCode": 1,
+  "temporaryScriptAbsent": true,
+  "safeRecords": [
+    {
+      "stage": "warm-launch",
+      "elapsedMs": 7056
+    },
+    {
+      "stage": "warm-ready",
+      "elapsedMs": 18829
+    },
+    {
+      "stage": "launch",
+      "elapsedMs": 18851
+    },
+    {
+      "stage": "context",
+      "elapsedMs": 18870
+    },
+    {
+      "preparedBlankPage": true,
+      "sourceBudgetMs": 20000
+    },
+    {
+      "stage": "page-action-0",
+      "elapsedMs": 27284
+    },
+    {
+      "navigationStatus": 200,
+      "elapsedMs": 28751
+    },
+    {
+      "stage": "response-wait-0",
+      "elapsedMs": 28948
+    },
+    {
+      "resourceFinished": {
+        "path": "/events/search",
+        "type": "document",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 1375
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/js/gtm-init.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 2165
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/js/editing-diagnostics.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 2165
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/chunks/webpack-3abea4b957e42b44.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 2165
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/chunks/framework-c05ed99873e7bd34.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 2299
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/chunks/pages/_app-0c6b509029a80c53.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 3631
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/chunks/25f4ac2a-42dca740eec9c87f.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 3618
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/chunks/main-9e1000c0818c5d2c.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 3640
+      }
+    },
+    {
+      "resourceFailed": {
+        "path": "/_next/image",
+        "type": "image",
+        "reason": "net::ERR_FAILED"
+      }
+    },
+    {
+      "resourceFailed": {
+        "path": "/_next/image",
+        "type": "image",
+        "reason": "net::ERR_FAILED"
+      }
+    },
+    {
+      "resourceFailed": {
+        "path": "/_next/image",
+        "type": "image",
+        "reason": "net::ERR_FAILED"
+      }
+    },
+    {
+      "resourceFailed": {
+        "path": "/img/passion-logo.svg",
+        "type": "image",
+        "reason": "net::ERR_FAILED"
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/chunks/2bd5674f-4061c2aef688f238.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 4235
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/chunks/07c2d338-46c428f8cff8b8f6.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 4242
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/chunks/149-f1b85fda858e222d.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 4242
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/chunks/98309536-67c6bf29dfddd1f6.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 4252
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/chunks/pages/%5B%5B...path%5D%5D-b742abd41f6ab9c9.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 3854
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/chunks/974-c2c99cae71d64696.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 4243
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/build-TfctsWXpff2fKS/_buildManifest.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 3837
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/build-TfctsWXpff2fKS/_ssgManifest.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 3843
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/_Incapsula_Resource",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 3843
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/chunks/282-5f1b7317401c3e71.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 3950
+      }
+    },
+    {
+      "domContentLoaded": true
+    },
+    {
+      "pageErrorName": "Error"
+    },
+    {
+      "resourceFailed": {
+        "path": "/_Incapsula_Resource",
+        "type": "image",
+        "reason": "net::ERR_FAILED"
+      }
+    },
+    {
+      "resourceFailed": {
+        "path": "/_next/image",
+        "type": "image",
+        "reason": "net::ERR_FAILED"
+      }
+    },
+    {
+      "resourceFailed": {
+        "path": "/_next/image",
+        "type": "image",
+        "reason": "net::ERR_FAILED"
+      }
+    },
+    {
+      "resourceFailed": {
+        "path": "/_next/image",
+        "type": "image",
+        "reason": "net::ERR_FAILED"
+      }
+    },
+    {
+      "resourceFailed": {
+        "path": "/img/passion-logo.svg",
+        "type": "image",
+        "reason": "net::ERR_FAILED"
+      }
+    },
+    {
+      "pageState": {
+        "title": "onePA | Event Search",
+        "ready": "interactive",
+        "links": 0,
+        "scriptCount": 22,
+        "challenge": false
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/chunks/470.6ba173ae6d9eaf27.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 1949
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/js/gtag-init.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 1326
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/css/de7b2dd9f7321036.css",
+        "type": "fetch",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 3759
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/-api/auth/user/me",
+        "type": "fetch",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 2692
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/-api/search/time-periods",
+        "type": "fetch",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 2607
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/-api/search/neighbourhoods",
+        "type": "fetch",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 2830
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/-api/auth/user/validate-token",
+        "type": "fetch",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 2760
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/-api/search/outlets",
+        "type": "fetch",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 6086
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/-api/search/categories",
+        "type": "fetch",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 6093
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/_next/data/build-TfctsWXpff2fKS/en/Membership.json",
+        "type": "fetch",
+        "method": "GET",
+        "status": 308,
+        "elapsedMs": 5642
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/_next/data/build-TfctsWXpff2fKS/en/Events.json",
+        "type": "fetch",
+        "method": "GET",
+        "status": 308,
+        "elapsedMs": 5760
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/_next/data/build-TfctsWXpff2fKS/en/Dashboard/Membership.json",
+        "type": "fetch",
+        "method": "GET",
+        "status": 308,
+        "elapsedMs": 5623
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/_next/data/build-TfctsWXpff2fKS/en.json",
+        "type": "fetch",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 5654
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/_next/data/build-TfctsWXpff2fKS/en/interest-groups.json",
+        "type": "fetch",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 6211
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/_next/data/build-TfctsWXpff2fKS/en/about-us.json",
+        "type": "fetch",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 6614
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/_next/data/build-TfctsWXpff2fKS/en/facilities.json",
+        "type": "fetch",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 6486
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/_next/data/build-TfctsWXpff2fKS/en/passion-card.json",
+        "type": "fetch",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 6493
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/_next/data/build-TfctsWXpff2fKS/en/courses.json",
+        "type": "fetch",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 6671
+      }
+    },
+    {
+      "deadline": true,
+      "stage": "response-wait-0"
+    },
+    {
+      "stage": "close",
+      "elapsedMs": 47499
+    },
+    {
+      "ok": false,
+      "stage": "close",
+      "errorClass": "TimeoutError",
+      "category": "deadline",
+      "elapsedMs": 50354
+    },
+    {
+      "resources": {
+        "www.onepa.gov.sg:document": 1,
+        "www.onepa.gov.sg:stylesheet": 2,
+        "www.onepa.gov.sg:script": 19,
+        "fonts.googleapis.com:stylesheet": 1,
+        "www.googletagmanager.com:script": 3,
+        "www.onepa.gov.sg:image": 9,
+        "js.stripe.com:script": 1,
+        "www.onepa.gov.sg:fetch": 16,
+        "assets.wogaa.sg:script": 1,
+        "analytics.google.com:fetch": 1,
+        "stats.g.doubleclick.net:ping": 1
+      }
+    }
+  ],
+  "knownStartupError": null
+}

@@ -1,0 +1,155 @@
+{
+  "sourceCommit": "cb80c43595c22d166c3b87a5dd68359c436e52e9",
+  "scriptSha256": "e79293c250def3afccdde290033a65ea1a3921bdf91ee21cf1fffab80a6532db",
+  "exitCode": 1,
+  "temporaryScriptAbsent": true,
+  "safeRecords": [
+    {
+      "stage": "warm-launch",
+      "elapsedMs": 2426
+    },
+    {
+      "stage": "warm-ready",
+      "elapsedMs": 9831
+    },
+    {
+      "stage": "launch",
+      "elapsedMs": 9860
+    },
+    {
+      "stage": "context",
+      "elapsedMs": 9863
+    },
+    {
+      "stage": "page-action-0",
+      "elapsedMs": 18015
+    },
+    {
+      "navigationStatus": 200,
+      "elapsedMs": 20903
+    },
+    {
+      "stage": "response-wait-0",
+      "elapsedMs": 21118
+    },
+    {
+      "resourceFinished": {
+        "path": "/events/search",
+        "type": "document",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 2186
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/js/editing-diagnostics.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 1372
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "/js/gtm-init.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 1383
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/chunks/webpack-3abea4b957e42b44.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 1381
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/chunks/framework-c05ed99873e7bd34.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 1770
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/chunks/pages/_app-0c6b509029a80c53.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 6641
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/chunks/07c2d338-46c428f8cff8b8f6.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 6613
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/chunks/98309536-67c6bf29dfddd1f6.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 6623
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/chunks/2bd5674f-4061c2aef688f238.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 6625
+      }
+    },
+    {
+      "resourceFinished": {
+        "path": "//_next/static/chunks/main-9e1000c0818c5d2c.js",
+        "type": "script",
+        "method": "GET",
+        "status": 200,
+        "elapsedMs": 6711
+      }
+    },
+    {
+      "deadline": true,
+      "stage": "response-wait-0"
+    },
+    {
+      "stage": "close",
+      "elapsedMs": 30802
+    },
+    {
+      "pageInspectionFailed": true
+    },
+    {
+      "ok": false,
+      "stage": "close",
+      "errorClass": "Error",
+      "category": "deadline",
+      "elapsedMs": 32202
+    },
+    {
+      "resources": {
+        "www.onepa.gov.sg:document": 1,
+        "www.onepa.gov.sg:stylesheet": 2,
+        "www.onepa.gov.sg:script": 17,
+        "fonts.googleapis.com:stylesheet": 1,
+        "www.googletagmanager.com:script": 1,
+        "www.onepa.gov.sg:image": 4
+      }
+    }
+  ],
+  "knownStartupError": null
+}

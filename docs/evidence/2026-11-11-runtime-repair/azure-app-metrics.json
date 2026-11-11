@@ -1,0 +1,303 @@
+{
+  "window": "previous 1 hour",
+  "interval": "5 minutes",
+  "resources": {
+    "plan": {
+      "definitionError": null,
+      "definitions": [
+        {
+          "name": "CpuPercentage",
+          "unit": "Percent",
+          "supportedAggregationTypes": [
+            "None",
+            "Average",
+            "Minimum",
+            "Maximum",
+            "Total",
+            "Count"
+          ]
+        },
+        {
+          "name": "MemoryPercentage",
+          "unit": "Percent",
+          "supportedAggregationTypes": [
+            "None",
+            "Average",
+            "Minimum",
+            "Maximum",
+            "Total",
+            "Count"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "name": "CpuPercentage",
+          "unit": "Percent",
+          "aggregation": "Average",
+          "error": null,
+          "points": [
+            {
+              "timeStamp": "2026-11-11T04:05:00Z",
+              "average": 20.8
+            },
+            {
+              "timeStamp": "2026-11-11T04:10:00Z",
+              "average": 19.6
+            },
+            {
+              "timeStamp": "2026-11-11T04:15:00Z",
+              "average": 33.0
+            },
+            {
+              "timeStamp": "2026-11-11T04:20:00Z",
+              "average": 35.4
+            },
+            {
+              "timeStamp": "2026-11-11T04:25:00Z",
+              "average": 31.2
+            },
+            {
+              "timeStamp": "2026-11-11T04:30:00Z",
+              "average": 30.6
+            },
+            {
+              "timeStamp": "2026-11-11T04:35:00Z",
+              "average": 30.6
+            },
+            {
+              "timeStamp": "2026-11-11T04:40:00Z",
+              "average": 19.8
+            },
+            {
+              "timeStamp": "2026-11-11T04:45:00Z",
+              "average": 31.4
+            },
+            {
+              "timeStamp": "2026-11-11T04:50:00Z",
+              "average": 21.0
+            },
+            {
+              "timeStamp": "2026-11-11T04:55:00Z",
+              "average": 19.2
+            },
+            {
+              "timeStamp": "2026-11-11T05:00:00Z",
+              "average": 36.8
+            }
+          ]
+        },
+        {
+          "name": "MemoryPercentage",
+          "unit": "Percent",
+          "aggregation": "Average",
+          "error": null,
+          "points": [
+            {
+              "timeStamp": "2026-11-11T04:05:00Z",
+              "average": 73.6
+            },
+            {
+              "timeStamp": "2026-11-11T04:10:00Z",
+              "average": 73.8
+            },
+            {
+              "timeStamp": "2026-11-11T04:15:00Z",
+              "average": 72.4
+            },
+            {
+              "timeStamp": "2026-11-11T04:20:00Z",
+              "average": 66.2
+            },
+            {
+              "timeStamp": "2026-11-11T04:25:00Z",
+              "average": 65.4
+            },
+            {
+              "timeStamp": "2026-11-11T04:30:00Z",
+              "average": 65.8
+            },
+            {
+              "timeStamp": "2026-11-11T04:35:00Z",
+              "average": 66.6
+            },
+            {
+              "timeStamp": "2026-11-11T04:40:00Z",
+              "average": 67.4
+            },
+            {
+              "timeStamp": "2026-11-11T04:45:00Z",
+              "average": 68.2
+            },
+            {
+              "timeStamp": "2026-11-11T04:50:00Z",
+              "average": 71.0
+            },
+            {
+              "timeStamp": "2026-11-11T04:55:00Z",
+              "average": 73.0
+            },
+            {
+              "timeStamp": "2026-11-11T05:00:00Z",
+              "average": 70.6
+            }
+          ]
+        }
+      ]
+    },
+    "site": {
+      "definitionError": null,
+      "definitions": [
+        {
+          "name": "CpuTime",
+          "unit": "Seconds",
+          "supportedAggregationTypes": [
+            "Count",
+            "Total",
+            "Minimum",
+            "Maximum"
+          ]
+        },
+        {
+          "name": "MemoryWorkingSet",
+          "unit": "Bytes",
+          "supportedAggregationTypes": [
+            "None",
+            "Average",
+            "Minimum",
+            "Maximum",
+            "Total",
+            "Count"
+          ]
+        },
+        {
+          "name": "AverageMemoryWorkingSet",
+          "unit": "Bytes",
+          "supportedAggregationTypes": [
+            "None",
+            "Average",
+            "Minimum",
+            "Maximum",
+            "Total",
+            "Count"
+          ]
+        }
+      ],
+      "metrics": [
+        {
+          "name": "CpuTime",
+          "unit": "Seconds",
+          "aggregation": "Total",
+          "error": null,
+          "points": [
+            {
+              "timeStamp": "2026-11-11T04:05:00Z",
+              "total": 0.137
+            },
+            {
+              "timeStamp": "2026-11-11T04:10:00Z",
+              "total": 0.061
+            },
+            {
+              "timeStamp": "2026-11-11T04:15:00Z",
+              "total": 2.903
+            },
+            {
+              "timeStamp": "2026-11-11T04:20:00Z",
+              "total": 25.934
+            },
+            {
+              "timeStamp": "2026-11-11T04:25:00Z",
+              "total": 15.571
+            },
+            {
+              "timeStamp": "2026-11-11T04:30:00Z",
+              "total": 15.372
+            },
+            {
+              "timeStamp": "2026-11-11T04:35:00Z",
+              "total": 14.893
+            },
+            {
+              "timeStamp": "2026-11-11T04:40:00Z",
+              "total": 0.381
+            },
+            {
+              "timeStamp": "2026-11-11T04:45:00Z",
+              "total": 2.262
+            },
+            {
+              "timeStamp": "2026-11-11T04:50:00Z",
+              "total": 0.059
+            },
+            {
+              "timeStamp": "2026-11-11T04:55:00Z",
+              "total": 0.07
+            },
+            {
+              "timeStamp": "2026-11-11T05:00:00Z",
+              "total": 28.094
+            }
+          ]
+        },
+        {
+          "name": "MemoryWorkingSet",
+          "unit": "Bytes",
+          "aggregation": "Average",
+          "error": null,
+          "points": [
+            {
+              "timeStamp": "2026-11-11T04:05:00Z",
+              "average": 62026819.8
+            },
+            {
+              "timeStamp": "2026-11-11T04:10:00Z",
+              "average": 59223107.6
+            },
+            {
+              "timeStamp": "2026-11-11T04:15:00Z",
+              "average": 63113761.4
+            },
+            {
+              "timeStamp": "2026-11-11T04:20:00Z",
+              "average": 227655133.2
+            },
+            {
+              "timeStamp": "2026-11-11T04:25:00Z",
+              "average": 238108398.2
+            },
+            {
+              "timeStamp": "2026-11-11T04:30:00Z",
+              "average": 233775512.8
+            },
+            {
+              "timeStamp": "2026-11-11T04:35:00Z",
+              "average": 238116180.8
+            },
+            {
+              "timeStamp": "2026-11-11T04:40:00Z",
+              "average": 114695440.2
+            },
+            {
+              "timeStamp": "2026-11-11T04:45:00Z",
+              "average": 48655837.0
+            },
+            {
+              "timeStamp": "2026-11-11T04:50:00Z",
+              "average": 42633010.6
+            },
+            {
+              "timeStamp": "2026-11-11T04:55:00Z",
+              "average": 43194708.8
+            },
+            {
+              "timeStamp": "2026-11-11T05:00:00Z",
+              "average": 92548641.4
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "lookupError": null
+}

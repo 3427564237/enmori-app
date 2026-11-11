@@ -1,0 +1,13 @@
+{
+  "sourceCommit": "cb80c43595c22d166c3b87a5dd68359c436e52e9",
+  "scriptSha256": "6082789ef8cc277fa24f1cc665c7628f282abbca17f49141368770a8e75990a5",
+  "exitCode": 1,
+  "temporaryScriptAbsent": true,
+  "safeRecords": [
+    {
+      "stage": "warm-launch",
+      "elapsedMs": 7052
+    }
+  ],
+  "knownStartupError": null
+}
