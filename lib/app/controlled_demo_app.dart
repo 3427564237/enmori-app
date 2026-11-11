@@ -380,6 +380,7 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
           HttpProactiveRepository(
             baseUri: widget.baseUri,
             client: widget.client,
+            processing: widget.aiProcessing,
           ),
         ),
       proactiveMessagingEnabledProvider.overrideWithValue(

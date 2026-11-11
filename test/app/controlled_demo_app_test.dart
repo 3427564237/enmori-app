@@ -55,6 +55,96 @@ final class AuthDouble implements AuthRepository {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  testWidgets(
+    'OpenAI companion composition forwards its processor without automatic enrollment',
+    (tester) async {
+      final auth = AuthDouble();
+      final writes = <http.Request>[];
+      final client = MockClient((request) async {
+        if (request.method != 'GET') writes.add(request);
+        if (request.url.path == '/v1/me/onboarding') {
+          return http.Response(
+            jsonEncode({
+              'status': 'completed',
+              'account': {
+                'username': 'controlled_primary',
+                'optionalProcessingConsent': 'accepted',
+                'checkInVisibility': 'private',
+                'onboardingCompletedAt': '2026-10-19T00:00:00.000Z',
+              },
+            }),
+            200,
+          );
+        }
+        return http.Response(
+          jsonEncode({
+            'error': {'code': 'SERVICE_UNAVAILABLE', 'message': 'Synthetic'},
+          }),
+          503,
+        );
+      });
+      addTearDown(auth.sessions.close);
+      addTearDown(client.close);
+      await tester.pumpWidget(
+        ControlledDemoApp(
+          baseUri: Uri.parse(
+            'https://enmori-backend-20261029.azurewebsites.net',
+          ),
+          auth: auth,
+          client: client,
+          remoteGroupEnabled: true,
+          aiProcessing: AiClientProcessing.openaiCloud,
+          companionFirstFlowEnabled: true,
+          onClose: () async => const Success(null),
+        ),
+      );
+      await tester.pump();
+      auth.sessions.add(
+        const AuthSessionAuthenticated(subject: 'controlled_primary'),
+      );
+      await tester.pumpAndSettle();
+      final home = tester.element(find.byKey(const Key('route-home')));
+      final scope = ProviderScope.containerOf(home);
+      final router = GoRouter.of(home);
+      expect(scope.read(companionFirstFlowEnabledProvider), isTrue);
+      expect(scope.exists(proactiveNotificationControllerProvider), isFalse);
+      expect(
+        router.configuration
+            .findMatch(Uri.parse(AppRoutes.aiFollowUps))
+            .isError,
+        isFalse,
+      );
+      expect(writes, isEmpty);
+      expect(scope.read(proactiveProcessingAllowedProvider), isFalse);
+      // Exercise the composed adapter with a fake transport, separately from
+      // controller consent admission; this proves the selected mapper wiring.
+      await scope
+          .read(proactiveRepositoryProvider)!
+          .createIntent(
+            token: 'synthetic-test-token',
+            abort: ProactiveAbortSignal(),
+            command: CreateFollowUp(
+              intentId: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+              conversationId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+              sourceMessageId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+              time: FollowUpTime(
+                dueAt: DateTime.utc(2026, 11, 16, 7),
+                timeZone: 'Asia/Singapore',
+                displayTime: '2026-11-16 15:00',
+                offsetLabel: 'UTC+08:00',
+              ),
+              expectedSettingsRevision: 1,
+            ),
+          );
+      expect(writes, hasLength(1));
+      final command = jsonDecode(writes.single.body) as Map<String, dynamic>;
+      expect(command['processing'], 'cloud');
+      expect(command['provider'], 'openai');
+      expect(command['disclosureVersion'], 'openai_cloud_v1');
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpAndSettle();
+    },
+  );
   testWidgets('OpenAI app uses its own consent and Today wire request', (
     tester,
   ) async {
@@ -84,8 +174,11 @@ void main() {
       'disclosureVersion': 'groq_cloud_v1',
     };
     final client = MockClient((request) async {
-      expect(request.url.origin, edge.origin);
-      expect(request.headers['authorization'], 'Bearer synthetic-test-token');
+      expectSync(request.url.origin, edge.origin);
+      expectSync(
+        request.headers['authorization'],
+        'Bearer synthetic-test-token',
+      );
       final path = request.url.path;
       Object response;
       var status = 200;
@@ -102,8 +195,8 @@ void main() {
       } else if (path == '/v1/me/settings') {
         if (request.method == 'PUT') {
           final change = jsonDecode(request.body) as Map<String, dynamic>;
-          expect(change['expectedRevision'], revision);
-          expect(change['optionalProcessingConsent'], 'accepted');
+          expectSync(change['expectedRevision'], revision);
+          expectSync(change['optionalProcessingConsent'], 'accepted');
           grant = change['cloudAiConsent'] as Map<String, dynamic>;
           savedGrants.add(grant);
           revision++;

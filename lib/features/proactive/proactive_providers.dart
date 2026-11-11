@@ -7,6 +7,7 @@ import '../auth/auth_providers.dart';
 import '../auth/domain/auth_repository.dart';
 import '../account/account_preferences_providers.dart';
 import '../account/domain/account_repository.dart';
+import '../account/domain/cloud_ai_consent.dart';
 import '../account/content_access.dart';
 import 'data/method_channel_follow_up_time.dart';
 import 'data/secure_intent_id.dart';
@@ -21,6 +22,15 @@ export 'presentation/proactive_state.dart';
 final proactiveRepositoryProvider = Provider<ProactiveRepository?>(
   (ref) => null,
 );
+// Only new processing effects use this gate. Existing reads, cancellation and
+// off retain their own authority checks, including legacy local occurrences.
+final proactiveProcessingAllowedProvider = Provider<bool>((ref) {
+  final processing = ref.watch(aiClientProcessingProvider);
+  final settings = ref.watch(accountSettingsSnapshotProvider);
+  return settings?.consent == OptionalProcessingConsent.accepted &&
+      processing != AiClientProcessing.groqCloud &&
+      processing.allowsCloudConsent(settings?.cloudAiConsent);
+});
 final followUpTimePortProvider = Provider<FollowUpTimePort>(
   (ref) => const MethodChannelFollowUpTimePort(),
 );
@@ -38,6 +48,7 @@ final proactiveControllerProvider =
 
 class ProactiveController extends Notifier<ProactiveState> {
   late AuthRepository _auth;
+  late AiClientProcessing _processing;
   ProactiveRepository? _repository;
   AuthSession? _actor;
   Object _epoch = Object();
@@ -53,13 +64,16 @@ class ProactiveController extends Notifier<ProactiveState> {
     _epoch = Object();
     _actor = ref.watch(authSessionProvider).asData?.value;
     _auth = ref.watch(authRepositoryProvider);
+    _processing = ref.watch(aiClientProcessingProvider);
     _repository = ref.watch(proactiveRepositoryProvider);
     _ids = ref.watch(proactiveIntentIdsProvider);
     _now = ref.watch(proactiveNowProvider);
     ref.onDispose(_abortAll);
     ref.listen(contentAccessProvider, (_, _) => _invalidateLocal());
     ref.listen(accountSettingsSnapshotProvider, (_, next) {
-      if (next?.consent == OptionalProcessingConsent.rejected) {
+      if (next?.consent == OptionalProcessingConsent.rejected ||
+          _processing.cloudProvider != null &&
+              !_processing.allowsCloudConsent(next?.cloudAiConsent)) {
         _invalidateLocal(failure: _consent);
       }
     });
@@ -97,12 +111,19 @@ class ProactiveController extends Notifier<ProactiveState> {
       _actor is AuthSessionAuthenticated &&
       ref.read(contentAccessProvider).foreground;
   bool get _consentAllowed =>
+      _purposeAllowed &&
+      _processing != AiClientProcessing.groqCloud &&
+      _processing.allowsCloudConsent(
+        ref.read(accountSettingsSnapshotProvider)?.cloudAiConsent,
+      );
+  bool get _purposeAllowed =>
       ref.read(accountSettingsSnapshotProvider)?.consent ==
       OptionalProcessingConsent.accepted;
 
   Future<Result<T>> _call<T>(
     Future<Result<T>> Function(String, ProactiveAbortSignal) run, {
     bool needsConsent = false,
+    bool needsPurposeConsent = false,
     void Function()? admitted,
   }) async {
     final epoch = _epoch;
@@ -121,6 +142,9 @@ class ProactiveController extends Notifier<ProactiveState> {
       }
       if (token case Failure<String>(:final failure)) return Failure(failure);
       if (needsConsent && !_consentAllowed) return const Failure(_consent);
+      if (needsPurposeConsent && !_purposeAllowed) {
+        return const Failure(_consent);
+      }
       admitted?.call();
       final result = await Future.any<Result<T>?>([
         run((token as Success<String>).value, signal),
@@ -229,7 +253,9 @@ class ProactiveController extends Notifier<ProactiveState> {
     if (!state.canChangeSettings) return;
     final current = state.settings!;
     final zone = confirmedZone ?? current.timeZone;
-    if (zone.isEmpty || (mode != ProactiveMode.off && !_consentAllowed)) {
+    if (zone.isEmpty ||
+        (mode != ProactiveMode.off && !_purposeAllowed) ||
+        (mode == ProactiveMode.on && !_consentAllowed)) {
       state = state.copy(failure: _consent);
       return;
     }
@@ -255,7 +281,8 @@ class ProactiveController extends Notifier<ProactiveState> {
         settings: requested,
         expectedRevision: current.revision,
       ),
-      needsConsent: mode != ProactiveMode.off,
+      needsConsent: mode == ProactiveMode.on,
+      needsPurposeConsent: mode != ProactiveMode.off,
       admitted: () => state = state.copy(settingsUnconfirmed: true),
     );
     if (!_current(epoch)) return;

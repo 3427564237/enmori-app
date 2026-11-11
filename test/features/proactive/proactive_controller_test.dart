@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/account/content_access.dart';
 import 'package:enmori/features/account/domain/account_repository.dart';
+import 'package:enmori/features/account/domain/cloud_ai_consent.dart';
 import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/proactive/proactive_providers.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,6 +11,117 @@ import 'package:flutter_test/flutter_test.dart';
 import 'proactive_test_support.dart';
 
 void main() {
+  for (final consent in [
+    null,
+    CloudAiConsent.accepted,
+    CloudAiConsent.openaiDeclined,
+  ]) {
+    testWidgets(
+      'OpenAI requires its own current grant for on and create: $consent',
+      (tester) async {
+        final r = await ProactiveRig.create(
+          tester,
+          processing: AiClientProcessing.openaiCloud,
+          cloudConsent: consent,
+        );
+        await r.controller.load();
+        await r.controller.changeMode(
+          ProactiveMode.on,
+          confirmedZone: fixtureTime.timeZone,
+        );
+        expect(r.repo.saved, isEmpty);
+        await r.ready(tester);
+        expect(await r.controller.schedule(fixtureSource, fixtureTime), isNull);
+        expect(r.repo.creates, isEmpty);
+        expect(r.ids.calls, 0);
+        // Protective operations retain their original optional-purpose boundary.
+        await r.controller.changeMode(ProactiveMode.paused);
+        await tester.pump();
+        expect(r.repo.saved.single.settings.mode, ProactiveMode.paused);
+        await r.controller.changeMode(ProactiveMode.on);
+        expect(r.repo.saved, hasLength(1));
+        await r.controller.changeMode(ProactiveMode.off);
+        await tester.pump();
+        expect(r.repo.saved.last.settings.mode, ProactiveMode.off);
+        r.repo.active = [fixtureReceipt()];
+        await r.controller.readActive();
+        await r.controller.cancel(fixtureReceipt());
+        await tester.pump();
+        expect(r.repo.cancels, hasLength(1));
+        r.dispose();
+      },
+    );
+  }
+  testWidgets(
+    'OpenAI grant withdrawal during token acquisition admits no request',
+    (tester) async {
+      final r = await ProactiveRig.create(
+        tester,
+        processing: AiClientProcessing.openaiCloud,
+        cloudConsent: CloudAiConsent.openaiAccepted,
+      );
+      await r.ready(tester);
+      final token = Completer<Result<String>>();
+      r.auth.nextToken = token.future;
+      final pending = r.controller.schedule(fixtureSource, fixtureTime);
+      await tester.pump();
+      r.consent(
+        OptionalProcessingConsent.accepted,
+        revision: 2,
+        cloudConsent: CloudAiConsent.openaiDeclined,
+      );
+      await tester.pump();
+      token.complete(const Success('late-token'));
+      await pending;
+      expect(r.repo.creates, isEmpty);
+      expect(r.state.pendingIntent, isNull);
+      expect(r.state.sourceUnavailable, isTrue);
+      r.dispose();
+    },
+  );
+  testWidgets(
+    'OpenAI withdrawal preserves admitted unknown original key for readback and cancel',
+    (tester) async {
+      final r = await ProactiveRig.create(
+        tester,
+        processing: AiClientProcessing.openaiCloud,
+        cloudConsent: CloudAiConsent.openaiAccepted,
+      );
+      await r.ready(tester);
+      final ack = Completer<Result<FollowUpIntent>>();
+      r.repo.nextCreate = ack.future;
+      final pending = r.controller.schedule(fixtureSource, fixtureTime);
+      await tester.pump();
+      expect(r.repo.creates, hasLength(1));
+      r.consent(
+        OptionalProcessingConsent.accepted,
+        revision: 2,
+        cloudConsent: CloudAiConsent.openaiDeclined,
+      );
+      await tester.pump();
+      await pending;
+      expect(r.state.pendingIntent?.intentId, fixtureIntent);
+      ack.complete(Success(fixtureReceipt()));
+      await tester.pump();
+      expect(r.state.lastIntent, isNull);
+      r.repo.active = [fixtureReceipt()];
+      final original = await r.controller.checkPendingIntent();
+      expect(original?.intentId, fixtureIntent);
+      await tester.pump();
+      await r.controller.cancel(original!);
+      await tester.pump();
+      expect(r.repo.cancels, hasLength(1));
+      r.consent(
+        OptionalProcessingConsent.accepted,
+        revision: 3,
+        cloudConsent: CloudAiConsent.openaiAccepted,
+      );
+      await tester.pump();
+      expect(r.repo.creates, hasLength(1));
+      expect(r.state.sourceUnavailable, isTrue);
+      r.dispose();
+    },
+  );
   testWidgets(
     'read-only entry is default off; settings ACK never creates an intent',
     (tester) async {

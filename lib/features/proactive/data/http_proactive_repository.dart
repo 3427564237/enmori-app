@@ -6,16 +6,20 @@ import 'package:http/http.dart' as http;
 
 import '../../../core/network/backend_api_client.dart';
 import '../../../core/result/result.dart';
+import '../../account/domain/cloud_ai_consent.dart';
 import '../domain/proactive.dart';
 import '../domain/proactive_repository.dart';
 
 /// Explicit composition only. One caller-owned client, one HTTP attempt per
 /// command, strict complete response, no redirects, retry or token retention.
 final class HttpProactiveRepository implements ProactiveRepository {
-  HttpProactiveRepository({required Uri baseUri, required http.Client client})
-    : this._(baseUri, client);
+  HttpProactiveRepository({
+    required Uri baseUri,
+    required http.Client client,
+    AiClientProcessing processing = AiClientProcessing.local,
+  }) : this._(baseUri, client, processing);
 
-  HttpProactiveRepository._(this._base, this._client) {
+  HttpProactiveRepository._(this._base, this._client, this._processing) {
     if (!isApprovedBackendBaseUri(_base) ||
         !const {'', '/'}.contains(_base.path) ||
         _base.hasQuery ||
@@ -26,6 +30,7 @@ final class HttpProactiveRepository implements ProactiveRepository {
 
   final Uri _base;
   final http.Client _client;
+  final AiClientProcessing _processing;
 
   @override
   Future<Result<ProactiveSettings>> readSettings({
@@ -91,7 +96,8 @@ final class HttpProactiveRepository implements ProactiveRepository {
     required ProactiveAbortSignal abort,
     required CreateFollowUp command,
   }) {
-    if (!_uuid(command.intentId) ||
+    if (_processing == AiClientProcessing.groqCloud ||
+        !_uuid(command.intentId) ||
         !_uuid(command.conversationId) ||
         !_uuid(command.sourceMessageId) ||
         !_revision(command.expectedSettingsRevision) ||
@@ -120,7 +126,11 @@ final class HttpProactiveRepository implements ProactiveRepository {
         'category': 'explicit_follow_up',
         'dueAt': command.time.dueAt.toIso8601String(),
         'timeZone': command.time.timeZone,
-        'processing': 'local',
+        'processing': _processing.wireProcessing,
+        if (_processing == AiClientProcessing.openaiCloud) ...{
+          'provider': 'openai',
+          'disclosureVersion': CloudAiProvider.openai.disclosureVersion,
+        },
         'expectedSettingsRevision': command.expectedSettingsRevision,
       },
       idempotencyKey: command.intentId,

@@ -5,6 +5,7 @@ import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/account/account_preferences_providers.dart';
 import 'package:enmori/features/account/content_access.dart';
 import 'package:enmori/features/account/domain/account_repository.dart';
+import 'package:enmori/features/account/domain/cloud_ai_consent.dart';
 import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/proactive/domain/proactive.dart';
 import 'package:enmori/features/proactive/domain/proactive_messaging.dart';
@@ -13,6 +14,202 @@ import 'proactive_messaging_test_support.dart';
 import 'proactive_test_support.dart';
 
 void main() {
+  testWidgets(
+    'cloud withdrawal during registration ACK keeps unknown fence and allows explicit verified cleanup',
+    (tester) async {
+      final r = await MessagingRig.create(
+        tester,
+        processing: AiClientProcessing.openaiCloud,
+        cloudConsent: CloudAiConsent.openaiAccepted,
+      );
+      addTearDown(r.dispose);
+      final ack = Completer<Result<ProactiveRegistration>>();
+      r.registrations.nextReplace = ack.future;
+      final pending = r.controller.enablePush();
+      await tester.pump();
+      expect(r.registrations.puts, 1);
+      r.preferences.value = ownConsent(
+        revision: 2,
+        cloudConsent: CloudAiConsent.openaiDeclined,
+      );
+      r.container
+          .read(accountSettingsSnapshotProvider.notifier)
+          .observe(r.preferences.value);
+      await tester.pump();
+      await pending;
+      ack.complete(Success(registered()));
+      await tester.pump();
+      expect(r.state.unconfirmed, isTrue);
+      expect(r.sdk.refreshSubscriptions, 0);
+      await r.controller.enablePush();
+      expect(r.registrations.puts, 1);
+      r.registrations.metadata = registered();
+      await r.controller.readRegistration();
+      expect(r.state.unconfirmed, isFalse);
+      await r.controller.disablePush();
+      expect(r.registrations.deletes, 1);
+      expect(r.registrations.puts, 1);
+    },
+  );
+  testWidgets(
+    'revoked source receipt cannot navigate even when optional read consent remains',
+    (tester) async {
+      final r = await MessagingRig.create(
+        tester,
+        processing: AiClientProcessing.openaiCloud,
+        cloudConsent: CloudAiConsent.openaiDeclined,
+      );
+      addTearDown(r.dispose);
+      r.resolving = Future.value(
+        const Failure(
+          AppFailure(
+            kind: AppFailureKind.aiSourceUnavailable,
+            message: 'Synthetic revoked receipt',
+          ),
+        ),
+      );
+      r.sdk.clicked.add(deliveryReference);
+      await tester.pump();
+      await tester.pump();
+      expect(r.resolutions, [deliveryReference]);
+      expect(r.targets, isEmpty);
+      expect(r.state.hasPendingDelivery, isTrue);
+      expect(r.registrations.puts, 0);
+    },
+  );
+  for (final consent in [
+    null,
+    CloudAiConsent.accepted,
+    CloudAiConsent.openaiDeclined,
+  ]) {
+    testWidgets(
+      'OpenAI push rejects non-current grant before permission or token: $consent',
+      (tester) async {
+        final r = await MessagingRig.create(
+          tester,
+          processing: AiClientProcessing.openaiCloud,
+          cloudConsent: consent,
+        );
+        addTearDown(r.dispose);
+        await r.controller.enablePush();
+        expect(r.sdk.calls, ['initial']);
+        expect(r.registrations.puts, 0);
+        expect(r.settings.saved, isEmpty);
+      },
+    );
+  }
+  testWidgets(
+    'OpenAI withdrawal releases confirmed installation and reacceptance never reenrolls',
+    (tester) async {
+      final r = await MessagingRig.create(
+        tester,
+        processing: AiClientProcessing.openaiCloud,
+        cloudConsent: CloudAiConsent.openaiAccepted,
+      );
+      addTearDown(r.dispose);
+      await r.controller.enablePush();
+      expect(r.registrations.puts, 1);
+      r.preferences.value = ownConsent(
+        revision: 2,
+        cloudConsent: CloudAiConsent.openaiDeclined,
+      );
+      r.container
+          .read(accountSettingsSnapshotProvider.notifier)
+          .observe(r.preferences.value);
+      await tester.pump();
+      await tester.pump();
+      expect(r.registrations.deletes, 1);
+      expect(r.sdk.calls.where((v) => v == 'delete'), hasLength(1));
+      r.preferences.value = ownConsent(
+        revision: 3,
+        cloudConsent: CloudAiConsent.openaiAccepted,
+      );
+      r.container
+          .read(accountSettingsSnapshotProvider.notifier)
+          .observe(r.preferences.value);
+      r.sdk.refreshed.add('after-reacceptance');
+      await tester.pump();
+      expect(r.registrations.puts, 1);
+    },
+  );
+  for (final boundary in ['permission', 'token']) {
+    testWidgets('OpenAI withdrawal while awaiting $boundary never registers', (
+      tester,
+    ) async {
+      final r = await MessagingRig.create(
+        tester,
+        processing: AiClientProcessing.openaiCloud,
+        cloudConsent: CloudAiConsent.openaiAccepted,
+      );
+      addTearDown(r.dispose);
+      final permission = Completer<Result<ProactiveNotificationPermission>>();
+      final token = Completer<Result<String>>();
+      if (boundary == 'permission') {
+        r.sdk.requested = permission.future;
+      } else {
+        r.sdk.tokenFuture = token.future;
+      }
+      final pending = r.controller.enablePush();
+      await tester.pump();
+      r.preferences.value = ownConsent(
+        revision: 2,
+        cloudConsent: CloudAiConsent.openaiDeclined,
+      );
+      r.container
+          .read(accountSettingsSnapshotProvider.notifier)
+          .observe(r.preferences.value);
+      await tester.pump();
+      permission.complete(
+        const Success(ProactiveNotificationPermission.granted),
+      );
+      token.complete(const Success('late-token'));
+      await pending;
+      expect(r.registrations.puts, 0);
+      expect(r.settings.saved, isEmpty);
+      if (boundary == 'permission') {
+        expect(r.sdk.calls, isNot(contains('token')));
+      }
+    });
+  }
+  testWidgets(
+    'OpenAI rotation rereads provider grant before another registration',
+    (tester) async {
+      final r = await MessagingRig.create(
+        tester,
+        processing: AiClientProcessing.openaiCloud,
+        cloudConsent: CloudAiConsent.openaiAccepted,
+      );
+      addTearDown(r.dispose);
+      await r.controller.enablePush();
+      r.preferences.value = ownConsent(
+        revision: 2,
+        cloudConsent: CloudAiConsent.openaiDeclined,
+      );
+      r.sdk.refreshed.add('rotated-after-withdrawal');
+      await tester.pump();
+      await tester.pump();
+      expect(r.registrations.puts, 1);
+      expect(r.registrations.deletes, 1);
+    },
+  );
+  testWidgets(
+    'delivery resolver keeps original read authority when current cloud grant is declined',
+    (tester) async {
+      final r = await MessagingRig.create(
+        tester,
+        processing: AiClientProcessing.openaiCloud,
+        cloudConsent: CloudAiConsent.openaiDeclined,
+        initial: deliveryReference,
+      );
+      addTearDown(r.dispose);
+      await tester.pump();
+      await tester.pump();
+      expect(r.resolutions, [deliveryReference]);
+      expect(r.targets, hasLength(1));
+      expect(r.registrations.puts, 0);
+      expect(r.sdk.calls, ['initial']);
+    },
+  );
   testWidgets(
     'explicit enable replaces another installation; sign-out never revokes that other device',
     (tester) async {

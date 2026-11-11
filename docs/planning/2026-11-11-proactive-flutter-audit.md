@@ -2,7 +2,7 @@
 
 Date: 11 November 2026. Audited source: `492ad5975e48ae8a596de839c985201fdad81049`.
 
-Status: implementation preparation, not approval of a new contract or evidence of live delivery. The [recovery decision](../decisions/2026-11-11-li-onepa-proactive-recovery.md) assigns the existing feature repair. The Backend proposal at `0731ac3`, `docs/planning/2026-11-11-openai-proactive-integration-proposal.md`, requires LI confirmation before its cloud request/storage/operational extension is implemented. No account setting, consent, schedule, registration or device permission was changed by this audit.
+Initial status: implementation preparation. The [recovery decision](../decisions/2026-11-11-li-onepa-proactive-recovery.md) assigned the existing feature repair; the Backend proposal at `0731ac3` initially required LI confirmation. LI subsequently [approved that exact minimal contract](../decisions/2026-11-11-li-openai-proactive-integration.md). The implementation and fake verification below follow that decision. No account setting, consent, schedule, registration or device permission was changed by this work.
 
 ## Demonstrated client gap and smallest changes
 
@@ -59,3 +59,17 @@ fvm flutter test test/features/proactive test/app/companion_first_flow_router_te
 ```
 
 Result: **114/114 passed** at `492ad597`. This is fake/adapter/widget source evidence. It is not evidence of OpenAI scheduled execution, Firebase registration, actual FCM delivery, APK installation, physical-device behavior, or sustained two-month operation. The audit made no cloud requests or writes.
+
+## Implemented under the confirmed minimal contract
+
+The client now composes the approved OpenAI+companion capability on the unchanged remote-origin boundary. It forwards the exact cloud tuple only for new OpenAI intents; the local request remains exact, and unsupported Groq creation sends no request. Existing response parsing, revision preconditions, original idempotency keys and read/cancel shapes remain unchanged.
+
+New intent/on/resume and push enable/rotation check current OpenAI plus optional-purpose consent. Protective pause retains its original optional-purpose requirement; off/cancel/registration deletion have no added cloud requirement. The controller listens directly to the authoritative Settings snapshot for immediate withdrawal retirement, rather than waiting for a derived presentation provider to refresh. An already admitted unknown intent remains available only for original-ID readback and cancellation, not automatic replay.
+
+Notification consent checks now observe a fresh non-stale Settings revision before rejecting a prior expected revision. This makes a newly observed server-side withdrawal retire the old grant and invoke the existing confirmed-owner/installation release path. No old revision may replace a newer observation; no rejected effect continues after observation. Unknown registration ACKs preserve their fence until explicit current-status verification. Reacceptance does not enable push or register a token.
+
+New confirmation and management copy identify the current processor, while old rows remain neutral. A consent notice links to existing AI Settings without wrapping the whole management route in the chat gate. The opaque delivery resolver retains original purpose/source authorization. The existing composed chat/message page still has its pre-existing `AiConsentGate`; reaching the resolver's verified target after cloud withdrawal does not establish that the phone will display legacy local message text without that page gate. No new read-only message interface was added.
+
+Final focused command adds `test/app/controlled_demo_app_test.dart` to the baseline command: **140/140 passed**. This includes exact local/cloud request mapping, full composition wiring with no automatic enrollment, wrong/missing provider grants, token/permission/registration-ACK withdrawal, protective controls, original unknown-key recovery, fresh rotation withdrawal cleanup, legacy source resolver access and revoked-receipt rejection, neutral old rows, and a confirmed Sydney civil/UTC instant. Existing Singapore, DST fold/gap, zone-change, lifecycle, one-installation and permission tests remain passing. The original OpenAI composition test's MockClient assertions now use `expectSync`: asynchronous callbacks could otherwise collide with `tester.tap`'s guarded test scope and be mistaken for a service failure. No production account/network code was changed for that test issue.
+
+Android is the current delivery target. These tests do not prove real Android timezone conversion, FCM arrival, model execution, iOS readiness, sustained service availability or a two-month device-registration lifetime.

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/account/content_access.dart';
+import 'package:enmori/features/account/domain/cloud_ai_consent.dart';
 import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/proactive/presentation/proactive_follow_up_page.dart';
 import 'package:enmori/features/proactive/presentation/proactive_settings_page.dart';
@@ -14,6 +15,83 @@ import 'package:flutter_test/flutter_test.dart';
 import 'proactive_test_support.dart';
 
 void main() {
+  testWidgets(
+    'OpenAI confirmation preserves the reviewed Sydney instant and never enables push',
+    (tester) async {
+      final r = await ProactiveRig.create(
+        tester,
+        processing: AiClientProcessing.openaiCloud,
+        cloudConsent: CloudAiConsent.openaiAccepted,
+      );
+      final selected = FollowUpTime(
+        dueAt: DateTime.utc(2026, 11, 15, 23, 30),
+        timeZone: 'Australia/Sydney',
+        displayTime: '2026-11-16 10:30',
+        offsetLabel: 'UTC+11:00',
+      );
+      r.time.deviceZone = selected.timeZone;
+      r.time.resolution = Success([selected]);
+      await _pump(
+        tester,
+        r,
+        ProactiveFollowUpPage(source: fixtureSource, onBack: () {}),
+      );
+      expect(find.textContaining('OpenAI · once'), findsOneWidget);
+      expect(find.textContaining('Local model'), findsNothing);
+      await _verify(tester, date: '2026-11-16', time: '10:30');
+      await _tap(tester, 'proactive-confirm-time');
+      await _tap(tester, 'proactive-schedule');
+      expect(r.repo.saved.single.settings.timeZone, selected.timeZone);
+      expect(r.repo.saved.single.settings.pushEnabled, isFalse);
+      expect(r.repo.creates, isEmpty);
+      await _tap(tester, 'proactive-schedule');
+      expect(r.repo.creates.single.time.dueAt, selected.dueAt);
+      expect(r.repo.creates.single.time.timeZone, selected.timeZone);
+      await _dispose(tester, r);
+    },
+  );
+  testWidgets(
+    'cloud decline leaves management settings action, neutral old row and cancellation reachable',
+    (tester) async {
+      final r = await ProactiveRig.create(
+        tester,
+        processing: AiClientProcessing.openaiCloud,
+        cloudConsent: CloudAiConsent.openaiDeclined,
+      );
+      r.repo.settings = fixtureSettings(mode: ProactiveMode.on, revision: 1);
+      r.repo.active = [fixtureReceipt()];
+      var settings = 0;
+      await _pump(
+        tester,
+        r,
+        ProactiveSettingsPage(onBack: () {}, onOpenSettings: () => settings++),
+      );
+      expect(
+        find.textContaining(
+          'New follow-ups require optional AI data use and OpenAI',
+        ),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Review AI settings'));
+      expect(settings, 1);
+      await _visible(tester, 'proactive-turn-off', settings: true);
+      expect(
+        tester
+            .widget<OutlinedButton>(find.byKey(const Key('proactive-turn-off')))
+            .onPressed,
+        isNotNull,
+      );
+      await _visible(tester, 'proactive-cancel-$fixtureIntent', settings: true);
+      expect(find.textContaining('Scheduled once'), findsOneWidget);
+      await tester.tap(
+        find.byKey(const Key('proactive-cancel-$fixtureIntent')),
+      );
+      await tester.pumpAndSettle();
+      expect(r.repo.cancels, hasLength(1));
+      expect(r.repo.creates, isEmpty);
+      await _dispose(tester, r);
+    },
+  );
   testWidgets(
     'settings survive permission foreground roundtrip with fresh reads but retire on session replacement',
     (tester) async {

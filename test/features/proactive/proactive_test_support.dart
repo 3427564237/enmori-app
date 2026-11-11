@@ -85,10 +85,13 @@ final class ProactiveRig {
   static Future<ProactiveRig> create(
     WidgetTester tester, {
     DateTime? now,
+    AiClientProcessing processing = AiClientProcessing.local,
+    CloudAiConsent? cloudConsent,
   }) async {
     final rig = ProactiveRig._();
     rig.container = ProviderContainer(
       overrides: [
+        aiClientProcessingProvider.overrideWithValue(processing),
         authRepositoryProvider.overrideWithValue(rig.auth),
         proactiveRepositoryProvider.overrideWithValue(rig.repo),
         followUpTimePortProvider.overrideWithValue(rig.time),
@@ -103,7 +106,7 @@ final class ProactiveRig {
     await tester.pump();
     rig.auth.sessions.add(AuthSessionAuthenticated(subject: 'same-user'));
     await tester.pump();
-    rig.consent(OptionalProcessingConsent.accepted);
+    rig.consent(OptionalProcessingConsent.accepted, cloudConsent: cloudConsent);
     rig.controller.beginSourceReview();
     return rig;
   }
@@ -111,13 +114,18 @@ final class ProactiveRig {
   ProactiveController get controller =>
       container.read(proactiveControllerProvider.notifier);
   ProactiveState get state => container.read(proactiveControllerProvider);
-  void consent(OptionalProcessingConsent consent, {int revision = 1}) {
+  void consent(
+    OptionalProcessingConsent consent, {
+    int revision = 1,
+    CloudAiConsent? cloudConsent,
+  }) {
     container
         .read(accountSettingsSnapshotProvider.notifier)
         .observe(
           OwnSettings(
             checkInVisibility: CheckInVisibility.private,
             consent: consent,
+            cloudAiConsent: cloudConsent,
             revision: revision,
           ),
         );

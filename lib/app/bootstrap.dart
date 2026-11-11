@@ -226,7 +226,6 @@ bool validOpenAiTestAppSelection({
 }) =>
     !enabled ||
     (remoteAccount &&
-        !companionFirstFlow &&
         baseUri?.scheme == 'https' &&
         baseUri?.host == 'enmori-backend-20261029.azurewebsites.net' &&
         baseUri?.port == 443 &&
