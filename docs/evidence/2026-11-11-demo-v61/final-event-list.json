@@ -1,0 +1,32 @@
+{
+  "vantage": "deployed Azure HTTPS API",
+  "request": "GET /v1/event-browse page 0",
+  "contractVersion": 3,
+  "singleAttempt": true,
+  "timeoutSeconds": 120,
+  "observedAtUtc": "2026-11-11T07:26:21.530952+00:00",
+  "httpStatus": 200,
+  "sourceStatus": [
+    {
+      "provider": "ticketmaster",
+      "available": true
+    },
+    {
+      "provider": "onepa",
+      "available": false
+    }
+  ],
+  "rowsReturned": 19,
+  "coversProvided": 6,
+  "nextPageAvailable": true,
+  "sourceAsOf": "2026-11-11T07:26:23.154Z",
+  "providerCounts": {
+    "ticketmaster": 19,
+    "onepa": 0
+  },
+  "providerCoverCounts": {
+    "ticketmaster": 6,
+    "onepa": 0
+  },
+  "elapsedMs": 91937
+}

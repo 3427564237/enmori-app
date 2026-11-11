@@ -31,3 +31,5 @@ The authorized single synthetic Persona preview returned HTTP 200 in 12.760 seco
 The retained demo friend's final-instance Profile and Discovery reads returned 200. Friends All returned 200/ready in 10.95 seconds and Home returned 200/ready in 11.47 seconds. Both contained one candidate: the main user, at index zero. This proves the real recommendation chain using the friend's token; it does not prove the reverse direction or the main user's physical Home top two. No automatic friend request or main-user profile change occurred.
 
 The distributable APK is also copied to `/home/miku/Downloads/ENMORI-demo-v61-release.apk` with the same verified hash. Login files remain private, outside Git.
+
+A final single live Event page-zero read on the deployed v61 service returned HTTP 200 in 91.937 seconds: Ticketmaster available (19 records, 6 provided covers), onePA unavailable (0 records). The source status was explicit; the response was not treated as proof of full source availability. See [final-event-list.json](final-event-list.json).
