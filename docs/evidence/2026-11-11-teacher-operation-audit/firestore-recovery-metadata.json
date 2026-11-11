@@ -1,0 +1,28 @@
+{
+  "observedAtUtc": "2026-11-11T12:12:33.300Z",
+  "database": {
+    "status": 200,
+    "locationId": "asia-southeast1",
+    "type": "FIRESTORE_NATIVE",
+    "concurrencyMode": "PESSIMISTIC",
+    "pointInTimeRecoveryEnablement": "POINT_IN_TIME_RECOVERY_DISABLED",
+    "deleteProtectionState": "DELETE_PROTECTION_DISABLED",
+    "earliestVersionTime": "2026-11-11T11:12:33.284592Z",
+    "versionRetentionPeriod": "3600s",
+    "databaseEdition": "STANDARD",
+    "createTime": "2026-09-08T16:00:09.842947Z",
+    "updateTime": "2026-09-08T16:00:09.842947Z"
+  },
+  "backupSchedules": {
+    "status": 200,
+    "count": 0,
+    "hasNextPage": false,
+    "items": []
+  },
+  "backups": {
+    "status": 200,
+    "count": 0,
+    "hasNextPage": false,
+    "items": []
+  }
+}

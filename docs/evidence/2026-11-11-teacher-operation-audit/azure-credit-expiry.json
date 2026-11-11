@@ -1,0 +1,38 @@
+{
+  "observedAtUtc": "2026-11-11T12:12:29.769870+00:00",
+  "subscription": {
+    "status": 200,
+    "state": "Enabled",
+    "spendingLimit": "On"
+  },
+  "expiry": {
+    "state": "reported_by_credit_lots",
+    "dates": [
+      "2027-10-28T07:20:08.0000000Z"
+    ]
+  },
+  "billingAccountsReadStatus": 200,
+  "matchedBillingProfiles": 1,
+  "creditLots": {
+    "status": 200,
+    "count": 1,
+    "hasNextLink": false,
+    "items": [
+      {
+        "source": "Azure for students credit",
+        "startDate": "2026-10-28T07:20:08.0000000Z",
+        "expirationDate": "2027-10-28T07:20:08.0000000Z",
+        "originalAmount": {
+          "currency": "USD",
+          "value": 100.0
+        },
+        "closedBalance": {
+          "currency": "USD",
+          "value": 100.0
+        },
+        "creditCurrency": "USD",
+        "isEstimatedBalance": false
+      }
+    ]
+  }
+}
