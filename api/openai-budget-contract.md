@@ -6,6 +6,12 @@ contract, not a public HTTP DTO or permission to spend. It preserves the previou
 Groq quota ledger and grants. It does not install a real grant, initialize a real
 database, migrate data, enable a consumer, or authorize a provider fallback.
 
+The [11 November teacher-stability decision](../docs/decisions/2026-11-11-li-teacher-stability-implementation.md)
+additionally approves the exact [purchased-credit successor](../docs/planning/2026-11-11-openai-paid-credit-successor-proposal.md).
+The v1 gift rules below remain unchanged. The final section defines the separate
+v2 grant; approval to implement it is not evidence of a purchase or permission to
+install a real grant without its concrete verified operator packet.
+
 ## Fixed grant and units
 
 One shared OpenAI trial grant covers evaluation, failed attempts, retries,
@@ -250,3 +256,100 @@ balances/prices/IDs and a temporary credential profile. It establishes local SDK
 transaction evidence, not production Firestore, live model, verified provider
 balance/pricing, physical concurrent hosts, consumer adoption, phone acceptance,
 UAT or release evidence.
+
+## One purchased-credit successor (v2)
+
+The original `ai_cloud_cost_budget/current` document, its v1 grant, all charges,
+unknown reservations and every permanent attempt remain in place. A separately
+approved actual purchase uses only `ai_cloud_cost_budget/{grantId}` and
+`ai_cloud_cost_budget/{grantId}/attempts/{attemptId}`. The path is derived from a
+validated UUID grant, never an arbitrary path or a discovered newest document.
+There is no active-pointer document, registry, automatic rollover or old-ledger
+fallback. A further successor beyond this first v1-to-v2 transition needs a new
+reviewed carry-forward contract.
+
+All money remains integer USD nanodollars. Let `P` be the actual net purchased
+USD credit, `R` the verified creation balance, `A <= P` the separately approved
+new allowance, `U` the **entire** retained v1 reserved amount, and `D` its confirmed
+charges not proven reflected in `R`. If reflection is unknown, retain the entire
+old confirmed spend as `D`. The immutable cap is
+`min(A, max(0, min(P, R) - U - D))`, evaluated with `bigint`. A zero cap authorizes
+no calls. Other existing credit cannot erase `U` or `D` from this purchase's
+allowance. New evidence never automatically releases these deductions or raises
+the cap. The planned S$10 is not a verified USD receipt.
+
+`openai_cost_grant_v2` contains exactly:
+
+| Field | Meaning |
+| --- | --- |
+| `schemaVersion`, `grantId`, `provider`, `currency` | `openai_cost_grant_v2`, new UUID, `openai`, `USD` |
+| `fundingKind`, `fundingReference` | `purchased_credit`, bounded opaque evidence reference |
+| `creditIssuedAtMs`, `creditExpiresAtMs` | Actual purchase issuance and verified expiry |
+| `creditedPurchasedNanoUsd`, `approvedCapNanoUsd` | Fixed `P` and `A` |
+| `verifiedSpendableRemainingNanoUsd` | Fixed creation observation `R` |
+| `predecessor` | Exactly `grantId`, `reservedLiabilityNanoUsd` (`U`), `unreflectedSpentNanoUsd` (`D`) for retained v1 `current` |
+| `balanceVerifiedAtMs`, `balanceValidUntilMs` | Explicit operator verification and deadline |
+| `capNanoUsd` | Exact fixed cap above |
+| `priceSnapshot` | Existing exact snapshot shape, only `gpt-6.1-sol` with `serviceTier: default` |
+
+It has no gift amount or fictitious gift cycle. Extra fields, mixed variants,
+wrong predecessor, malformed timestamps/references, unsafe integers and changed
+cap arithmetic are rejected. Both verification windows end within seven days
+of their respective observation and no later than credit expiry. An earlier
+known applicable price change shortens the evidence window. This review policy
+does not establish future prices or balances; the approved residual risks and
+operator verification requirements remain explicit in the successor proposal.
+
+The ledger uses `openai_cost_budget_v2` with the same remaining exact fields as
+v1. Its independent spent/reserved/counts begin at zero **only at explicit
+installation of new funding**, without resetting lifetime history. Its attempts
+retain the exact existing `openai_cost_attempt_v1` shape. Recovery never creates
+missing state. Recovery, reserve and settlement validate the retained v1
+predecessor's identity, unchanged full reserved liability and older fenced epoch.
+A reserve also reads the same attempt UUID under `current/attempts`; any existing
+record there rejects reuse even if the paid ledger has no such ID. Every consumer
+shares one selected authority and cap; there is no separate teacher allowance.
+
+### Explicit operator operations
+
+`createOfflinePaidCloudCostBudgetSeed` is pure. It requires the full retained
+predecessor ledger and attempts, validates their exact counts/sums/original
+reservation and settlement arithmetic, the captured newer fence, grant
+deductions and current evidence. It performs no I/O and does not prove payment.
+
+`PaidCloudCreditOperator` is never connected to app startup. It takes an explicit
+gateway, trusted UTC clock and stopped/drained operator guard. One instance
+admits **at most one mutation**, including an unknown result. The operator must
+already have retired the old epoch through the separately reviewed ownership
+procedure before capturing its final predecessor snapshot. Merely stopping a
+local process does not prove that an old SDK write cannot still commit.
+
+Install reads the exact captured runtime fence, whole predecessor ledger, all
+predecessor attempts and target absence before creating only the paid ledger.
+Freshness refresh reads the exact fence, both ledgers and both complete attempt
+inventories before changing only the permitted grant verification timestamps and
+price snapshot ID/timestamps. No operator step resets quota, changes the fence,
+rewrites an attempt or releases a hold. Both transactions use `maxAttempts:1`.
+
+Freshness additionally requires unchanged funding, cap, deductions, model, price
+rates and credit expiry; monotonically advancing verification observations;
+and provider balance coverage for `cap - new spent + U + unreflected confirmed
+old/new charges`. Current new reservations are included in `cap - new spent`.
+The evidence's own price-validity boundary cannot be exceeded. Proven reflected
+charges need not be deducted twice in this check, but the creation deductions
+and cap remain fixed. A mismatch, insufficient coverage or expired/unknown
+evidence closes admission rather than increasing an allowance.
+
+Any lost acknowledgement requires `inspect` against the **same original packet,
+grant ID, expected resulting ledger and complete attempt inventories**. Inspect
+does no mutation. It can confirm exact durable state; an absent/conflicting
+state or dependency failure does not authorize replay or another grant ID.
+Retain the old packet and financial evidence privately. Rollback uses the same
+paid grant with compatible software, or ordinary-only mode; an expired gift or
+old executable is never a reason to reset or discard either financial history.
+
+No real paid grant has been installed by the source implementation. Actual
+manual purchase, receipt, net USD amount, expiry, liabilities, concrete cap,
+model access, price evidence and approved stopped/drained installation remain
+necessary before live use. No payment method, automatic charge, extra generation,
+new endpoint, model, dependency, user consent or retention purpose is introduced.

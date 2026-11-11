@@ -14,15 +14,11 @@ export interface CloudModelPrice {
 }
 
 /** Fixed verification snapshot. Replacing a process never renews this grant. */
-export interface CloudCostGrant {
-  readonly schemaVersion: 'openai_cost_grant_v1';
+interface CloudCostGrantBase {
   readonly grantId: string;
   readonly provider: 'openai';
   readonly currency: 'USD';
-  readonly cycleId: string;
-  readonly cycleStartedAtMs: number;
   readonly creditExpiresAtMs: number;
-  readonly originalGiftCreditNanoUsd: NanoUsd;
   readonly verifiedSpendableRemainingNanoUsd: NanoUsd;
   readonly balanceVerifiedAtMs: number;
   readonly balanceValidUntilMs: number;
@@ -34,6 +30,27 @@ export interface CloudCostGrant {
     readonly prices: readonly CloudModelPrice[];
   };
 }
+export interface CloudGiftCostGrant extends CloudCostGrantBase {
+  readonly schemaVersion: 'openai_cost_grant_v1';
+  readonly cycleId: string;
+  readonly cycleStartedAtMs: number;
+  readonly originalGiftCreditNanoUsd: NanoUsd;
+}
+/** One separately approved purchase, never a renewal of the original gift. */
+export interface CloudPaidCostGrant extends CloudCostGrantBase {
+  readonly schemaVersion: 'openai_cost_grant_v2';
+  readonly fundingKind: 'purchased_credit';
+  readonly fundingReference: string;
+  readonly creditIssuedAtMs: number;
+  readonly creditedPurchasedNanoUsd: NanoUsd;
+  readonly approvedCapNanoUsd: NanoUsd;
+  readonly predecessor: {
+    readonly grantId: string;
+    readonly reservedLiabilityNanoUsd: NanoUsd;
+    readonly unreflectedSpentNanoUsd: NanoUsd;
+  };
+}
+export type CloudCostGrant = CloudGiftCostGrant | CloudPaidCostGrant;
 
 /** Input includes cached/write subsets; output includes the reasoning subset. */
 export interface CloudConfirmedUsage {

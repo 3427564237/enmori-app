@@ -4,14 +4,16 @@ import type { FirestoreGateway, StoredDocument } from '../../shared/infrastructu
 import { cloudConfirmedCostNanoUsd, cloudCostGrantCurrent, cloudCostGrantExpiresAt, cloudReservationNanoUsd,
   costRecord, decodeCloudConfirmedUsage, decodeCloudCostAttempt, decodeCloudCostGrant, exactCostFields,
   isCostInteger, isCostUuid } from '../domain/cloud-cost.js';
-import type { CloudConfirmedUsage, CloudCostAttemptInput, CloudCostBudgetAuthority, CloudCostBudgetSnapshot, CloudCostGrant,
+import type { CloudConfirmedUsage, CloudCostAttemptInput, CloudCostBudgetAuthority, CloudCostBudgetSnapshot, CloudCostGrant, CloudPaidCostGrant,
   CloudCostReconcileResult, CloudCostRecoveryResult, CloudCostReservation, CloudCostReserveResult } from '../ports/cloud-cost-budget.js';
 import type { RuntimeClock } from '../ports/runtime-clock.js';
 
 export const cloudCostBudgetPath = 'ai_cloud_cost_budget/current';
-const attemptPath = (id: string) => `${cloudCostBudgetPath}/attempts/${id}`;
-interface Ledger extends RuntimeEpoch {
-  readonly schemaVersion: 'openai_cost_budget_v1';
+export const cloudCostGrantPath = (grant: CloudCostGrant): string => grant.schemaVersion === 'openai_cost_grant_v1'
+  ? cloudCostBudgetPath : `ai_cloud_cost_budget/${grant.grantId}`;
+const attemptPath = (path: string, id: string) => `${path}/attempts/${id}`;
+export interface CloudCostLedger extends RuntimeEpoch {
+  readonly schemaVersion: 'openai_cost_budget_v1' | 'openai_cost_budget_v2';
   readonly grant: CloudCostGrant;
   readonly lastObservedAtMs: number;
   readonly reservedNanoUsd: number;
@@ -38,10 +40,36 @@ interface LocalReservation {
   usageKey?: string;
 }
 const validEpoch = (value: RuntimeEpoch): boolean => isCostUuid(value.processEpoch) && isCostInteger(value.generation) && value.generation > 0;
-const snapshot = (ledger: Ledger): CloudCostBudgetSnapshot => Object.freeze({ grantId: ledger.grant.grantId, capNanoUsd: ledger.grant.capNanoUsd,
+const snapshot = (ledger: CloudCostLedger): CloudCostBudgetSnapshot => Object.freeze({ grantId: ledger.grant.grantId, capNanoUsd: ledger.grant.capNanoUsd,
   reservedNanoUsd: ledger.reservedNanoUsd, spentNanoUsd: ledger.spentNanoUsd,
   availableNanoUsd: Number(BigInt(ledger.grant.capNanoUsd) - BigInt(ledger.reservedNanoUsd) - BigInt(ledger.spentNanoUsd)),
   expiresAtMs: cloudCostGrantExpiresAt(ledger.grant), attemptCount: ledger.attemptCount, reconciledCount: ledger.reconciledCount });
+
+/** Pure storage decoding; expiry is checked separately for admission so old
+ * financial evidence stays readable after the gift has expired. */
+export function decodeCloudCostLedger(raw: StoredDocument | undefined): CloudCostLedger | undefined {
+  if (!raw || !exactCostFields(raw, ['schemaVersion', 'grant', 'processEpoch', 'generation', 'lastObservedAtMs', 'reservedNanoUsd',
+    'spentNanoUsd', 'attemptCount', 'reconciledCount']) || !isCostUuid(raw.processEpoch) || !isCostInteger(raw.generation) || raw.generation < 1 ||
+    !isCostInteger(raw.lastObservedAtMs) || !isCostInteger(raw.reservedNanoUsd) || !isCostInteger(raw.spentNanoUsd) ||
+    !isCostInteger(raw.attemptCount) || !isCostInteger(raw.reconciledCount) || raw.reconciledCount > raw.attemptCount ||
+    (raw.attemptCount === 0 && (raw.reservedNanoUsd !== 0 || raw.spentNanoUsd !== 0)) ||
+    (raw.reconciledCount === raw.attemptCount && raw.reservedNanoUsd !== 0) ||
+    (raw.reconciledCount < raw.attemptCount && raw.reservedNanoUsd === 0)) return undefined;
+  const grant = decodeCloudCostGrant(raw.grant);
+  if (!grant || raw.schemaVersion !== (grant.schemaVersion === 'openai_cost_grant_v1' ? 'openai_cost_budget_v1' : 'openai_cost_budget_v2') ||
+    BigInt(raw.reservedNanoUsd) + BigInt(raw.spentNanoUsd) > BigInt(grant.capNanoUsd)) return undefined;
+  return {schemaVersion: grant.schemaVersion === 'openai_cost_grant_v1' ? 'openai_cost_budget_v1' : 'openai_cost_budget_v2', grant, processEpoch: raw.processEpoch, generation: raw.generation,
+    lastObservedAtMs: raw.lastObservedAtMs, reservedNanoUsd: raw.reservedNanoUsd, spentNanoUsd: raw.spentNanoUsd,
+    attemptCount: raw.attemptCount, reconciledCount: raw.reconciledCount};
+}
+
+export function paidCreditPredecessorMatches(raw: StoredDocument | undefined, grant: CloudPaidCostGrant, epoch: RuntimeEpoch): boolean {
+  const old = decodeCloudCostLedger(raw);
+  return !!old && old.grant.schemaVersion === 'openai_cost_grant_v1' && old.grant.grantId === grant.predecessor.grantId &&
+    old.generation < epoch.generation && old.processEpoch !== epoch.processEpoch &&
+    old.reservedNanoUsd === grant.predecessor.reservedLiabilityNanoUsd &&
+    old.spentNanoUsd >= grant.predecessor.unreflectedSpentNanoUsd;
+}
 
 /** Pure, separately invoked seed builder for synthetic/offline review. It does
  * no I/O, never changes a fence and is never called by recover(). A real grant
@@ -49,7 +77,7 @@ const snapshot = (ledger: Ledger): CloudCostBudgetSnapshot => Object.freeze({ gr
 export function createOfflineCloudCostBudgetSeed(grantInput: CloudCostGrant, epoch: RuntimeEpoch, observedAtMs: number):
   { readonly path: typeof cloudCostBudgetPath; readonly data: StoredDocument } {
   const grant = decodeCloudCostGrant(grantInput);
-  if (!grant || !validEpoch(epoch) || !cloudCostGrantCurrent(grant, observedAtMs)) throw Error('CLOUD_COST_SEED_INVALID');
+  if (!grant || grant.schemaVersion !== 'openai_cost_grant_v1' || !validEpoch(epoch) || !cloudCostGrantCurrent(grant, observedAtMs)) throw Error('CLOUD_COST_SEED_INVALID');
   return Object.freeze({ path: cloudCostBudgetPath, data: Object.freeze({ schemaVersion: 'openai_cost_budget_v1', grant,
     processEpoch: epoch.processEpoch, generation: epoch.generation, lastObservedAtMs: observedAtMs,
     reservedNanoUsd: 0, spentNanoUsd: 0, attemptCount: 0, reconciledCount: 0 }) });
@@ -62,6 +90,7 @@ export function createOfflineCloudCostBudgetSeed(grantInput: CloudCostGrant, epo
 export class FirestoreCloudCostBudget implements CloudCostBudgetAuthority {
   private readonly grant: CloudCostGrant;
   private readonly grantKey: string;
+  private readonly path: string;
   private readonly epoch: RuntimeEpoch;
   private readonly reservations = new WeakMap<CloudCostReservation, LocalReservation>();
   private lease: object | undefined;
@@ -75,7 +104,8 @@ export class FirestoreCloudCostBudget implements CloudCostBudgetAuthority {
     const grant = decodeCloudCostGrant(grantInput);
     if (!grant || !validEpoch(epoch) || typeof gateway?.runTransaction !== 'function' || typeof clock?.now !== 'function' ||
       typeof utcMilliseconds !== 'function' || typeof ownsHost !== 'function') throw Error('CLOUD_COST_CONFIGURATION_INVALID');
-    this.grant = grant; this.grantKey = JSON.stringify(grant); this.epoch = Object.freeze({ ...epoch });
+    this.grant = grant; this.path = cloudCostGrantPath(grant); this.grantKey = JSON.stringify(grant);
+    this.epoch = Object.freeze({processEpoch: epoch.processEpoch, generation: epoch.generation});
   }
   private host(): boolean { try { return this.ownsHost() === true; } catch { return false; } }
   private live(check: () => boolean): boolean { try { return check() === true; } catch { return false; } }
@@ -108,25 +138,19 @@ export class FirestoreCloudCostBudget implements CloudCostBudgetAuthority {
       raw.processEpoch !== this.epoch.processEpoch || raw.generation !== this.epoch.generation ||
       !isCostInteger(raw.cleanupGeneration) || !this.host()) throw Error();
   }
-  private decodeLedger(raw: StoredDocument | undefined, now: number, requireAdmission = true): Ledger {
-    if (!raw || !exactCostFields(raw, ['schemaVersion', 'grant', 'processEpoch', 'generation', 'lastObservedAtMs', 'reservedNanoUsd',
-      'spentNanoUsd', 'attemptCount', 'reconciledCount']) || raw.schemaVersion !== 'openai_cost_budget_v1' || !isCostUuid(raw.processEpoch) ||
-      !isCostInteger(raw.generation) || raw.generation < 1 || raw.generation > this.epoch.generation ||
-      (raw.generation === this.epoch.generation && raw.processEpoch !== this.epoch.processEpoch) ||
-      !isCostInteger(raw.lastObservedAtMs) || raw.lastObservedAtMs > now || (requireAdmission && !cloudCostGrantCurrent(this.grant, now)) ||
-      !isCostInteger(raw.reservedNanoUsd) || !isCostInteger(raw.spentNanoUsd) || !isCostInteger(raw.attemptCount) ||
-      !isCostInteger(raw.reconciledCount) || raw.reconciledCount > raw.attemptCount ||
-      BigInt(raw.reservedNanoUsd) + BigInt(raw.spentNanoUsd) > BigInt(this.grant.capNanoUsd) ||
-      (raw.attemptCount === 0 && (raw.reservedNanoUsd !== 0 || raw.spentNanoUsd !== 0)) ||
-      (raw.reconciledCount === raw.attemptCount && raw.reservedNanoUsd !== 0) ||
-      (raw.reconciledCount < raw.attemptCount && raw.reservedNanoUsd === 0)) throw Error();
-    const grant = decodeCloudCostGrant(raw.grant);
-    if (!grant || JSON.stringify(grant) !== this.grantKey) throw Error();
-    return { schemaVersion: 'openai_cost_budget_v1', grant, processEpoch: raw.processEpoch, generation: raw.generation,
-      lastObservedAtMs: raw.lastObservedAtMs, reservedNanoUsd: raw.reservedNanoUsd, spentNanoUsd: raw.spentNanoUsd,
-      attemptCount: raw.attemptCount, reconciledCount: raw.reconciledCount };
+  private decodeLedger(raw: StoredDocument | undefined, now: number, requireAdmission = true): CloudCostLedger {
+    const ledger = decodeCloudCostLedger(raw);
+    if (!ledger || ledger.generation > this.epoch.generation ||
+      (ledger.generation === this.epoch.generation && ledger.processEpoch !== this.epoch.processEpoch) ||
+      ledger.lastObservedAtMs > now || (requireAdmission && !cloudCostGrantCurrent(this.grant, now)) ||
+      JSON.stringify(ledger.grant) !== this.grantKey) throw Error();
+    return ledger;
   }
-  private requireCurrentLedger(ledger: Ledger): void {
+  private async verifyPredecessor(tx: import('../../shared/infrastructure/firebase/firestore-gateway.js').FirestoreTransactionGateway): Promise<void> {
+    if (this.grant.schemaVersion === 'openai_cost_grant_v2' &&
+        !paidCreditPredecessorMatches(await tx.get(cloudCostBudgetPath), this.grant, this.epoch)) throw Error();
+  }
+  private requireCurrentLedger(ledger: CloudCostLedger): void {
     if (ledger.processEpoch !== this.epoch.processEpoch || ledger.generation !== this.epoch.generation) throw Error();
   }
   async recover(): Promise<CloudCostRecoveryResult> {
@@ -135,10 +159,11 @@ export class FirestoreCloudCostBudget implements CloudCostBudgetAuthority {
     try {
       const ledger = await this.gateway.runTransaction(async tx => {
         this.verifyFence(await tx.get('ai_runtime_fence/current'));
-        const raw = await tx.get(cloudCostBudgetPath), now = this.now(), old = this.decodeLedger(raw, now);
+        await this.verifyPredecessor(tx);
+        const raw = await tx.get(this.path), now = this.now(), old = this.decodeLedger(raw, now);
         const next = { ...old, ...this.epoch, lastObservedAtMs: now };
         if (!this.host() || !cloudCostGrantCurrent(this.grant, this.now())) throw Error();
-        tx.set(cloudCostBudgetPath, next); return next;
+        tx.set(this.path, next); return next;
       }, { maxAttempts: 1 });
       if (!this.host() || !cloudCostGrantCurrent(this.grant, this.now())) throw Error();
       this.lease = Object.freeze({}); this.active = true;
@@ -154,20 +179,22 @@ export class FirestoreCloudCostBudget implements CloudCostBudgetAuthority {
     try {
       const result = await this.gateway.runTransaction(async tx => {
         this.verifyFence(await tx.get('ai_runtime_fence/current'));
-        const [raw, existing] = await readTogether([
-          () => tx.get(cloudCostBudgetPath), () => tx.get(attemptPath(input.attemptId)),
+        await this.verifyPredecessor(tx);
+        const [raw, existing, predecessorAttempt] = await readTogether([
+          () => tx.get(this.path), () => tx.get(attemptPath(this.path, input.attemptId)),
+          ...(this.grant.schemaVersion === 'openai_cost_grant_v2' ? [() => tx.get(attemptPath(cloudCostBudgetPath, input.attemptId))] : []),
         ]);
         const now = this.now(), old = this.decodeLedger(raw, now); this.requireCurrentLedger(old);
         if (!this.current(lease) || !this.live(live)) return { kind: 'rejected', reason: 'unavailable' } as const;
-        if (existing !== undefined) return { kind: 'rejected', reason: 'duplicate' } as const;
+        if (existing !== undefined || predecessorAttempt !== undefined) return { kind: 'rejected', reason: 'duplicate' } as const;
         if (BigInt(old.reservedNanoUsd) + BigInt(old.spentNanoUsd) + BigInt(amount) > BigInt(this.grant.capNanoUsd))
           return { kind: 'rejected', reason: 'exhausted' } as const;
         if (old.attemptCount === Number.MAX_SAFE_INTEGER) throw Error();
         const attempt: Attempt = { schemaVersion: 'openai_cost_attempt_v1', grantId: this.grant.grantId, ...input,
           ...this.epoch, createdAtMs: now, reservedNanoUsd: amount, state: 'reserved' };
         if (!this.current(lease) || !this.live(live)) return { kind: 'rejected', reason: 'unavailable' } as const;
-        tx.create(attemptPath(input.attemptId), { ...attempt });
-        tx.set(cloudCostBudgetPath, { ...old, lastObservedAtMs: now, reservedNanoUsd: old.reservedNanoUsd + amount, attemptCount: old.attemptCount + 1 });
+        tx.create(attemptPath(this.path, input.attemptId), { ...attempt });
+        tx.set(this.path, { ...old, lastObservedAtMs: now, reservedNanoUsd: old.reservedNanoUsd + amount, attemptCount: old.attemptCount + 1 });
         return { kind: 'confirmed' } as const;
       }, { maxAttempts: 1 });
       if (result.kind !== 'confirmed') return result;
@@ -220,8 +247,9 @@ export class FirestoreCloudCostBudget implements CloudCostBudgetAuthority {
     try {
       const result = await this.gateway.runTransaction(async tx => {
         this.verifyFence(await tx.get('ai_runtime_fence/current'));
+        await this.verifyPredecessor(tx);
         const [raw, attemptRaw] = await readTogether([
-          () => tx.get(cloudCostBudgetPath), () => tx.get(attemptPath(state.input.attemptId)),
+          () => tx.get(this.path), () => tx.get(attemptPath(this.path, state.input.attemptId)),
         ]);
         const now = this.now(), old = this.decodeLedger(raw, now, false); this.requireCurrentLedger(old);
         const attempt = this.decodeAttempt(attemptRaw, state, now);
@@ -234,8 +262,8 @@ export class FirestoreCloudCostBudget implements CloudCostBudgetAuthority {
           BigInt(old.spentNanoUsd) + BigInt(cost) > BigInt(this.grant.capNanoUsd)) throw Error();
         const nextAttempt: Attempt = { ...attempt, state: 'reconciled', reconciledAtMs: now, chargedNanoUsd: cost, usage };
         if (!this.settlementCurrent(state.lease)) throw Error();
-        tx.set(attemptPath(state.input.attemptId), { ...nextAttempt });
-        tx.set(cloudCostBudgetPath, { ...old, lastObservedAtMs: now, reservedNanoUsd: old.reservedNanoUsd - state.amount,
+        tx.set(attemptPath(this.path, state.input.attemptId), { ...nextAttempt });
+        tx.set(this.path, { ...old, lastObservedAtMs: now, reservedNanoUsd: old.reservedNanoUsd - state.amount,
           spentNanoUsd: old.spentNanoUsd + cost, reconciledCount: old.reconciledCount + 1 });
         return 'confirmed' as const;
       }, { maxAttempts: 1 });
