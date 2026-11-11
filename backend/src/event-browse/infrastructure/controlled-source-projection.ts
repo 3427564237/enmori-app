@@ -110,7 +110,10 @@ export class ControlledSourceProjection implements BrowseSource {
     const now=parseBrowseInstant(asOf);
     if(now===undefined||signal.aborted)throw dependencyUnavailable;
     const deadline = new AbortController();
-    const timer = setTimeout(() => deadline.abort(), this.source.status?45000:10000);
+    // The public catalogue may use its full 90-second demo source budget.
+    // Allow its completed multi-provider outcome plus bounded traversal time;
+    // a genuine failure still cannot become an empty or partial ranking snapshot.
+    const timer = setTimeout(() => deadline.abort(), this.source.status?110000:10000);
     const bounded = AbortSignal.any([signal, deadline.signal]);
     try {
       if(this.pending) {
