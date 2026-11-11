@@ -34,6 +34,7 @@ export function socialEventSource(peek: (id: string, asOf: string) => BrowseOccu
     throw new Error('Participation projection capacity');
   }
   const activity: EventActivitySource = {
+    ...(prepare ? { prepare } : {}),
     async read(tx, viewer, owner, asOf) {
       if (!ready(asOf)) throw new Error('Current event source unavailable');
       const result: EventActivityMetadata[] = [];

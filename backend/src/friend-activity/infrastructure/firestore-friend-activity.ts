@@ -19,7 +19,21 @@ async function completePage(read:(after:string|undefined)=>Promise<readonly Stor
 export class FirestoreFriendActivity implements FriendActivity {
   constructor(private readonly store:FirestoreGateway,private readonly clock:Clock,private readonly authority:SocialAuthority,private readonly events?:EventActivitySource){}
   async read(uid:string,view:"home"|"all",category:ActivityCategory){
-    try{return await this.store.runTransaction(async tx=>{
+    try{
+      let source:void|{readonly current:()=>boolean}=undefined;
+      if(category!=="check_in_created"&&this.events?.prepare){
+        const permitted=await this.store.runTransaction(async tx=>{
+          const own=await this.authority.viewer(tx,uid);
+          return own.data.optionalProcessingConsent==="accepted";
+        });
+        if(!permitted)return ok({activities:[]});
+        const before=this.clock.now();
+        if(!before.ok||!Number.isFinite(before.value.getTime()))return fail("SERVICE_UNAVAILABLE");
+        // Never hold personal-data transactions open during public provider IO.
+        // The complete read below rechecks identity, consent and each friendship.
+        source=await this.events.prepare(before.value.toISOString());
+      }
+      const result=await this.store.runTransaction(async tx=>{
       const own=await this.authority.viewer(tx,uid),now=this.clock.now();
       if(!now.ok||!Number.isFinite(now.value.getTime())||!tx.listPage)return fail("SERVICE_UNAVAILABLE");
       if(own.data.optionalProcessingConsent!=="accepted")return ok({activities:[]});
@@ -94,6 +108,9 @@ export class FirestoreFriendActivity implements FriendActivity {
         if(view==="home"&&activities.length===2)break;
       }
       return ok({activities});
-    });}catch(e){return err(failure(e));}
+    });
+      if(source&&!source.current())return fail("SERVICE_UNAVAILABLE");
+      return result;
+    }catch(e){return err(failure(e));}
   }
 }

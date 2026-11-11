@@ -15,6 +15,9 @@ final class BackendFriendActivityRepository
   }) async {
     final response = await client.get(
       '/v1/me/friends/activity?view=${home ? 'home' : 'all'}&category=${category?.wire ?? 'all'}',
+      readTimeout: category == FriendActivityType.checkIn
+          ? null
+          : const Duration(seconds: 120),
     );
     if (response case Failure<JsonObject>(:final failure)) {
       return Failure(failure);

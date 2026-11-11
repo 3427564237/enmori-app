@@ -17,6 +17,9 @@ export interface EventActivityMetadata {
   readonly type:"event_interested"|"event_going";readonly sourceRecordId:string;readonly occurredAt:string;
 }
 export interface EventActivitySource {
+  /** Prepare the existing public source outside transactions after viewer
+   * authorization. Personal sources and permissions are freshly read afterward. */
+  prepare?(asOf:string):Promise<void|{readonly current:()=>boolean}>;
   read(tx:SocialSourceReader,viewerAccountId:string,ownerAccountId:string,asOf:string,
     purpose:"friends_activity_v1"):Promise<readonly EventActivityMetadata[]|undefined>;
   /** After ranking only. Recheck exact participation and current gated Event source;
