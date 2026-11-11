@@ -1,0 +1,76 @@
+{
+  "date": "2026-11-11",
+  "timezone": "Asia/Singapore",
+  "implementation_commit": "0c9d22dcdf9a2bc8c0fcd4b7b8781cd551e72a67",
+  "verified_source_commit": "7d0b67f02151e491271f53f4c563e0655c11bf88",
+  "local_integration": {
+    "status": "complete",
+    "target_branch": "souma/demo-ready-20261111",
+    "preserved_base": "2603656366ad250ecf0e4f6aa7e015e8dcb47d99",
+    "included_source": "7d0b67f02151e491271f53f4c563e0655c11bf88",
+    "method": "fast-forward",
+    "remote_main_merged": false,
+    "pushed": false
+  },
+  "checks": {
+    "typescript": "passed",
+    "backend_full": {
+      "passed": 1868,
+      "failed": 0
+    },
+    "flutter_directed": {
+      "files": 16,
+      "passed": 180,
+      "failed": 0
+    },
+    "flutter_analysis": "no issues",
+    "firestore_auth_emulator": {
+      "project": "demo-enmori-rmvp01a-r10",
+      "passed": 6,
+      "failed": 0
+    },
+    "synthetic_widget_previews": {
+      "rendered": 10,
+      "languages": [
+        "en",
+        "zh"
+      ],
+      "physical_phone": false
+    }
+  },
+  "apk": {
+    "path": "/home/miku/Downloads/ENMORI-admin-v63-release.apk",
+    "bytes": 68721032,
+    "sha256": "75939653a622f9f7c0b52e3298bd396a7759e1d37ca949e41cfcc12d802a98f3",
+    "package": "com.enmori.app.group",
+    "version_code": 63,
+    "version_name": "1.0.0-demo20261111",
+    "signature_verified": true,
+    "certificate_sha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+    "installed": false
+  },
+  "log_directory": "/home/miku/.codex/worktrees/admin-value-20261111/ENMORI/build/admin-value-verification",
+  "log_sha256": {
+    "typescript.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "backend-full.log": "faff5dee2dcd85882f67e07025d19fda46b55e5bfa26351e026f175dab691fbf",
+    "flutter-directed.log": "c985d7deafb4a0f14d1c9e57323c95c3e9e8b3218c5e70eccde436db77ef5621",
+    "analyze.log": "7b36c09df20fe281fb506a73a9292cfee30e9892ff150b10b63e61c75c328835",
+    "emulator.log": "0d3a9fd06b5427d74fc2947033da1983853cd9650792159171cef2c706401acc",
+    "apk-build.log": "22fdf4226af63b80a56c9d800bee4a911581e96484290d1ea096d0ad39396a29",
+    "apk-signature.log": "25db9fb3051eb4b950bf5f9ee6f2004edec0b783531644f9c6033b59b1acc533",
+    "apk-badging.log": "b9f27039a95ef820a0ee37390e254378612bb5c2a1fea3aeffa12e70a4d5dc71",
+    "local-integration.log": "472af9e1ebb75365fede7b8f11b3c4b8be4b486fd5badb4e4aea91bc825fbdce"
+  },
+  "boundaries": {
+    "backend_deployed": false,
+    "real_admin_mutations": false,
+    "real_role_grants": false,
+    "real_model_probes": false,
+    "physical_phone_flows": false,
+    "live_cleanup_sla_verified": false,
+    "full_flutter_suite_run": false,
+    "independent_review": false,
+    "uat_or_release_acceptance": false
+  },
+  "rollout_constraint": "Coordinate updated APK distribution before the first real category assignment; older strict version-3 clients reject populated managedCategory."
+}
