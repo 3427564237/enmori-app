@@ -235,3 +235,17 @@ test("shutdown after actor creation invalidates its fresh-auth barrier and preve
     assert.equal(f.store.settingsValue.revision, 0); assert.equal(f.identityCalls(), 2);
   } finally { await f.http.close(); }
 });
+
+test('OpenAI create wire accepts exactly the explicit marker and preserves the original neutral response view', async()=>{
+  const f=await server();try{
+    await f.app.replaceSettings(f.actor,0,f.settings);
+    const cloud={...command(f),processing:'cloud',provider:'openai',disclosureVersion:'openai_cloud_v1'};
+    const send=(payload:object)=>f.http.inject({method:'POST',url:'/v1/me/proactive-intents',headers:{...headers,'idempotency-key':ids.intent},payload});
+    for(const payload of [{...cloud,provider:'groq'},{...cloud,disclosureVersion:'groq_cloud_v1'}])assert.equal((await send(payload)).statusCode,422);
+    for(const payload of [{...cloud,cloudAiConsentGeneration:1},{...cloud,processing:'local'},
+      {...command(f),processing:'cloud',provider:'openai'}])assert.equal((await send(payload)).statusCode,400);
+    const accepted=await send(cloud);assert.equal(accepted.statusCode,201);
+    for(const key of ['processing','provider','disclosureVersion','cloudAiConsentGeneration','authorizationScope'])assert.equal(Object.hasOwn(accepted.json(),key),false);
+    assert.equal(f.store.rows.get(ids.intent)?.processing,'cloud');assert.deepEqual(f.counts(),{model:0,sends:0});
+  }finally{await f.http.close();}
+});
