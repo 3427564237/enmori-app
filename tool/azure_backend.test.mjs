@@ -138,3 +138,13 @@ test('Azure lifecycle passes only the explicit arm, probes permissions, and sani
   assert(!logs.join('\n').includes(arm.firebaseUid));
   assert.deepEqual(logs.map(line => JSON.parse(line)).filter(row => row.phase === 'listening').map(row => row.aiConfigured), [false, true, true]);
 });
+
+test('OpenAI proactive is absent by default and accepts only the approved existing configuration tuple', () => {
+  const firstFlow={audience:'registered_accounts',worker:{mode:'service',intervalMs:60000},push:{leaseDurationMs:2592000000}};
+  assert.equal(azureConfiguration(armed,'24.19.0').cloudTestApp.firstFlow,undefined);
+  const parse=value=>azureConfiguration({...armed,ENMORI_OPENAI_TEST_APP_CONFIG:JSON.stringify({...arm,firstFlow:value})},'24.19.0').cloudTestApp;
+  assert.deepEqual(parse(firstFlow).firstFlow,firstFlow);
+  for(const bad of [null,{}, {...firstFlow,audience:'fixed'}, {...firstFlow,extra:true},
+    {...firstFlow,worker:{mode:'service'}}, {...firstFlow,worker:{mode:'service',intervalMs:1000}},
+    {...firstFlow,push:{leaseDurationMs:5184000000}}, {...firstFlow,push:{leaseDurationMs:2592000000,enabled:true}}]) assert.equal(parse(bad),null);
+});

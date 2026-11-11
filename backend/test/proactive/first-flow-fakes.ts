@@ -39,7 +39,7 @@ export class FakeFirstFlowStore implements FirstFlowStore {
       occurredAt: "2026-10-24T04:00:00.000Z", text: "Synthetic: ask how my preparation went.", purposeRevocationGeneration: 0 };
   }
   private permitted(a: ProactiveActor): boolean { return a.current() && a.principal.firebaseUid === "owner"; }
-  private changed(row: FirstFlowIntent, patch: Partial<FirstFlowIntent>): FirstFlowIntent {
+  private changed(row: FirstFlowIntent, patch: Partial<Omit<FirstFlowIntent,"processing"|"provider"|"disclosureVersion">>): FirstFlowIntent {
     const next = { ...row, ...patch, revision: row.revision + 1 }; this.rows.set(row.intentId, next); return next;
   }
   async source(a: ProactiveActor, topic: string, message: string) {
@@ -116,6 +116,16 @@ export class FakeFirstFlowStore implements FirstFlowStore {
     if (!this.permitted(a)) return { kind: "terminated" as const };
     if (!row || row.state !== "reserved") return { kind: "conflict" as const };
     return ok(this.changed(row, { state: "failed" }));
+  }
+  async validateReservation(a: ProactiveActor, reservation: FirstFlowReservation): Promise<FirstFlowResult<void>> {
+    const row = this.rows.get(reservation.intent.intentId);
+    if (!this.permitted(a)) return { kind: "terminated" };
+    if (!row || !this.sourceAlive) return { kind: "not_found" };
+    if (row.state !== "reserved" || row.revision !== reservation.intent.revision ||
+        this.settingsValue.mode !== "on" || this.settingsValue.grantGeneration !== row.grantGeneration ||
+        this.sourceValue.sourceVersion !== reservation.source.sourceVersion) return { kind: "selection_conflict" };
+    if (this.clock.now >= Date.parse(row.expiresAt)) return { kind: "expired" };
+    return ok(undefined);
   }
   async publish(a: ProactiveActor, input: FirstFlowPublish): Promise<FirstFlowResult<FirstFlowIntent>> {
     await this.beforePublish?.(); const row = this.rows.get(input.reservation.intent.intentId);

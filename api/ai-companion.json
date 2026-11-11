@@ -353,15 +353,57 @@
           "processing": {
             "type": "string",
             "enum": [
-              "local"
+              "local",
+              "cloud"
             ]
           },
           "expectedSettingsRevision": {
             "type": "integer",
             "minimum": 0,
             "maximum": 9007199254740991
+          },
+          "provider": {
+            "const": "openai"
+          },
+          "disclosureVersion": {
+            "const": "openai_cloud_v1"
           }
-        }
+        },
+        "oneOf": [
+          {
+            "properties": {
+              "processing": {
+                "const": "local"
+              }
+            },
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "provider"
+                  ]
+                },
+                {
+                  "required": [
+                    "disclosureVersion"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "required": [
+              "provider",
+              "disclosureVersion"
+            ],
+            "properties": {
+              "processing": {
+                "const": "cloud"
+              }
+            }
+          }
+        ],
+        "description": "Local retains the original exact request. OpenAI requires all three exact processor markers and current own optional-processing and OpenAI consent. Consent generations are captured only by the server. A stored local intent is never converted to cloud; changed processor fields cannot reuse an intent idempotency key."
       },
       "Intent": {
         "type": "object",

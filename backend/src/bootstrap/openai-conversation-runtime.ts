@@ -6,7 +6,8 @@ import type { ConversationInput } from '../ai-conversation/ports/conversation-li
 import { BoundedAiRuntime } from '../ai-runtime/application/bounded-ai-runtime.js';
 import { CloudAdmissionOwner } from '../ai-runtime/application/cloud-admission-owner.js';
 import { CloudCostBudgetOwner } from '../ai-runtime/application/cloud-cost-budget-owner.js';
-import { OpenAiChatTransport } from '../ai-runtime/infrastructure/openai-chat-transport.js';
+import { buildFirstFlowMessages } from '../ai-runtime/infrastructure/local-first-flow-transport.js';
+import type { FirstFlowModelInput } from '../proactive/ports/first-flow.js';
 import { buildChatMessages } from '../ai-runtime/infrastructure/local-chat-transport.js';
 import { OpenAiCloudTransport, assertOpenAiTransportSettings, buildOpenAiRequest, countOpenAiInputTokens,
   type OpenAiTransportConfiguration } from '../ai-runtime/infrastructure/openai-cloud-transport.js';
@@ -39,6 +40,9 @@ interface OpenAiConversationRuntimeBase {
 export type OpenAiConversationRuntimeOptions = OpenAiConversationRuntimeBase & (
   | { readonly inputTokenUpperBound: (requestBody: string) => number; readonly countInputTokens?: never }
   | { readonly countInputTokens: true; readonly inputTokenUpperBound?: never });
+
+type Projection = ConversationInput | FirstFlowModelInput;
+const messages = (input: Projection) => 'inputKind' in input ? buildFirstFlowMessages(input) : buildChatMessages(input);
 
 const unknown = (): CloudGenerationObservation => ({ kind: 'unknown', physical: 'unknown' });
 const stopped = (): CloudGenerationObservation => ({ kind: 'failure', physical: 'stopped' });
@@ -151,7 +155,7 @@ export function createOpenAiConversationRuntime(options: OpenAiConversationRunti
               handle.disclosureVersion === OPENAI_CLOUD_PROCESSING.disclosureVersion && options.cloudConsent.current(handle) === true;
           } catch { return false; }
         };
-        if (!live()) return unknown();
+        if (!live() || (handle.monetaryConsumer === 'proactive') !== (typeof handle.proactiveProjection === 'function')) return unknown();
         // CloudAdmissionOwner already reserved one slot for generation. Count
         // gets another full slot in the same durable rate ledger before any
         // provider effect. Its larger token ceiling is deliberately conservative.
@@ -163,22 +167,24 @@ export function createOpenAiConversationRuntime(options: OpenAiConversationRunti
         }
         // Reserve metadata before borrowing the projection. The authorized bridge
         // performs fresh checkpoints AFTER this asynchronous monetary mutation.
-        const reserved = await options.costBudget.reserve({ attemptId: options.randomAttemptId(), consumer: handle.monetaryConsumer === 'persona' ? 'persona' : consumer,
+        const reserved = await options.costBudget.reserve({ attemptId: options.randomAttemptId(), consumer: handle.monetaryConsumer === 'persona' || handle.monetaryConsumer === 'proactive' ? handle.monetaryConsumer : consumer,
           model: configuration.model, maxInputTokens: configuration.maxInputTokens, maxOutputTokens: configuration.maxOutputTokens }, live);
         if (reserved.kind !== 'confirmed' || !live()) return unknown();
         const pending = options.costBudget.dispatch(reserved.reservation, async money => {
           if (!live()) return unknown();
           const available = () => live() && money.available() === true;
-          const createChat = (inputTokenUpperBound: (body: string) => number, http = options.http) =>
-            new OpenAiChatTransport(new OpenAiCloudTransport(options.apiKey, configuration, options.clock, http, {
+          const createChat = (inputTokenUpperBound: (body: string) => number, http = options.http): CloudGenerationTransport<Projection> & {readonly processing: typeof OPENAI_CLOUD_PROCESSING} => ({
+            processing: OPENAI_CLOUD_PROCESSING,
+            dispatch: (input,budget) => new OpenAiCloudTransport(options.apiKey, configuration, options.clock, http, {
               inputTokenUpperBound, reservedTokens: rateLimits.tokensPerRequest, available, rateLimited,
               confirmUsage: usage => money.confirmUsage(usage),
-            }));
-          const chat: CloudGenerationTransport<ConversationInput> & { readonly processing: typeof OPENAI_CLOUD_PROCESSING } =
+            }).dispatch(messages(input),budget),
+          });
+          const chat: CloudGenerationTransport<Projection> & { readonly processing: typeof OPENAI_CLOUD_PROCESSING } =
             verifiedBound ? createChat(verifiedBound) : { processing: OPENAI_CLOUD_PROCESSING, async dispatch(projection, budget) {
               let paidStarted = false;
               try {
-                const body = buildOpenAiRequest(buildChatMessages(projection), configuration);
+                const body = buildOpenAiRequest(messages(projection), configuration);
                 const tokens = await countOpenAiInputTokens(body, configuration, budget, { key: options.apiKey,
                   clock: options.clock, http: options.http, available, rateLimited });
                 // The bridge authorized the Count request. Refresh the original
@@ -196,6 +202,12 @@ export function createOpenAiConversationRuntime(options: OpenAiConversationRunti
                 return paidStarted ? observation : stopped();
               } catch { return paidStarted ? unknown() : stopped(); }
             } };
+          if (handle.monetaryConsumer === 'proactive') {
+            if (!await options.cloudConsent.verify(handle,budget) || !available() || !await handle.authorize() || !available()) return stopped();
+            const projection=handle.proactiveProjection?.();
+            if(!projection || !available() || !options.cloudConsent.current(handle)) return stopped();
+            return chat.dispatch(projection,budget);
+          }
           const authorized = new AuthorizedAsyncCloudConversationTransport(chat, options.cloudConsent);
           return authorized.dispatch(handle, budget);
         });
