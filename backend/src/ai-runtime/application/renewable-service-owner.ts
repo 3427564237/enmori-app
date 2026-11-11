@@ -54,8 +54,8 @@ export class RenewableServiceOwner {
       if(this.abort.signal.aborted)finish();
     });
   }
-  private async response(submitted:number,invoke:(live:()=>boolean)=>Promise<ServiceOwnerResult>,live:()=>boolean):Promise<ServiceOwnerResult>{
-    const end=submitted+SERVICE_OWNER_RESPONSE_MS;
+  private async response(submitted:number,invoke:(live:()=>boolean)=>Promise<ServiceOwnerResult>,live:()=>boolean,limit=Infinity):Promise<ServiceOwnerResult>{
+    const end=Math.min(submitted+SERVICE_OWNER_RESPONSE_MS,limit);
     const current=()=>{const now=this.now();return now!==undefined&&now<end&&!this.abort.signal.aborted&&live();};
     if(!current())return {kind:'unknown'};
     return new Promise(resolve=>{
@@ -84,7 +84,7 @@ export class RenewableServiceOwner {
     const began=this.now();if(began===undefined)return undefined;const limit=began+SERVICE_OWNER_STARTUP_MS;
     while(this.phase==='starting'){
       const submitted=this.now();if(submitted===undefined||submitted>=limit)break;
-      const result=await this.response(submitted,live=>this.authority.acquire(this.processEpoch,live),()=>this.phase==='starting');
+      const result=await this.response(submitted,live=>this.authority.acquire(this.processEpoch,live),()=>this.phase==='starting',limit);
       const now=this.now();if(now===undefined||this.phase!=='starting'||now>=limit)break;
       if(result.kind==='confirmed'){
         if(this.install(result.lease,submitted))return Object.freeze({processEpoch:result.lease.processEpoch,generation:result.lease.generation});

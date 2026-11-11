@@ -68,6 +68,17 @@ test('an occupied lease can expire inside the 135s window without overlapping pr
   const start=f.owner.start();await flush();for(const t of [30000,60000,90000,120000])await f.clock.advance(t);
   assert((await start)?.generation===10);assert.equal(calls,5);assert.equal(f.owner.current(),true);f.owner.stop();
 });
+test('the final occupied-window transaction is cut off at 135s even when its 15s ACK bound would end later',async()=>{
+  const f=fixture(),pending=deferred<ServiceOwnerResult>();let calls=0,finished=false;
+  f.authority.acquire=async()=>{calls++;return f.clock.now()>=134000?pending.promise:
+    {kind:'occupied',remainingMs:Math.min(120000,134000-f.clock.now())};};
+  const start=f.owner.start().then(value=>{finished=true;return value;});await flush();
+  for(const t of [30000,60000,90000,120000,134000])await f.clock.advance(t);
+  assert.equal(calls,6);assert.equal(finished,false);await f.clock.advance(135000);
+  assert.equal(finished,true);assert.equal(await start,undefined);assert.equal(f.owner.lost,false);
+  pending.resolve({kind:'confirmed',lease:f.lease()});await flush();assert.equal(f.owner.current(),false);
+  assert.equal(f.clock.timers.size,0);
+});
 test('renewal timeout retires synchronously; late success cannot reopen or reattempt',async()=>{
   const f=fixture(),pending=deferred<ServiceOwnerResult>();let renewals=0;
   f.authority.renew=()=>{renewals++;return pending.promise;};await f.owner.start();
