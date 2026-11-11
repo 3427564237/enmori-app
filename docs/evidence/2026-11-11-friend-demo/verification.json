@@ -1,0 +1,64 @@
+{
+  "observedAtUtc": "2026-11-11T07:20:07.416Z",
+  "deployedCandidate": "a04251b0775e512bafdcafb75d026edc2caf499b",
+  "identity": "new ordinary demonstration friend account",
+  "contractVersion": 3,
+  "loginHttpStatus": 200,
+  "reads": [
+    { "name": "own-profile", "httpStatus": 200, "elapsedMs": 5716 },
+    { "name": "own-recommendation-profile", "httpStatus": 200, "elapsedMs": 4777 },
+    {
+      "name": "friends-all",
+      "httpStatus": 200,
+      "elapsedMs": 10954,
+      "ownState": "ready",
+      "suggestionCount": 1,
+      "userSuppliedTargetUsername": "3427564237",
+      "targetIndex": 0,
+      "sharedInterestCount": 2,
+      "commonEventCount": 0,
+      "sharedAffiliationReasonPresent": true
+    },
+    {
+      "name": "friends-home",
+      "httpStatus": 200,
+      "elapsedMs": 11466,
+      "ownState": "ready",
+      "suggestionCount": 1,
+      "userSuppliedTargetUsername": "3427564237",
+      "targetIndex": 0,
+      "sharedInterestCount": 2,
+      "commonEventCount": 0,
+      "sharedAffiliationReasonPresent": true
+    }
+  ],
+  "sharedFactorCheck": {
+    "kind": "public-shared-factor-calculation-only",
+    "formulaVersion": "friend_recommendation_v3",
+    "sharedInterestPoints": 8,
+    "sameAffiliationPoints": 1,
+    "publicFactorPoints": 9,
+    "completeMainCandidatePoolReconstructed": false,
+    "mainRequesterExclusionsRead": false,
+    "mainHomeTop2Verified": false
+  },
+  "boundaries": {
+    "mainAccountApiReadPerformed": false,
+    "physicalPhoneVerified": false,
+    "mainAccountDataChanged": false,
+    "friendRequestsSent": false,
+    "messagesSent": false,
+    "adminGrantedToFriend": false,
+    "cloudProcessingConsentGrantedToFriend": false,
+    "eventPageZeroRefreshedDuringSmoke": false
+  },
+  "repairVerification": {
+    "previousAllHttpStatus": 503,
+    "previousAllElapsedMs": 47261,
+    "multiProviderSnapshotSeconds": 110,
+    "friendGetSeconds": 120,
+    "directedBackendTestsPassed": 45,
+    "directedFlutterTestsPassed": 19,
+    "targetedAnalysisIssues": 0
+  }
+}
