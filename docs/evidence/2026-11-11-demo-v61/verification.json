@@ -1,0 +1,54 @@
+{
+  "sourceCommit": "a04251b0775e512bafdcafb75d026edc2caf499b",
+  "packageSha256": "1a892ed75a27d71a5e51711e1a5fb858e027faa528c5bbfc7d9e79ba2a70fb41",
+  "packageBytes": 67986031,
+  "everyEntryVerified": true,
+  "startup": [
+    {
+      "phase": "configuration",
+      "nodeVersion": "24.19.0",
+      "selectedHost": true,
+      "identityEndpointPath": "/msi/token",
+      "cloudTestApp": "armed"
+    },
+    {
+      "phase": "listening",
+      "firebaseRead": true,
+      "aiConfigured": true,
+      "aiAvailable": true
+    }
+  ],
+  "startupProbeSeconds": 315.1722584,
+  "drain": {
+    "allContainersStopped": true,
+    "httpStopped": true,
+    "localStopped": true,
+    "endedCount": 1,
+    "observedAppContainers": 4,
+    "inspectedPlatformLogs": 1
+  },
+  "cloudLedgerAtRefresh": {
+    "capNanoUsd": 3400000000,
+    "spentNanoUsd": 100184700,
+    "reservedNanoUsd": 4096000,
+    "attemptCount": 104,
+    "reconciledCount": 102
+  },
+  "balanceEvidence": "LI-reported US$67.90, expiry 19 November; original earlier grant expiry retained",
+  "freshnessValidUntil": "2026-11-12T00:00:00+08:00",
+  "allAuthenticatedAccounts": true,
+  "perAccountConsentStillRequired": true,
+  "sourceTests": {
+    "backend": 1839,
+    "flutterDirected": 36,
+    "flutterAnalysis": "passed"
+  },
+  "apk": {
+    "versionCode": 61,
+    "versionName": "1.0.0-demo20261111",
+    "sha256": "9482ff40bedeb6e044be9c57694e4ee6b91ca382ceb759ecc1db04557dec80a7",
+    "installMode": "adb install -r",
+    "packageReadback": "passed",
+    "visualJourneysReverified": false
+  }
+}
