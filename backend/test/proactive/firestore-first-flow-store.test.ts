@@ -340,3 +340,16 @@ test('restart preserves queued cloud generation but fails started work and never
   f.g.put(base,{...f.g.rows.get(base)!.data,cloudAiConsentGeneration:4});
   assert.equal((await restarted.reserve(f.actor,id(10),1)).kind,'denied');
 });
+
+test('cloud withdrawal permits strict push-off while mode stays on, without opening zone/quiet or re-enable changes',async()=>{
+  const f=fixture(true,undefined,true);await f.enable();
+  value(await f.store.replaceRegistration(f.actor,{expectedRevision:0,installationRef:installation,registrationKind:'fcm_token',registrationValue:'synthetic',enabled:true}));
+  f.g.put(base,{...f.g.rows.get(base)!.data,cloudAiConsent:{state:'declined',disclosureVersion:'openai_cloud_v1'},cloudAiConsentGeneration:4});
+  value(await f.store.deleteRegistration(f.actor,installation,1));
+  for(const patch of [{timeZone:'Australia/Sydney'},{quiet:{kind:'disabled' as const}},{preview:'hidden' as const}])
+    assert.equal((await f.store.replaceSettings(f.actor,1,{...settings,pushEnabled:false,...patch})).kind,'denied');
+  const disabled=value(await f.store.replaceSettings(f.actor,1,{...settings,pushEnabled:false}));
+  assert.equal(disabled.mode,'on');assert.equal(disabled.pushEnabled,false);
+  assert.equal((await f.store.replaceSettings(f.actor,2,settings)).kind,'denied');
+  assert.equal((await f.store.replaceSettings(f.actor,2,{...settings,pushEnabled:false})).kind,'denied');
+});

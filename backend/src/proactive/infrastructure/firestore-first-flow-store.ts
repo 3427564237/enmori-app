@@ -189,9 +189,11 @@ export class FirestoreFirstFlowStore implements FirstFlowStore {
       const normalized=settingsInput(input as unknown as Row);if(!uint(expectedRevision)||!normalized)refuse("invalid");
       if(normalized.pausedUntil!==undefined&&Date.parse(normalized.pausedUntil)<=this.now())refuse("invalid");
       const old=await this.state(tx,a);if(old.revision!==expectedRevision)refuse("revision_conflict");
-      if(this.options.cloudProcessing&&(normalized.mode==="on"||(normalized.pushEnabled&&!old.pushEnabled)))this.cloudGrant(account);
-      const intents:FirstFlowIntent[]=[];for(const id of old.activeIntentIds)intents.push(await this.intentRow(tx,a,id));
       const eligibility=(s:FirstFlowSettingsInput)=>JSON.stringify([s.mode,s.pausedUntil??null,s.categories,s.timeZone,s.quiet,s.maximumInRolling24h,s.cooldownMinutes,s.pushEnabled]);
+      const onlyDisablePush=old.pushEnabled&&!normalized.pushEnabled&&old.preview===normalized.preview&&
+        eligibility({...old,pushEnabled:false})===eligibility(normalized);
+      if(this.options.cloudProcessing&&((normalized.mode==="on"&&!onlyDisablePush)||(normalized.pushEnabled&&!old.pushEnabled)))this.cloudGrant(account);
+      const intents:FirstFlowIntent[]=[];for(const id of old.activeIntentIds)intents.push(await this.intentRow(tx,a,id));
       const changed=eligibility(old)!==eligibility(normalized);
       let state:State={...normalized,revision:bump(old.revision),grantGeneration:changed?bump(old.grantGeneration):old.grantGeneration,activeIntentIds:old.activeIntentIds,rollingAttemptTimes:old.rollingAttemptTimes,
         ...(old.inFlightOccurrenceId?{inFlightOccurrenceId:old.inFlightOccurrenceId}:{})};
