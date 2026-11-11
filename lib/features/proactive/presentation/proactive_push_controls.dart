@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/presentation/enmori_localizations.dart';
+import '../../../core/presentation/local_time.dart';
 import '../domain/proactive_messaging.dart';
 import '../proactive_notification_controller.dart';
 
@@ -20,6 +21,9 @@ class ProactivePushControls extends ConsumerWidget {
         state.registration?.installationRef !=
             ref.watch(proactiveMessagingInstallationRefProvider);
     final active = state.configured && state.authenticated && !state.busy;
+    final expiry = state.configured && state.authenticated && !state.unconfirmed
+        ? state.registration?.expiresAt
+        : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -80,6 +84,13 @@ class ProactivePushControls extends ConsumerWidget {
             context.tr(
               'System notifications are off or have not been checked.',
               '系统通知已关闭或尚未核对。',
+            ),
+          ),
+        if (expiry != null)
+          Text(
+            context.tr(
+              'Registration expiry: ${localTimeLabel(context, expiry)} (local time)',
+              '登记到期时间：${localTimeLabel(context, expiry)}（本地时间）',
             ),
           ),
         if (state.busy)
