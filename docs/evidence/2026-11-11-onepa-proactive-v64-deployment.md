@@ -14,9 +14,13 @@ Date: 11 November 2026. Builds and source checks are in the [reviewed candidate 
 
 The SCM VFS `site/wwwroot/deployment-manifest.json` lookup returned 404; this is not treated as the application's mounted-file result. A separate small app-container read initially timed out while the public-source request was running. Neither observation is evidence of a version mismatch. Package construction/activation hashes, selected package, compatible live configuration and newly available proactive routes are the verified evidence above; any later mounted-file observation is recorded separately.
 
+After that source request settled, a final bounded app-container read at `11:45:26.581Z` confirmed the actual mounted `/home/site/wwwroot/deployment-manifest.json`: 304 bytes, source `ae6a1d831a616a9c26b4deaf3c3899a4d0d474d1`, SHA-256 `e6ccbf0191bb12b89aae5e9be96c1453e835fd6e21d7340ce3f5e2ad85220029`. Its byte hash matched the already verified package payload's manifest entry. The connection was closed; no extra browser or remote write occurred. This resolves the mounted-source observation without treating the earlier timeout as a mismatch or retrying a mutation.
+
 ## Authenticated functionality
 
 The retained demo Admin signed in and received 200 for Profile, onboarding, Admin capability, interest tags, operations status, Event categories and operation records. The existing profile hash and all 16 interest-tag records matched the pre-update reads. Empty category/audit lists are reported as empty; no fixtures or assignments were created to manufacture coverage.
+
+After the real public-source read, a new Admin status read at `11:47:27Z` reported **ready** for Backend, Firebase, AI, Ticketmaster and onePA, with actual source observation times. The initial pre-acquisition `unknown/not_observed` state was preserved in the private evidence and was not treated as a failure or a successful acquisition.
 
 The retained friend-demo ordinary account signed in and received 200 for Profile/onboarding. All three Admin feature routes returned 403 for that account, and an unauthenticated Admin read returned 401. Ordinary access was not promoted.
 
