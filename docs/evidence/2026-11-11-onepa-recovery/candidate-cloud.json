@@ -1,0 +1,398 @@
+{
+  "sourceRepairCommit": "6eefa41",
+  "compiledReaderSha256": "6504f31fc8c99071a823f95540f1736aed98106f65693d0d0cafcda60db948d5",
+  "loadedFrom": "in-memory data URL; no deployed file changed",
+  "callerBudgetMs": 90000,
+  "watchdogMs": 100000,
+  "environment": {
+    "pwd": "/home",
+    "node": "v24.22.1",
+    "sourceCommit": "b64ad02bb36aaf531be51e86ab7583ab67b63d56",
+    "displaySet": "false"
+  },
+  "observations": [
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "catalogue-begin",
+      "elapsedMs": 317
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "launch-1-begin",
+      "elapsedMs": 326
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "launch-1-done",
+      "elapsedMs": 7412,
+      "durationMs": 7086
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "newContext-begin",
+      "elapsedMs": 7415
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "newContext-done",
+      "elapsedMs": 7805,
+      "durationMs": 390
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "newPage-begin",
+      "elapsedMs": 7836
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "newPage-done",
+      "elapsedMs": 12906,
+      "durationMs": 5071
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "searchResponse-1-begin",
+      "elapsedMs": 13034
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "navigation-1-begin",
+      "elapsedMs": 13151
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "http",
+      "elapsedMs": 14319,
+      "kind": "document",
+      "status": 200
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "navigation-1-done",
+      "elapsedMs": 25279,
+      "durationMs": 12128
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "http",
+      "elapsedMs": 36244,
+      "kind": "search",
+      "status": 201
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "body-metadata",
+      "elapsedMs": 37061,
+      "status": 201,
+      "bodyNumber": 1,
+      "bytes": 31024,
+      "json": true,
+      "topType": "object",
+      "topKeys": [
+        "dt",
+        "ts",
+        "widgets"
+      ],
+      "widgetsType": "array",
+      "widgetCount": 1,
+      "productGridCount": 1,
+      "gridKeys": [
+        "content",
+        "entity",
+        "limit",
+        "offset",
+        "rfk_id",
+        "total_item",
+        "type",
+        "used_in"
+      ],
+      "offset": 0,
+      "offsetType": "number",
+      "limit": 10,
+      "limitType": "number",
+      "page": null,
+      "totalItem": 2260,
+      "totalItemType": "number",
+      "contentType": "array",
+      "rows": 10,
+      "validIdCount": 10,
+      "duplicateIds": 0,
+      "idDigest": "d3719c7a6baa0ec8"
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "searchResponse-1-done",
+      "elapsedMs": 37100,
+      "durationMs": 24066
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "render-expected",
+      "elapsedMs": 37109,
+      "renderNumber": 1,
+      "expectedIds": 10,
+      "idDigest": "d3719c7a6baa0ec8"
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "render-1-begin",
+      "elapsedMs": 37110
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "render-1-done",
+      "elapsedMs": 39160,
+      "durationMs": 2051
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "searchResponse-2-begin",
+      "elapsedMs": 40510
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "nextPage-1-begin",
+      "elapsedMs": 40606
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "nextPage-1-done",
+      "elapsedMs": 50283,
+      "durationMs": 9677
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "http",
+      "elapsedMs": 58992,
+      "kind": "search",
+      "status": 201
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "body-metadata",
+      "elapsedMs": 60774,
+      "status": 201,
+      "bodyNumber": 2,
+      "bytes": 30871,
+      "json": true,
+      "topType": "object",
+      "topKeys": [
+        "dt",
+        "ts",
+        "widgets"
+      ],
+      "widgetsType": "array",
+      "widgetCount": 1,
+      "productGridCount": 1,
+      "gridKeys": [
+        "content",
+        "entity",
+        "limit",
+        "offset",
+        "rfk_id",
+        "total_item",
+        "type",
+        "used_in"
+      ],
+      "offset": 10,
+      "offsetType": "number",
+      "limit": 10,
+      "limitType": "number",
+      "page": null,
+      "totalItem": 2260,
+      "totalItemType": "number",
+      "contentType": "array",
+      "rows": 10,
+      "validIdCount": 10,
+      "duplicateIds": 0,
+      "idDigest": "ffd1b5764d9d468f"
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "searchResponse-2-done",
+      "elapsedMs": 60784,
+      "durationMs": 20274
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "render-expected",
+      "elapsedMs": 60784,
+      "renderNumber": 2,
+      "expectedIds": 10,
+      "idDigest": "ffd1b5764d9d468f"
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "render-2-begin",
+      "elapsedMs": 60784
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "render-2-done",
+      "elapsedMs": 61446,
+      "durationMs": 662
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "searchResponse-3-begin",
+      "elapsedMs": 62095
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "nextPage-2-begin",
+      "elapsedMs": 62104
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "nextPage-2-done",
+      "elapsedMs": 62948,
+      "durationMs": 844
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "http",
+      "elapsedMs": 80538,
+      "kind": "search",
+      "status": 201
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "body-metadata",
+      "elapsedMs": 81304,
+      "status": 201,
+      "bodyNumber": 3,
+      "bytes": 30706,
+      "json": true,
+      "topType": "object",
+      "topKeys": [
+        "dt",
+        "ts",
+        "widgets"
+      ],
+      "widgetsType": "array",
+      "widgetCount": 1,
+      "productGridCount": 1,
+      "gridKeys": [
+        "content",
+        "entity",
+        "limit",
+        "offset",
+        "rfk_id",
+        "total_item",
+        "type",
+        "used_in"
+      ],
+      "offset": 20,
+      "offsetType": "number",
+      "limit": 10,
+      "limitType": "number",
+      "page": null,
+      "totalItem": 2260,
+      "totalItemType": "number",
+      "contentType": "array",
+      "rows": 10,
+      "validIdCount": 10,
+      "duplicateIds": 0,
+      "idDigest": "c2670e0db0248ffc"
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "searchResponse-3-done",
+      "elapsedMs": 81332,
+      "durationMs": 19237
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "render-expected",
+      "elapsedMs": 81332,
+      "renderNumber": 3,
+      "expectedIds": 10,
+      "idDigest": "c2670e0db0248ffc"
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "render-3-begin",
+      "elapsedMs": 81332
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "render-3-done",
+      "elapsedMs": 83819,
+      "durationMs": 2487
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "searchResponse-4-begin",
+      "elapsedMs": 83949
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "nextPage-3-begin",
+      "elapsedMs": 83968
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "nextPage-3-done",
+      "elapsedMs": 85668,
+      "durationMs": 1700
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "browser-close-begin",
+      "elapsedMs": 90078
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "searchResponse-4-failed",
+      "elapsedMs": 91612,
+      "durationMs": 7616,
+      "errorName": "Error",
+      "method": "page.waitForResponse"
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "browser-close-begin",
+      "elapsedMs": 91639
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "browser-close-done",
+      "elapsedMs": 92465,
+      "durationMs": 825
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "catalogue-failed",
+      "elapsedMs": 92473,
+      "durationMs": 92155,
+      "errorName": "Error",
+      "method": "page.waitForResponse"
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "result",
+      "elapsedMs": 92474,
+      "ok": false,
+      "errorName": "Error",
+      "safeReason": null,
+      "aborted": true
+    },
+    {
+      "probe": "candidate onePA catalogue 6eefa41",
+      "stage": "browser-close-done",
+      "elapsedMs": 93166,
+      "durationMs": 3088
+    },
+    {
+      "probe": "owned watchdog",
+      "phase": "complete",
+      "code": 0,
+      "signal": null,
+      "deadlineHit": false,
+      "observedOwnedProcesses": 16,
+      "ownedRunningRemaining": 0,
+      "stderrBytes": 0
+    }
+  ],
+  "fullCatalogueSuccess": false
+}

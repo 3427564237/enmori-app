@@ -1,0 +1,35 @@
+# onePA reader recovery evidence — 11 November 2026
+
+Scope: the approved anonymous public Chromium acquisition mechanism, five official search pages / at most 50 records, existing provider restrictions, and existing cancellation bounds. No provider challenge interaction, authenticated profile, dependency/host/region change, AI call, app restart, settings write, catalogue write, or deployment was performed by this investigation. Source repair is `6eefa41`; source validation does not establish cloud or phone acceptance.
+
+## Reproduced failure
+
+The original reader succeeded on the operator host with the pinned dependencies: document HTTP 200, five search responses HTTP 201, offsets 0/10/20/30/40, 50 unique source IDs and approved public URLs, 17 future rows after the existing projector. The instrumented metadata comparison completed in 7.868 seconds. This is provider/parser feasibility on that host, not Azure availability.
+
+After a separate Admin v63 deployment finished, one unauthenticated Azure Profile request returned 401 in 0.246 seconds. The original reader then reached the official page and API on Azure: launch 13.809 seconds, context 1.127 seconds, page 12.305 seconds, document 200 and search 201. It failed after the first Next Page action, before second-page rendering, in 84.856 seconds. It was not aborted and did not encounter a recorded 403/429 or visible challenge. Its independent watchdog observed 19 own descendant processes and zero running descendants after completion.
+
+A single targeted metadata comparison located the exact failure. Azure returned the first validated grid (`offset=0`, `limit=10`, ten valid unique PA IDs), then another identical first-page grid while the reader was waiting for the second page. Both response bodies had the same ordered ID digest. The old listener selected any matching search URL with status 201, so it treated the duplicate offset 0 as page 10 and threw `Source format changed`. That attempt completed in 70.971 seconds and its watchdog observed 16 own descendants and zero running descendants afterward. The source/API was reachable; accepting a repeated page as new data would have been incorrect.
+
+The repair associates each wait with its expected offset. It ignores only an already completed, structurally valid old page with the same total and ordered identities. An unknown offset, altered old identity, malformed grid, bad or duplicate PA ID, or missing rendered link remains a failure. The official Next Page action, unique-identity source checks, byte/record bounds, DOM matching and fail-closed publication are retained.
+
+## Initialization cancellation
+
+A separate local regression reproduced a detail-reader gap: abort during `newContext` left the returned read unsettled and issued neither a context close nor a browser close; it rejected only after context initialization was manually released. This is a source lifecycle defect, not proof of the Azure catalogue failure's cause.
+
+The repair registers cancellation before launch/context initialization, promptly rejects the caller and retains the initializing reader's slot through cleanup. It closes a shared browser only when no live reader remains, does not admit a new browser while that close is pending, and closes a late launch without creating a context. An independent live reader is preserved. The existing four-reader bound and 20-second combined signal remain.
+
+## Earlier initialization probes and limits
+
+A headed initialization-only A → B → A comparison did not prove `--start-minimized` was the cause. Original arguments first timed out at a diagnostic 15-second launch bound; the next run without that argument created a page, and the final run with the original argument also created a page. No launch flag was changed by the repair. The pinned Playwright implementation also contains a bounded graceful browser close followed by a process kill; an outstanding close alone is not evidence of a permanent Chromium leak.
+
+An earlier shell diagnostic reached its external 120-second timeout without terminal phase output. Its remote cleanup was not independently proved, and subsequent shell connections failed. That unknown result must not be represented as a successful cleanup. Later high CPU and unresponsive HTTP overlapped a separate Admin deployment/cold start reported by the integrating operator; they cannot be attributed solely to onePA or to that probe. The two subsequent completed catalogue probes used an independently supervised owned-process inventory, including Chromium's separate process groups, and verified zero own running descendants.
+
+## Validation
+
+TypeScript compilation passed. All 31 targeted tests passed: catalogue response correlation, unexpected/changed pages, malformed/duplicate identities, rendered links, cancellation, late initialization, shared-browser isolation, projection, stable source identity, provider partial failure and source deadlines. No timeout, provider access rule or deployment configuration was relaxed.
+
+The single final candidate cloud sample is recorded in [candidate-cloud.json](candidate-cloud.json). It loaded only the compiled candidate catalogue module through an in-memory data URL, using the existing deployed public-resource helper and pinned browser. No remote file or selector changed. It reached and DOM-matched the real offset 0, 10 and 20 pages, with ten valid unique IDs per page. Launch/context/page took 7.086/0.390/5.071 seconds. The three successful search waits took 24.066, 20.274 and 19.237 seconds. While waiting for offset 30, the unchanged 90-second caller budget aborted the read. It returned failure at 92.474 seconds; browser close finished at 93.166 seconds. The watchdog observed 16 own descendants, zero running descendants after cleanup, no hard watchdog expiry and no stderr.
+
+**onePA is not yet restored on Azure.** The pagination race is corrected at source and the candidate reached three real pages, but the full five-page catalogue still did not fit the approved budget. No partial catalogue was published or treated as success. The measured waits alone do not distinguish remote request latency from browser scheduling/container resource delay. Any further diagnosis should separate request timing and browser scheduling before choosing a change; neither longer timeouts nor another host/region has been selected here. One sample also does not establish repeatable cold/warm operation, two-month reliability, integrated API or phone acceptance.
+
+No activity titles/descriptions, raw provider payloads, user data, browser cookies, tokens or credentials are included in these artifacts. Metadata digests identify equal public result batches without retaining their records.
