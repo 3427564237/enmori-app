@@ -24,7 +24,9 @@ The live application ledger was read at 2026-11-11T10:43:52Z: original cap USD3.
 
 The selected runtime's ceilings remain 8,192 input and 2,048 output tokens. Using the existing verified grant's conservative maximum input rate USD2.50/M and output rate USD10/M, one full-ceiling reservation is USD0.04096. Thus USD1 covers 24 such reservations, ignoring other consumers; actual smaller complete requests can cost less. This is a conservative capacity calculation from the current grant, not a promised message count for an unpurchased S$10 balance. All authenticated accounts currently share the same cap, including Conversation, preview and proactive work; there is no reserved teacher allowance.
 
-## Long-running gaps to close before final freeze
+## Long-running gaps at the initial audit
+
+The following table preserves the initial audit. Later evidence supersedes its implementation/deployment status only: [v64 deployment](../evidence/2026-11-11-onepa-proactive-v64-deployment.md) now verifies live onePA and proactive management routes, the reviewed Backend integration and retained Admin access. The signed v64 APK exists, but the phone's system rejected its first installation attempt and readback remained v63. Paid due execution, physical notifications, restart recovery, funding continuation and two-month acceptance remain open. No iOS work has started.
 
 | Boundary | Current evidence | Required outcome |
 | --- | --- | --- |
