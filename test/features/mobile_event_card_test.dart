@@ -57,6 +57,8 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
+        expect(find.text('No cover provided by source.'), findsOneWidget);
+        expect(find.text('Event cover unavailable.'), findsNothing);
         expect(find.text('Detail-only introduction.'), findsNothing);
         expect(find.textContaining('Introduction unavailable'), findsNothing);
         expect(find.textContaining('暂无简介'), findsNothing);

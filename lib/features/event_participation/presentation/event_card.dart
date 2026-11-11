@@ -1,5 +1,10 @@
 import '../../event_detail/presentation/event_information.dart'
-    show EventCover, eventStatusLabel, eventDeadlineLabel, eventPriceLabel;
+    show
+        EventCover,
+        EventCoverPlaceholder,
+        eventStatusLabel,
+        eventDeadlineLabel,
+        eventPriceLabel;
 import '../../../core/presentation/enmori_localizations.dart';
 
 import 'package:flutter/material.dart';
@@ -74,14 +79,7 @@ final class EventCard extends StatelessWidget {
                         case final cover?)
                       EventCover(key: ValueKey(cover), url: cover)
                     else
-                      SizedBox(
-                        height: 64,
-                        child: Center(
-                          child: Text(
-                            context.tr('Event cover unavailable.', '暂无活动封面。'),
-                          ),
-                        ),
-                      ),
+                      const EventCoverPlaceholder(),
                     const SizedBox(height: 12),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,

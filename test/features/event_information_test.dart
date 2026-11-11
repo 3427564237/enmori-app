@@ -123,6 +123,34 @@ Widget _detailWithPeopleLink() => Scaffold(
 );
 
 void main() {
+  testWidgets(
+    'missing source cover is a neutral placeholder without image I/O',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 740);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final covers = _Covers();
+      await tester.pumpWidget(
+        _host(
+          const Scaffold(
+            body: Padding(
+              padding: EdgeInsets.all(16),
+              child: EventCover(url: null),
+            ),
+          ),
+          covers,
+          textScale: 2,
+        ),
+      );
+      expect(covers.loads, isEmpty);
+      expect(find.text('No cover provided by source.'), findsOneWidget);
+      expect(find.byKey(const Key('event-cover-unavailable')), findsNothing);
+      expect(find.byKey(const Key('event-cover-image')), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('synthetic preview never requests a real provider cover', (
     tester,
   ) async {
@@ -172,6 +200,8 @@ void main() {
       covers.loads.single.pending.complete(null);
       await tester.pump();
       expect(find.byKey(const Key('event-cover-unavailable')), findsOneWidget);
+      expect(find.text('Cover could not be loaded.'), findsOneWidget);
+      expect(find.byKey(const Key('event-cover-not-provided')), findsNothing);
       expect(find.text(_event.shortDescription!), findsOneWidget);
       expect(tester.takeException(), isNull);
     },

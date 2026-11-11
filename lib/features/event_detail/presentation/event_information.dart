@@ -321,6 +321,9 @@ final class EventCoverState extends ConsumerState<EventCover>
         setState(_clear);
       }
     });
+    if (widget.url == null && !_cleared) {
+      return const EventCoverPlaceholder();
+    }
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
       child: AspectRatio(
@@ -348,7 +351,7 @@ final class EventCoverState extends ConsumerState<EventCover>
                               'Cover cleared. Reload event details to view it again.',
                               '封面已清除，请刷新活动详情后查看。',
                             )
-                          : context.tr('Event cover unavailable.', '暂无活动封面。'),
+                          : context.tr('Cover could not be loaded.', '封面加载失败。'),
                       key: Key(
                         _loading
                             ? 'event-cover-loading'
@@ -370,6 +373,31 @@ final class EventCoverState extends ConsumerState<EventCover>
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
+}
+
+/// A neutral source-data absence, never a substitute event photograph.
+final class EventCoverPlaceholder extends StatelessWidget {
+  const EventCoverPlaceholder({super.key});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    key: const Key('event-cover-not-provided'),
+    constraints: const BoxConstraints(minHeight: 64),
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(16),
+    ),
+    child: Row(
+      children: [
+        const ExcludeSemantics(child: Icon(Icons.event_outlined)),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(context.tr('No cover provided by source.', '来源未提供封面。')),
+        ),
+      ],
+    ),
+  );
 }
 
 String eventStatusLabel(BuildContext context, String? status) =>
