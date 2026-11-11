@@ -59,9 +59,9 @@ val openAiTestEdge = "https://enmori-backend-20261029.azurewebsites.net"
 check(companionDefines["ENMORI_OPENAI_TEST_APP"] in setOf(null, "true", "false")) {
     "Invalid OpenAI test-app selection"
 }
-check(!openAiTestApp || (!companionNative && companionDefines["ENMORI_REMOTE_GROUP"] == "true" &&
+check(!openAiTestApp || (companionDefines["ENMORI_REMOTE_GROUP"] == "true" &&
     companionDefines["ENMORI_API_BASE_URL"] in setOf(openAiTestEdge, "$openAiTestEdge/", "$openAiTestEdge:443", "$openAiTestEdge:443/"))) {
-    "OpenAI test app requires the approved Azure edge with proactive consumers disabled"
+    "OpenAI test app requires the approved Azure edge and remote group configuration"
 }
 // Group updates must preserve the approved companion entries. Missing defines
 // previously produced a valid APK with these existing features silently absent.
