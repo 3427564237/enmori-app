@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/presentation/section_heading.dart';
 import 'friend_discovery_controller.dart';
 import '../../auth/auth_providers.dart';
+import '../../auth/domain/auth_repository.dart';
 import 'friend_ignore_controller.dart';
 import 'ignored_people_page.dart';
 
@@ -87,8 +88,31 @@ final class _FriendDiscoveryPanelState
     if (mounted) controller.load();
   }
 
+  Future<void> _openDiscovery(String username, Object? session) async {
+    if (!mounted ||
+        session is! AuthSessionAuthenticated ||
+        !identical(session, ref.read(authSessionProvider).asData?.value)) {
+      return;
+    }
+    await _open(() async {
+      final action = await Navigator.of(context).push<DiscoveryCardAction>(
+        MaterialPageRoute(
+          builder: (_) => DiscoveryCardPage(username: username),
+        ),
+      );
+      // Return to the owning route first: its navigation guard correctly
+      // rejects callbacks while a separate discovery card covers that route.
+      if (mounted &&
+          action == DiscoveryCardAction.viewProfile &&
+          identical(session, ref.read(authSessionProvider).asData?.value)) {
+        await widget.onOpenProfile(username);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final session = ref.watch(authSessionProvider).asData?.value;
     ref.listen(authSessionProvider, (previous, next) {
       if (!identical(previous?.asData?.value, next.asData?.value)) {
         _closeSnack();
@@ -384,14 +408,7 @@ final class _FriendDiscoveryPanelState
                           ),
                       ],
                     ),
-                    onTap: () => _open(
-                      () => Navigator.of(context).push<void>(
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              DiscoveryCardPage(username: person.username),
-                        ),
-                      ),
-                    ),
+                    onTap: () => _openDiscovery(person.username, session),
                   ),
                 ),
                 IconButton(

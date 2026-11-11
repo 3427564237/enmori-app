@@ -8,6 +8,7 @@ import '../../../core/result/result.dart';
 import '../../../core/presentation/enmori_localizations.dart';
 import '../../../core/presentation/identity_avatar.dart';
 import '../../auth/auth_providers.dart';
+import '../../auth/domain/auth_repository.dart';
 import '../../account/content_access.dart';
 import 'friend_page.dart';
 
@@ -28,12 +29,15 @@ final _cardProvider = FutureProvider.autoDispose
           .get('/v1/users/${Uri.encodeComponent(username)}/discovery-card');
     });
 
+enum DiscoveryCardAction { viewProfile }
+
 /// Separate minimal identity contract; private full-profile fields are never read.
 class DiscoveryCardPage extends ConsumerWidget {
   const DiscoveryCardPage({required this.username, super.key});
   final String username;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final session = ref.watch(authSessionProvider).asData?.value;
     final value = ref.watch(_cardProvider(username));
     Widget body = const Center(child: CircularProgressIndicator());
     if (!value.isLoading) {
@@ -59,6 +63,22 @@ class DiscoveryCardPage extends ConsumerWidget {
                 '发现名片不开放对方的私密资料。',
               ),
             ),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: () {
+                if (session is AuthSessionAuthenticated &&
+                    identical(
+                      session,
+                      ref.read(authSessionProvider).asData?.value,
+                    ) &&
+                    ModalRoute.of(context)?.isCurrent == true) {
+                  Navigator.of(context).pop(DiscoveryCardAction.viewProfile);
+                }
+              },
+              icon: const Icon(Icons.person_outline),
+              label: Text(context.tr('View profile', '查看主页')),
+            ),
+            const SizedBox(height: 8),
             FilledButton(
               onPressed: () async {
                 await Navigator.of(context).push<void>(
