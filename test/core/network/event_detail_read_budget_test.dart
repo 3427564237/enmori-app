@@ -48,7 +48,7 @@ void main() {
     );
   }
   for (final recommendations in [false, true]) {
-    testWidgets('demo Event read waits beyond 30 seconds without resending', (
+    testWidgets('measured Event read waits beyond 120 seconds without resending', (
       tester,
     ) async {
       var requests = 0;
@@ -57,7 +57,7 @@ void main() {
         () async => const Success('synthetic'),
         httpClient: MockClient((request) async {
           requests++;
-          await Future<void>.delayed(const Duration(seconds: 45));
+          await Future<void>.delayed(const Duration(seconds: 200));
           return http.Response(
             jsonEncode({
               'asOf': '2026-11-11T00:00:00Z',
@@ -79,9 +79,9 @@ void main() {
           : BackendActivityRepository(client).read(null);
       work.then((value) => result = value);
       await tester.pump();
-      await tester.pump(const Duration(seconds: 31));
+      await tester.pump(const Duration(seconds: 121));
       expect(result, isNull);
-      await tester.pump(const Duration(seconds: 15));
+      await tester.pump(const Duration(seconds: 80));
       expect(result, isA<Success>());
       expect(requests, 1);
     });
@@ -117,4 +117,36 @@ void main() {
       );
     },
   );
+  testWidgets('late Event completion cannot escape the bounded client deadline', (
+    tester,
+  ) async {
+    var requests = 0;
+    final client = BackendApiClient(
+      Uri.https('example.test', '/'),
+      () async => const Success('synthetic'),
+      httpClient: MockClient((request) async {
+        requests++;
+        await Future<void>.delayed(const Duration(seconds: 240));
+        return http.Response(
+          jsonEncode({
+            'asOf': '2026-11-11T00:00:00Z',
+            'items': [],
+            'scope': 'singapore_events_v2',
+          }),
+          200,
+        );
+      }),
+    );
+    addTearDown(client.close);
+    Object? result;
+    BackendActivityRepository(client).read(null).then((value) => result = value);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 224));
+    expect(result, isNull);
+    await tester.pump(const Duration(seconds: 2));
+    expect(result, isA<Failure>());
+    await tester.pump(const Duration(seconds: 15));
+    expect(result, isA<Failure>());
+    expect(requests, 1);
+  });
 }

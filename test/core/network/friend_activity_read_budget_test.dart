@@ -23,7 +23,7 @@ void main() {
           () async => const Success('synthetic'),
           httpClient: MockClient((request) async {
             requests.add(request);
-            await Future<void>.delayed(const Duration(seconds: 100));
+            await Future<void>.delayed(const Duration(seconds: 200));
             return http.Response(jsonEncode({'activities': []}), 200);
           }),
         );
@@ -33,9 +33,9 @@ void main() {
             .read(home: false, category: category)
             .then((value) => result = value);
         await tester.pump();
-        await tester.pump(const Duration(seconds: 46));
+        await tester.pump(const Duration(seconds: 121));
         expect(result, isNull);
-        await tester.pump(const Duration(seconds: 55));
+        await tester.pump(const Duration(seconds: 80));
         expect(result, isA<Success>());
         expect(requests, hasLength(1));
         expect(
