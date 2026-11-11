@@ -1,0 +1,15 @@
+# LI — implement restart recovery and purchased-credit continuation
+
+Date: 11 November 2026 (Asia/Singapore). Authority: LI / PM, current task.
+
+LI explicitly confirmed: “允许两次合成测试，自动重启恢复和额度续接按方案实施，不自动充值。再发起一次 v64 安装，我会在手机上确认，保留现有数据和登录状态，继续推进到能稳定运行两个月的最终版本。”
+
+This accepts the exact [same-Azure-service restart proposal](../planning/2026-11-11-openai-service-restart-proposal.md) and [purchased-credit successor proposal](../planning/2026-11-11-openai-paid-credit-successor-proposal.md). Implement and verify their bounded contracts, including independent review, isolated SDK/clock/concurrency checks and the prescribed stopped/drained migration before a live restart rehearsal. Preserve their supersession scope and every unaffected rule. The restart proposal supersedes the earlier prohibition on automatic takeover only for the explicitly configured existing service and its renewable exclusive-owner capability; it does not authorize arbitrary host takeover or replay of unknown work.
+
+The paid successor implementation may proceed now. A real successor grant still requires the actual manual purchase, verified net USD credit/balance/expiry, predecessor liabilities and concrete cap/validity packet specified by that proposal. Do not invent future credit, enlarge the current USD3.40 grant, reset financial history, release unknown holds or automatically recharge. The accepted maximum seven-day manual evidence-review policy does not renew any verification timestamp by itself or establish two-month funding today.
+
+Authorize the prepared dedicated synthetic protocol for at most **two paid generations**, one canonical Conversation response and one scheduled OpenAI follow-up, with at most **USD0.08192** worst-case reservation inside the unchanged **USD3.40** shared cap. The dedicated synthetic identity may accept its own optional-processing and `openai_cloud_v1` disclosure and create its one schedule. Preserve permanent dispatch markers and unknown outcomes; do not retry a paid request, register an FCM device or substitute another user's data. Close the synthetic schedule/settings and withdraw its consent afterward, retaining its isolated records for reconciliation. The earlier Persona authorization remains consumed and is not replenished.
+
+Authorize one fresh `adb install -r` attempt for the already verified signed v64 APK. LI will handle the phone's system confirmation. Preserve the current app data and authenticated session; no uninstall, data clearing, logout or bypass of system permission is authorized. Verify the installed version separately from observed phone UI/login state.
+
+Continue toward the Android/backend teacher handoff for 16 November 2026 and at least through 16 January 2027, extending that end if delivery moves. The final two-month readiness claim still requires actual operating evidence and funding rather than a passed source suite alone. No iOS development starts before Android is final and explicitly frozen. This approval does not create teacher accounts, send messages to teachers, change hosting/payment plans or waive per-account consent and notification permission.
