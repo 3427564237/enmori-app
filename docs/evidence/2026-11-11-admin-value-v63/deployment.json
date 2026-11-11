@@ -1,0 +1,242 @@
+{
+  "verifiedAtUtc": "2026-11-11T10:54:42.599744+00:00",
+  "authority": "../../decisions/2026-11-11-li-admin-v63-deployment.md",
+  "sourceStage": "verification.json",
+  "backend": {
+    "host": "enmori-backend-20261029.azurewebsites.net",
+    "state": "Running",
+    "sourceCommit": "b64ad02bb36aaf531be51e86ab7583ab67b63d56",
+    "activePackage": "2026111110320863.zip",
+    "sha256": "ab0547ed4e1d2c2694f358e64e4027db4e7bbecf08d2b1d297c808b2e2f03371",
+    "bytes": 68014378,
+    "entryCount": 8540,
+    "everyEntryVerified": true,
+    "postStartSelectorAndPackageReadback": true,
+    "previousPackageRetained": "2026111107451962.zip",
+    "drain": {
+      "allContainersStopped": true,
+      "httpStopped": true,
+      "localStopped": true,
+      "endedCount": 1,
+      "observedAppContainers": 6
+    },
+    "startupEvents": [
+      {
+        "phase": "configuration",
+        "nodeVersion": "24.19.0",
+        "selectedHost": true,
+        "identityEndpointPath": "/msi/token",
+        "cloudTestApp": "armed"
+      },
+      {
+        "phase": "listening",
+        "firebaseRead": true,
+        "aiConfigured": true,
+        "aiAvailable": true
+      }
+    ],
+    "startupProbeSeconds": 249.0584842,
+    "prepareTimeoutReconciledWithoutRebuild": true,
+    "configuration": {
+      "onlyStartupClaimChanged": true,
+      "grantAndUnrelatedSettingsPreserved": true
+    },
+    "ledger": {
+      "atUtc": "2026-11-11T10:50:15.645Z",
+      "generation": 82,
+      "grantUnchanged": true,
+      "costAndAttemptsPreserved": true,
+      "quotaPolicyUnchanged": true,
+      "modelCallsAdded": 0,
+      "attemptCount": 105,
+      "reconciledCount": 103,
+      "spentNanoUsd": 101226700,
+      "reservedNanoUsd": 4096000
+    }
+  },
+  "api": {
+    "mode": "after",
+    "atUtc": "2026-11-11T10:50:14.981Z",
+    "reads": [
+      {
+        "role": "admin",
+        "path": "/v1/me/profile",
+        "status": 200,
+        "elapsedMs": 1646,
+        "profileHash": "c8f26daff2c45d32014cc726b4dcec5009dc79c609bcba40bd5620934517d99a"
+      },
+      {
+        "role": "admin",
+        "path": "/v1/me/interest-tag-admin-capability",
+        "status": 200,
+        "elapsedMs": 1418,
+        "allowed": true
+      },
+      {
+        "role": "admin",
+        "path": "/v1/admin/interest-tags",
+        "status": 200,
+        "elapsedMs": 2107,
+        "count": 16,
+        "catalogueHash": "ee01b1cbf24a08391717e63b18fb13fe5e369d09f7d000caac9752f7437335fb"
+      },
+      {
+        "role": "admin",
+        "path": "/v1/me/onboarding",
+        "status": 200,
+        "elapsedMs": 6577,
+        "onboardingStatus": "completed"
+      },
+      {
+        "role": "admin",
+        "path": "/v1/admin/operations-status",
+        "status": 200,
+        "elapsedMs": 3749,
+        "services": [
+          {
+            "service": "backend",
+            "configured": true,
+            "state": "ready",
+            "lastObservedAt": "2026-11-11T10:50:29.534Z"
+          },
+          {
+            "service": "firebase",
+            "configured": true,
+            "state": "ready",
+            "lastObservedAt": "2026-11-11T10:50:29.534Z",
+            "lastSucceededAt": "2026-11-11T10:50:29.534Z"
+          },
+          {
+            "service": "ai",
+            "configured": true,
+            "state": "ready",
+            "lastObservedAt": "2026-11-11T10:50:29.534Z"
+          },
+          {
+            "service": "ticketmaster",
+            "configured": true,
+            "state": "ready",
+            "lastObservedAt": "2026-11-11T10:50:10.956Z",
+            "lastSucceededAt": "2026-11-11T10:50:10.956Z"
+          },
+          {
+            "service": "onepa",
+            "configured": true,
+            "state": "unknown",
+            "reason": "not_observed"
+          }
+        ],
+        "observedAt": "2026-11-11T10:50:29.534Z"
+      },
+      {
+        "role": "admin",
+        "path": "/v1/admin/event-categories",
+        "status": 200,
+        "elapsedMs": 1099,
+        "count": 0
+      },
+      {
+        "role": "admin",
+        "path": "/v1/admin/operation-records",
+        "status": 200,
+        "elapsedMs": 7364,
+        "count": 0
+      },
+      {
+        "role": "ordinary",
+        "path": "/v1/me/profile",
+        "status": 200,
+        "elapsedMs": 1903,
+        "profileHash": "574a4e503cd7ed81a86d4dc682026fd4815fd9b517accc4cb218e345b84f6276"
+      },
+      {
+        "role": "ordinary",
+        "path": "/v1/me/onboarding",
+        "status": 200,
+        "elapsedMs": 2985,
+        "onboardingStatus": "completed"
+      },
+      {
+        "role": "ordinary",
+        "path": "/v1/admin/operations-status",
+        "status": 403,
+        "elapsedMs": 721,
+        "errorCode": "AUTH_FORBIDDEN"
+      },
+      {
+        "role": "ordinary",
+        "path": "/v1/admin/event-categories",
+        "status": 403,
+        "elapsedMs": 633,
+        "errorCode": "AUTH_FORBIDDEN"
+      },
+      {
+        "role": "ordinary",
+        "path": "/v1/admin/operation-records",
+        "status": 403,
+        "elapsedMs": 2130,
+        "errorCode": "AUTH_FORBIDDEN"
+      },
+      {
+        "role": "unauthenticated",
+        "path": "/v1/admin/operations-status",
+        "status": 401,
+        "elapsedMs": 106,
+        "errorCode": "AUTH_REQUIRED"
+      }
+    ],
+    "productWrites": 0,
+    "modelCalls": 0,
+    "existingCatalogueUnchanged": true,
+    "existingDemoAdminProfileUnchanged": true,
+    "completedAtUtc": "2026-11-11T10:50:48.146Z",
+    "passed": true
+  },
+  "phone": {
+    "atUtc": "2026-11-11T10:33:57.724491+00:00",
+    "versionCode": 63,
+    "versionName": "1.0.0-demo20261111",
+    "firstInstallTimeUnchanged": true,
+    "firstInstallTime": "2026-10-29 10:50:00",
+    "lastUpdateTime": "2026-11-11 18:32:51",
+    "dataDirectoryUnchanged": true,
+    "installMode": "adb install -r",
+    "uninstall": false,
+    "dataClear": false,
+    "verifiedAtUtc": "2026-11-11T10:54:42.599744+00:00",
+    "sameAuthenticatedAccountObserved": true,
+    "sameProfileAndAvatarObserved": true,
+    "existingInterestsVisible": true,
+    "existingSavedCheckInsVisible": true,
+    "loginPromptEncountered": false,
+    "logout": false,
+    "credentialsReentered": false,
+    "productEdits": false,
+    "finalScreen": "Home",
+    "transientStartupReadFailures": "Recovered after backend readiness and explicit read-only refreshes",
+    "locationFallback": "Location unavailable; existing home area used",
+    "privateScreenshotSha256": {
+      "phone-before.png": "902ddd8e26ce204f0fe8714cd90e46c2aab843e4d2cb2226be99dc0d22ebedee",
+      "phone-profile-reloaded.png": "2d1390502ee43fc56a626657ea55cef65d63d9969d6594df58022d6f63ede107",
+      "phone-home-retry.png": "1b019332a13cbb38d662db8df9569ead3b1fcec38b84f62d38c06ba2c2d3312e",
+      "phone-home-final.png": "c72fc0b3a9f1d7ef33c7cfca819292f9d283a168b9a17fb1609a9a617d3fd699"
+    }
+  },
+  "apk": {
+    "path": "/home/miku/Downloads/ENMORI-admin-v63-release.apk",
+    "sha256": "75939653a622f9f7c0b52e3298bd396a7759e1d37ca949e41cfcc12d802a98f3",
+    "package": "com.enmori.app.group",
+    "originalCertificateVerified": true,
+    "sameBackendAndFirebaseConfigurationAsV62": true
+  },
+  "boundaries": {
+    "realAdminMutations": false,
+    "realRoleGrants": false,
+    "operatorPaidModelProbes": false,
+    "phoneAccountSwitched": false,
+    "allPhoneAdminJourneysAccepted": false,
+    "liveCleanup24HourSlaVerified": false,
+    "fullUatOrReleaseAcceptance": false,
+    "remoteMainMergedOrPushed": false
+  }
+}
