@@ -1,5 +1,7 @@
 # Admin value increment — local integration and v63 candidate
 
+Later authorized follow-up: [Backend deployment and retained phone session](deployment.md), with [runtime/install verification](deployment.json). The source-stage results below remain historical evidence.
+
 Authority: [LI's approved decision](../../decisions/2026-11-11-li-admin-value-integration.md), accepting the [concrete contract](../../planning/2026-11-11-admin-value-contract-proposal.md). The [API boundary](../../../api/admin-operations-contract.md) records the implementation and rollout constraint.
 
 ## Delivered behavior
@@ -37,8 +39,8 @@ The source was fast-forward merged into local `souma/demo-ready-20261111`, prese
 
 The first `--no-pub` release attempt retained a development-only integration-test plugin registrant. Inspection of the installed Flutter tooling confirmed that `--no-pub` skips release-mode plugin regeneration. The final build enables the standard regeneration path; no dependency or product-source workaround is used.
 
-## Remaining runtime boundary
+## Source-stage runtime boundary
 
-No deployment, phone installation, real catalogue/association mutation, role grant, paid model probe, remote-main merge or teammate message is part of this task. A signed build does not prove login retention or physical-device journeys. Full Flutter-suite, live-service, real cleanup timing, independent review, dual-device, iOS, UAT and Release acceptance are not claimed.
+The source-stage task did not include deployment, phone installation, real catalogue/association mutation, role grants, paid model probes, remote-main merge or teammate messages. A signed build alone does not prove login retention or physical-device journeys. Full Flutter-suite, live-service, real cleanup timing, independent review, dual-device, iOS, UAT and Release acceptance were not claimed at that stage. The separately authorized deployment/install evidence is linked above.
 
 Before the first real Event assignment, coordinate the updated APK with the Backend deployment: older strict version-3 APKs reject a populated `managedCategory` field. This candidate has no real assignments and preserves existing data. Physical audit cleanup within 24 hours remains a target awaiting real-runtime evidence.
