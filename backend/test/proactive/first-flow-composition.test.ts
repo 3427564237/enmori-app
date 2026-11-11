@@ -10,6 +10,15 @@ import { SinglePostFcmSender } from "../../src/proactive/infrastructure/single-p
 import type { FirstFlowResult, FirstFlowSettingsInput, ProactiveActor } from "../../src/proactive/ports/first-flow.js";
 import type { FirestoreGateway, FirestoreTransactionGateway, StoredDocument, StoredDocumentSnapshot } from "../../src/shared/infrastructure/firebase/firestore-gateway.js";
 import { createAuthBindingDocumentId } from "../../src/shared/infrastructure/firebase/firestore-records.js";
+import { CloudFirstFlowExecution } from "../../src/proactive/application/cloud-first-flow-execution.js";
+import { FirestorePersonaPreviewAuthority } from "../../src/personas/infrastructure/firestore-persona-preview-authority.js";
+import { FirestoreCloudAiConsentAuthority } from "../../src/account/infrastructure/firestore-cloud-ai-consent-authority.js";
+import { CloudConsentFence } from "../../src/account/application/cloud-consent-fence.js";
+import { FirestoreCloudConsentGateway } from "../../src/account/infrastructure/firestore-cloud-consent-gateway.js";
+import { OPENAI_CLOUD_PROCESSING } from "../../src/account/domain/cloud-ai-consent.js";
+import { BoundedAiRuntime } from "../../src/ai-runtime/application/bounded-ai-runtime.js";
+import type { AsyncConversationModelInput } from "../../src/ai-conversation/ports/async-conversation.js";
+import { FakeClock } from "../ai-runtime/support.js";
 
 const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 const owner = id(1), topic = id(2), user = id(3), originalAssistant = id(4), installation = id(5);
@@ -86,11 +95,15 @@ class CompositionGateway implements FirestoreGateway {
 }
 
 function fixture(options: { model?: () => Promise<Response>; credential?: () => Promise<void>;
-  providerStatus?: number; leaseDurationMs?: number; modelTimeoutMs?: number } = {}) {
+  providerStatus?: number; leaseDurationMs?: number; modelTimeoutMs?: number; cloud?: true } = {}) {
   const gateway = new CompositionGateway();
+  const epoch={processEpoch:id(99),generation:1};
+  if(options.cloud)gateway.put('ai_runtime_fence/current',{...epoch,cleanupGeneration:0});
+  const fenced=options.cloud?new FirestoreCloudConsentGateway(gateway,epoch,()=>true):gateway;
   gateway.put(`auth_bindings/${createAuthBindingDocumentId(principal.firebaseUid)!}`, { accountId: owner });
   gateway.put(base, { username: "composition_owner", optionalProcessingConsent: "accepted", checkInVisibility: "private",
     onboardingCompletedAt: new Date(start).toISOString(), purposeRevocationGeneration: 0 });
+  if(options.cloud)gateway.put(base,{...gateway.rows.get(base)!.data,cloudAiConsent:{state:'accepted',disclosureVersion:'openai_cloud_v1'},cloudAiConsentGeneration:2});
   gateway.put(`${base}/persona_state/current`, { stateRevision: 0, livePersonaIds: [] });
   gateway.put(`${conversation}/messages/${user}`, { role: "user", sequence: 1,
     text: "Synthetic saved request for a later follow-up", acceptedAssistantMessageId: originalAssistant }, start - 200000);
@@ -99,8 +112,9 @@ function fixture(options: { model?: () => Promise<Response>; credential?: () => 
     appendBefore: { seconds: start / 1000 - 200 + 90 * 86400, nanoseconds: 0 } }, start - 100000);
   gateway.put(`${conversation}/message_sources/${originalAssistant}`, { sources: [] });
   gateway.put(conversation, { state: "live", lifecycleVersion: 1, nextSequence: 3, latestMessageId: originalAssistant });
-  const conversations = new FirestoreConversationStore(gateway, environment, () => gateway.now);
-  const store = new FirestoreFirstFlowStore(gateway, environment, { ownerAccountId: owner, utcMilliseconds: () => gateway.now,
+  const conversations = new FirestoreConversationStore(gateway, environment, () => gateway.now,undefined,options.cloud?OPENAI_CLOUD_PROCESSING:undefined);
+  const store = new FirestoreFirstFlowStore(fenced, environment, { ownerAccountId: owner, utcMilliseconds: () => gateway.now,
+    ...(options.cloud?{cloudProcessing:OPENAI_CLOUD_PROCESSING}:{}),
     conversationTransaction: (tx, p, account, current) => conversations.firstFlowTransaction(tx, p, account, current),
     installationRef: installation, registrationLeaseExpiresAt: new Date(start + (options.leaseDurationMs ?? 45 * 60000)).toISOString() });
   const actor: ProactiveActor = { principal, current: () => true,
@@ -124,7 +138,13 @@ function fixture(options: { model?: () => Promise<Response>; credential?: () => 
       return options.providerStatus === undefined ? Response.json({ name: "projects/synthetic-enmori-project/messages/one" })
         : new Response(null, { status: options.providerStatus });
     } });
-  const app = new FirstFlowApplication({ store, model: new LocalFirstFlowTransport(lane), sender,
+  const runtime=options.cloud?new BoundedAiRuntime<AsyncConversationModelInput>(new FakeClock(),{async generate(handle){
+    assert.equal(await handle.authorize(),true);modelRequests.push(handle.proactiveProjection?.());
+    return new TextEncoder().encode(JSON.stringify({schemaVersion:'ai_assistant_message_v1',message:'Synthetic cloud follow-up'}));
+  }},true):undefined;
+  const cloudExecution=runtime?new CloudFirstFlowExecution(new FirestorePersonaPreviewAuthority(fenced),
+    new FirestoreCloudAiConsentAuthority(fenced,new CloudConsentFence(),()=>true,OPENAI_CLOUD_PROCESSING),runtime):undefined;
+  const app = new FirstFlowApplication({ store, ...(cloudExecution?{cloudExecution}:{model: new LocalFirstFlowTransport(lane)}), sender,
     nowMs: () => gateway.now, newMessageId: () => messageId,
     ...(options.modelTimeoutMs === undefined ? {} : { modelTimeoutMs: options.modelTimeoutMs }) });
   const queued = async () => {
@@ -134,12 +154,12 @@ function fixture(options: { model?: () => Promise<Response>; credential?: () => 
       registrationKind: "fcm_token", registrationValue: "synthetic-registration-canary", enabled: true }));
     resultValue(await app.createIntent(actor, { intentId, conversationId: topic, sourceMessageId: user,
       category: "explicit_follow_up", dueAt: new Date(start + 60000).toISOString(), timeZone: "UTC",
-      processing: "local", expectedSettingsRevision: 1 }));
+      ...(options.cloud?{processing:'cloud' as const,...OPENAI_CLOUD_PROCESSING}:{processing:'local' as const}), expectedSettingsRevision: 1 }));
     gateway.now = start + 60000;
   };
   const run = () => app.runIntent(actor, intentId, new AbortController().signal);
   const counts = () => ({ model: modelRequests.length, provider: providerRequests.length, credentials });
-  return { gateway, conversations, store, app, actor, lane, queued, run, counts, modelRequests, providerRequests };
+  return { gateway, conversations, store, app, actor, lane, runtime, queued, run, counts, modelRequests, providerRequests };
 }
 
 test("F0 composition: real Store, conversation bridge, Runtime and sender produce one canonical proactive message", async () => {
@@ -303,4 +323,26 @@ test("a lost cleanup ACK remains unknown, with no regeneration or provider attem
   assert.equal(f.gateway.rows.get(`${base}/proactive_state/current`)!.data.inFlightOccurrenceId, undefined);
   assert.deepEqual(f.counts(), { model: 1, provider: 0, credentials: 0 });
   assert(!f.gateway.rows.has(`${conversation}/messages/${messageId}`));
+});
+
+test('OpenAI F0 composes real account/consent/source/store gates with one opaque TTL-zero notification and v3 history',async()=>{
+  const f=fixture({cloud:true});await f.queued();const published=resultValue(await f.run());
+  assert.equal(published.state,'published');assert.equal(published.dispatchState,'accepted');
+  assert.deepEqual(f.counts(),{model:1,provider:1,credentials:1});
+  assert.equal(f.gateway.rows.get(`${conversation}/message_sources/${messageId}`)!.data.schemaVersion,'source_use_v3');
+  const history=await f.conversations.listOwnedMessages(principal,owner,topic,undefined,()=>true);
+  assert.equal(history.kind,'confirmed');if(history.kind==='confirmed')assert.equal(history.value.messages.at(-1)?.provider,'openai');
+  const payload=JSON.parse(f.providerRequests[0]!.body);assert.deepEqual(payload.message.data,{deliveryRef:intentId});
+  assert.equal(payload.message.android.ttl,'0s');assert(!f.providerRequests[0]!.body.includes('Synthetic'));
+  resultValue(await f.run());assert.equal(f.counts().model,1);assert.equal(f.counts().provider,1);f.runtime!.shutdown();
+});
+
+for(const change of ['withdraw','reaccept','delete-source'])test(`OpenAI F0 revalidates ${change} after OAuth before one-time claim`,async()=>{
+  const f=fixture({cloud:true,credential:async()=>{
+    if(change==='delete-source')f.gateway.rows.delete(`${conversation}/messages/${user}`);
+    else f.gateway.put(base,{...f.gateway.rows.get(base)!.data,cloudAiConsentGeneration:3,
+      ...(change==='withdraw'?{cloudAiConsent:{state:'declined',disclosureVersion:'openai_cloud_v1'}}:{})});
+  }});await f.queued();assert.notEqual((await f.run()).kind,'ok');
+  assert.deepEqual(f.counts(),{model:1,provider:0,credentials:1});assert(f.gateway.rows.has(`${conversation}/messages/${messageId}`));
+  f.runtime!.shutdown();
 });

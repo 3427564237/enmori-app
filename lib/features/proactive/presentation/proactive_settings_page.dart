@@ -5,16 +5,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/presentation/enmori_localizations.dart';
 import '../../account/content_access.dart';
+import '../../account/account_preferences_providers.dart';
 import '../proactive_providers.dart';
 import 'proactive_status.dart';
+import 'proactive_processing_notice.dart';
 
 final class ProactiveSettingsPage extends ConsumerStatefulWidget {
   const ProactiveSettingsPage({
     required this.onBack,
+    this.onOpenSettings,
     this.pushControls,
     super.key,
   });
   final VoidCallback onBack;
+  final VoidCallback? onOpenSettings;
   final Widget? pushControls;
   @override
   ConsumerState<ProactiveSettingsPage> createState() =>
@@ -85,6 +89,10 @@ final class _ProactiveSettingsPageState
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(proactiveControllerProvider);
+    final processor =
+        ref.watch(aiClientProcessingProvider).cloudProvider?.displayName ??
+        context.tr('Local model', '本地模型');
+    final processingAllowed = ref.watch(proactiveProcessingAllowedProvider);
     final settings = state.settings;
     final controller = ref.read(proactiveControllerProvider.notifier);
     return Scaffold(
@@ -113,6 +121,9 @@ final class _ProactiveSettingsPageState
                     ),
                   )
                 else ...[
+                  ProactiveProcessingNotice(
+                    onOpenSettings: widget.onOpenSettings,
+                  ),
                   Text(
                     context.tr(
                       'A later contact about a message you sent',
@@ -134,8 +145,8 @@ final class _ProactiveSettingsPageState
                     ),
                   Text(
                     context.tr(
-                      'Local model · at most once per rolling 24 hours · 8-hour cooldown · at most 3 active requests.',
-                      '本地模型 · 每滚动 24 小时最多一次 · 冷却 8 小时 · 最多 3 个有效预约。',
+                      'New follow-ups: $processor · at most once per rolling 24 hours · 8-hour cooldown · at most 3 active requests.',
+                      '新跟进：$processor · 每滚动 24 小时最多一次 · 冷却 8 小时 · 最多 3 个有效预约。',
                     ),
                   ),
                   if (settings == null)
@@ -235,7 +246,10 @@ final class _ProactiveSettingsPageState
                       ),
                       FilledButton(
                         key: const Key('proactive-turn-on'),
-                        onPressed: state.canChangeSettings && _confirmedZone
+                        onPressed:
+                            processingAllowed &&
+                                state.canChangeSettings &&
+                                _confirmedZone
                             ? () => controller.changeMode(
                                 ProactiveMode.on,
                                 confirmedZone: _zone.text,

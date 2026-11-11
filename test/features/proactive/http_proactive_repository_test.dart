@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:enmori/core/result/result.dart';
+import 'package:enmori/features/account/domain/cloud_ai_consent.dart';
 import 'package:enmori/features/proactive/data/http_proactive_repository.dart';
 import 'package:enmori/features/proactive/domain/proactive.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -50,6 +51,73 @@ CreateFollowUp command() => CreateFollowUp(
 );
 
 void main() {
+  test('OpenAI create uses exact cloud tuple without changing response or idempotency', () async {
+    final requests = <http.Request>[];
+    final repo = _repo((r) async {
+      requests.add(r);
+      return http.Response(jsonEncode(intentJson()), 201);
+    }, processing: AiClientProcessing.openaiCloud);
+    expect(
+      await repo.createIntent(
+        token: 'fixture',
+        abort: ProactiveAbortSignal(),
+        command: command(),
+      ),
+      isA<Success<FollowUpIntent>>(),
+    );
+    expect(requests, hasLength(1));
+    expect(requests.single.headers['Idempotency-Key'], intent);
+    expect(jsonDecode(requests.single.body), {
+      'conversationId': topic,
+      'sourceMessageId': source,
+      'category': 'explicit_follow_up',
+      'dueAt': due.toIso8601String(),
+      'timeZone': 'Asia/Singapore',
+      'processing': 'cloud',
+      'provider': 'openai',
+      'disclosureVersion': 'openai_cloud_v1',
+      'expectedSettingsRevision': 1,
+    });
+  });
+  test('unsupported cloud processor creates nothing and keeps original read/cancel shape', () async {
+    final requests = <http.Request>[];
+    final repo = _repo((r) async {
+      requests.add(r);
+      return http.Response(
+        jsonEncode(
+          intentJson(state: r.method == 'DELETE' ? 'cancelled' : 'queued'),
+        ),
+        200,
+      );
+    }, processing: AiClientProcessing.groqCloud);
+    expect(
+      await repo.createIntent(
+        token: 'fixture',
+        abort: ProactiveAbortSignal(),
+        command: command(),
+      ),
+      isA<Failure<FollowUpIntent>>(),
+    );
+    expect(requests, isEmpty);
+    expect(
+      await repo.readIntent(
+        token: 'fixture',
+        abort: ProactiveAbortSignal(),
+        intentId: intent,
+      ),
+      isA<Success<FollowUpIntent>>(),
+    );
+    expect(
+      await repo.cancelIntent(
+        token: 'fixture',
+        abort: ProactiveAbortSignal(),
+        intentId: intent,
+        expectedRevision: 0,
+      ),
+      isA<Success<FollowUpIntent>>(),
+    );
+    expect(jsonDecode(requests.last.body), {'expectedRevision': 0});
+  });
   test('initial off has no selected zone and is not fabricated UTC', () async {
     final repo = _repo(
       (r) async => http.Response(jsonEncode(settingsJson()), 200),
@@ -386,8 +454,10 @@ void main() {
 }
 
 HttpProactiveRepository _repo(
-  Future<http.Response> Function(http.Request) handler,
-) => HttpProactiveRepository(
+  Future<http.Response> Function(http.Request) handler, {
+  AiClientProcessing processing = AiClientProcessing.local,
+}) => HttpProactiveRepository(
   baseUri: Uri.parse('https://api.invalid'),
   client: MockClient(handler),
+  processing: processing,
 );

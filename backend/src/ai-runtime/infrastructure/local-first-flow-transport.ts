@@ -27,17 +27,10 @@ function copyInput(value: unknown): FirstFlowModelInput | undefined {
     text: value.quotedRequest.text }, dueAt: value.dueAt, timeZone: value.timeZone, ...(persona ? { persona } : {}) };
 }
 
-/** F0's one-shot local follow-up. No history lookup, storage, tool, source-ID
- * projection, cloud fallback, output repair or automatic second generation. */
-export class LocalFirstFlowTransport implements FirstFlowModel {
-  constructor(private readonly lane: LocalModelLane) {
-    if (lane.model !== 'qwen3.5:9b') throw Error('AI_CONFIGURATION_INVALID');
-  }
-  get state() { return this.lane.state; }
-  async generate(input: FirstFlowModelInput, budget: RequestBudget): Promise<Uint8Array> {
-    const projection = copyInput(input);
-    if (!projection) throw Error('AI_UNAVAILABLE');
-    return this.lane.generate([
+export function buildFirstFlowMessages(input: FirstFlowModelInput): readonly {role: "system" | "user"; content: string}[] {
+  const projection = copyInput(input);
+  if (!projection) throw Error("AI_UNAVAILABLE");
+  return [
       // One bounded message-act candidate after independent 1/8 semantic QA.
       // A later actual comparison needs a new Root slot; the fixtures stay fixed.
       { role: 'system', content: 'You are ENMORI, a conversational companion. Write the one-shot follow-up itself for delivery to the user. ' +
@@ -54,6 +47,17 @@ export class LocalFirstFlowTransport implements FirstFlowModel {
         'Message-act example only, with an unrelated topic: earlier request "Ask me tomorrow if I watered the fern." becomes "Did you get a chance to water the fern?" Do not reuse the example topic. ' +
         'Return a JSON object with schemaVersion "ai_assistant_message_v1" and a non-empty "message" string.' },
       { role: 'user', content: JSON.stringify(projection) },
-    ], budget);
+    ];
+}
+
+/** F0's one-shot local follow-up. No history lookup, storage, tool, source-ID
+ * projection, cloud fallback, output repair or automatic second generation. */
+export class LocalFirstFlowTransport implements FirstFlowModel {
+  constructor(private readonly lane: LocalModelLane) {
+    if (lane.model !== 'qwen3.5:9b') throw Error('AI_CONFIGURATION_INVALID');
+  }
+  get state() { return this.lane.state; }
+  async generate(input: FirstFlowModelInput, budget: RequestBudget): Promise<Uint8Array> {
+    return this.lane.generate(buildFirstFlowMessages(input), budget);
   }
 }

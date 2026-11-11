@@ -16,7 +16,7 @@ final class BackendFriendDiscoveryRepository
     final response = await client.get(
       '/v1/recommendations/friends?view=${home ? 'home' : 'all'}',
       contractVersion: 3,
-      readTimeout: const Duration(seconds: 120),
+      readTimeout: const Duration(seconds: 225),
     );
     if (response case Failure<JsonObject>(:final failure)) {
       return Failure(failure);

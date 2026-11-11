@@ -1,3 +1,5 @@
+import type { FirstFlowCloudExecution } from '../proactive/ports/first-flow.js';
+import { OPENAI_CLOUD_PROCESSING } from '../account/domain/cloud-ai-consent.js';
 import { AccountFirstFlowDueWorker } from "../proactive/application/account-due-worker.js";
 import { FirestoreProactiveAccountRoster } from "../proactive/infrastructure/firestore-account-roster.js";
 import { createAccountScopedFirstFlowStore } from "../proactive/infrastructure/account-scoped-first-flow-store.js";
@@ -37,7 +39,8 @@ interface FirstFlowCompositionOptions {
   readonly environment: Readonly<Record<string, string | undefined>>;
   /** Exactly the retained-message gateway and store used by chat. */
   readonly conversation: { readonly gateway: FirestoreGateway; readonly store: FirestoreConversationStore };
-  readonly lane: LocalModelLane;
+  readonly lane?: LocalModelLane;
+  readonly cloudExecution?: FirstFlowCloudExecution;
   readonly auth: Pick<Auth, "getUser">;
   readonly credential?: Credential;
   readonly healthy: () => boolean;
@@ -46,6 +49,7 @@ interface FirstFlowCompositionOptions {
 
 export function createFirstFlowComposition(options: FirstFlowCompositionOptions) {
   requireFeatureEnvironment(options.environment);
+  if (!!options.lane === !!options.cloudExecution) throw Error("Exactly one first-flow execution kind required");
   const config = options.configuration, now = options.nowMs ?? Date.now;
   if(config.audience==="registered_accounts")return createRegisteredComposition(options,config);
   if (!config.firebaseUid || config.firebaseUid.length > 128 || !config.firebaseUid.isWellFormed() ||
@@ -65,6 +69,7 @@ export function createFirstFlowComposition(options: FirstFlowCompositionOptions)
   const current = () => accepting && options.healthy();
   const store = new FirestoreFirstFlowStore(options.conversation.gateway, options.environment, {
     ownerAccountId: config.ownerAccountId,
+    ...(options.cloudExecution?{cloudProcessing:OPENAI_CLOUD_PROCESSING}:{}),
     conversationTransaction: (tx, principal, owner, live) => options.conversation.store.firstFlowTransaction(tx, principal, owner, live),
     utcMilliseconds: now,
     ...(config.push ? { installationRef: config.push.installationRef,
@@ -73,7 +78,7 @@ export function createFirstFlowComposition(options: FirstFlowCompositionOptions)
   const sender: FirstFlowSender = config.push && options.credential
     ? new SinglePostFcmSender({ projectId: "enmori-rmvp-controlled", credential: options.credential })
     : { sendOnce: async () => ({ kind: "not_attempted" }) };
-  const application = new FirstFlowApplication({ store, model: new LocalFirstFlowTransport(options.lane), sender,
+  const application = new FirstFlowApplication({ store, ...(options.cloudExecution?{cloudExecution:options.cloudExecution}:{model:new LocalFirstFlowTransport(options.lane!)}), sender,
     newMessageId: randomUUID, nowMs: now });
   const actor: ProactiveActor = {
     principal: { firebaseUid: config.firebaseUid }, current,
@@ -108,9 +113,10 @@ function createRegisteredComposition(options:FirstFlowCompositionOptions,config:
     throw Error("Invalid ordinary-account companion configuration");
   let accepting=true;const current=()=>accepting&&options.healthy(),now=options.nowMs??Date.now;
   const store=createAccountScopedFirstFlowStore(options.conversation.gateway,options.environment,{
+    ...(options.cloudExecution?{cloudProcessing:OPENAI_CLOUD_PROCESSING}:{}),
     conversationTransaction:(tx,principal,owner,live)=>options.conversation.store.firstFlowTransaction(tx,principal,owner,live),
     utcMilliseconds:now,accountScopedRegistration:true,registrationLeaseDurationMs:config.push.leaseDurationMs});
-  const application=new FirstFlowApplication({store,model:new LocalFirstFlowTransport(options.lane),
+  const application=new FirstFlowApplication({store,...(options.cloudExecution?{cloudExecution:options.cloudExecution}:{model:new LocalFirstFlowTransport(options.lane!)}),
     sender:new SinglePostFcmSender({projectId:"enmori-rmvp-controlled",credential:options.credential}),newMessageId:randomUUID,nowMs:now});
   const actor=(uid:string):ProactiveActor=>({principal:{firebaseUid:uid},current,verifyCurrentAuth:async()=>{
     if(!current())return {kind:"invalid"};

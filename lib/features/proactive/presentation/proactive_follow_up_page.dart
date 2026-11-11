@@ -7,18 +7,22 @@ import '../../../core/presentation/enmori_localizations.dart';
 import '../../../core/presentation/local_time.dart';
 import '../../../core/result/result.dart';
 import '../../account/content_access.dart';
+import '../../account/account_preferences_providers.dart';
 import '../domain/follow_up_quiet.dart';
 import '../proactive_providers.dart';
 import 'proactive_status.dart';
+import 'proactive_processing_notice.dart';
 
 final class ProactiveFollowUpPage extends ConsumerStatefulWidget {
   const ProactiveFollowUpPage({
     required this.source,
     required this.onBack,
+    this.onOpenSettings,
     super.key,
   });
   final SavedFollowUpSource source;
   final VoidCallback onBack;
+  final VoidCallback? onOpenSettings;
   @override
   ConsumerState<ProactiveFollowUpPage> createState() => _FollowUpPageState();
 }
@@ -312,9 +316,14 @@ final class _FollowUpPageState extends ConsumerState<ProactiveFollowUpPage> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(proactiveControllerProvider);
+    final processor =
+        ref.watch(aiClientProcessingProvider).cloudProvider?.displayName ??
+        context.tr('Local model', '本地模型');
+    final processingAllowed = ref.watch(proactiveProcessingAllowedProvider);
     final valid = _owns && !state.sourceUnavailable;
     final pending = state.pendingIntent;
     final blocked =
+        !processingAllowed ||
         _submitting ||
         state.settingsBusy ||
         state.intentsBusy ||
@@ -345,6 +354,10 @@ final class _FollowUpPageState extends ConsumerState<ProactiveFollowUpPage> {
               key: const Key('proactive-follow-up-page'),
               padding: const EdgeInsets.all(20),
               children: [
+                if (_owns)
+                  ProactiveProcessingNotice(
+                    onOpenSettings: widget.onOpenSettings,
+                  ),
                 if (!valid)
                   Text(
                     context.tr(
@@ -383,8 +396,8 @@ final class _FollowUpPageState extends ConsumerState<ProactiveFollowUpPage> {
                   ),
                   Text(
                     context.tr(
-                      'Local model · once · at most 1 contact per rolling 24 hours, 8 hours apart. No system push is enabled by scheduling.',
-                      '本地模型 · 仅一次 · 每滚动 24 小时最多联系一次，至少间隔 8 小时。预约不会开启系统推送。',
+                      '$processor · once · at most 1 contact per rolling 24 hours, 8 hours apart. No system push is enabled by scheduling.',
+                      '$processor · 仅一次 · 每滚动 24 小时最多联系一次，至少间隔 8 小时。预约不会开启系统推送。',
                     ),
                   ),
                   const SizedBox(height: 16),

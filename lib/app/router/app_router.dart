@@ -431,6 +431,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           builder: (context, state) => ProactiveSettingsPage(
             key: ValueKey((routeSession, AppRoutes.aiFollowUps)),
             onBack: () => backFromShared(context, AppRoutes.aiFollowUps),
+            onOpenSettings: () => openShared(
+              context,
+              AppRoutes.aiFollowUps,
+              AppRoutes.aiSettings,
+            ),
             pushControls: const ProactivePushControls(),
           ),
         ),
@@ -447,6 +452,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               key: ValueKey((routeSession, extra.source)),
               source: extra.source,
               onBack: () => backFromShared(context, AppRoutes.newAiFollowUp),
+              onOpenSettings: () => openShared(
+                context,
+                AppRoutes.newAiFollowUp,
+                AppRoutes.aiSettings,
+              ),
             );
           },
         ),

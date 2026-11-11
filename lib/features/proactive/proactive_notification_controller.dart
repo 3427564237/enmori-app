@@ -81,6 +81,7 @@ class ProactiveNotificationController
     extends Notifier<ProactiveNotificationState> {
   late AuthRepository _auth;
   late AccountPreferencesRepository _preferences;
+  late AiClientProcessing _processing;
   ProactiveRepository? _settingsRepo;
   ProactiveRegistrationRepository? _registrations;
   ProactiveMessagingPort? _sdk;
@@ -128,6 +129,7 @@ class ProactiveNotificationController
     _resolver = ref.watch(proactiveDeliveryResolverProvider);
     _handler = ref.watch(proactiveMessageTargetHandlerProvider);
     _auth = ref.watch(authRepositoryProvider);
+    _processing = ref.watch(aiClientProcessingProvider);
     _actor = ref.watch(authSessionProvider).asData?.value;
     _preferences = ref.watch(accountPreferencesRepositoryProvider);
     _settingsRepo = ref.watch(proactiveRepositoryProvider);
@@ -176,8 +178,7 @@ class ProactiveNotificationController
       } else {
         _wakeForeground();
         if (before?.foreground == true) _invalidate();
-        if (ref.read(accountSettingsSnapshotProvider)?.consent ==
-            OptionalProcessingConsent.rejected) {
+        if (_withdrawn(ref.read(accountSettingsSnapshotProvider))) {
           _scheduleRelease();
         }
         _maybeOpen();
@@ -186,11 +187,12 @@ class ProactiveNotificationController
     });
     ref.listen(accountSettingsSnapshotProvider, (before, after) {
       if (after?.consent != OptionalProcessingConsent.accepted ||
+          _allowsProcessing(before) && !_allowsProcessing(after) ||
           before != null && after?.revision != before.revision) {
         final release =
             _boundSession != null &&
             identical(_boundSession, _actor) &&
-            after?.consent == OptionalProcessingConsent.rejected;
+            _withdrawn(after);
         _invalidate();
         if (release) _scheduleRelease();
       }
@@ -232,6 +234,16 @@ class ProactiveNotificationController
   bool get _consentAllowed =>
       ref.read(accountSettingsSnapshotProvider)?.consent ==
       OptionalProcessingConsent.accepted;
+  bool _allowsProcessing(OwnSettings? settings) =>
+      settings?.consent == OptionalProcessingConsent.accepted &&
+      _processing != AiClientProcessing.groqCloud &&
+      _processing.allowsCloudConsent(settings?.cloudAiConsent);
+  bool get _processingConsentAllowed =>
+      _allowsProcessing(ref.read(accountSettingsSnapshotProvider));
+  bool _withdrawn(OwnSettings? settings) =>
+      settings != null &&
+      (settings.consent == OptionalProcessingConsent.rejected ||
+          !_processing.allowsCloudConsent(settings.cloudAiConsent));
   ProactiveNotificationState _snapshot() => ProactiveNotificationState(
     configured: _configured,
     authenticated: _actor is AuthSessionAuthenticated,
@@ -314,8 +326,12 @@ class ProactiveNotificationController
     Object epoch,
     Future<Result<T>> Function(String, ProactiveAbortSignal) run, {
     bool needsConsent = false,
+    bool needsProcessingConsent = false,
   }) async {
-    bool current() => _current(epoch) && (!needsConsent || _consentAllowed);
+    bool current() =>
+        _current(epoch) &&
+        (!needsConsent || _consentAllowed) &&
+        (!needsProcessingConsent || _processingConsentAllowed);
     if (!current()) return const Failure(_notVerified);
     final abort = ProactiveAbortSignal();
     _requests.add(abort);
@@ -344,7 +360,11 @@ class ProactiveNotificationController
     }
   }
 
-  Future<OwnSettings?> _consent(Object epoch, {int? expected}) async {
+  Future<OwnSettings?> _consent(
+    Object epoch, {
+    int? expected,
+    bool processing = true,
+  }) async {
     if (!_current(epoch)) return null;
     final abort = ProactiveAbortSignal();
     _requests.add(abort);
@@ -372,16 +392,18 @@ class ProactiveNotificationController
     }
     final value = (result as Success<OwnSettings>).value,
         observed = ref.read(accountSettingsSnapshotProvider);
-    if (observed != null && observed.revision > value.revision ||
-        expected != null && value.revision != expected) {
+    if (observed != null && observed.revision > value.revision) {
       _failure = _notVerified;
       return null;
     }
     ref.read(accountSettingsSnapshotProvider.notifier).observe(value);
     if (!_current(epoch) ||
+        expected != null && value.revision != expected ||
         value.consent != OptionalProcessingConsent.accepted ||
         ref.read(accountSettingsSnapshotProvider)?.consent !=
-            OptionalProcessingConsent.accepted) {
+            OptionalProcessingConsent.accepted ||
+        processing &&
+            (!_allowsProcessing(value) || !_processingConsentAllowed)) {
       _failure = _notVerified;
       return null;
     }
@@ -431,9 +453,11 @@ class ProactiveNotificationController
     if (!_current(epoch)) throw const _Stopped(_notVerified);
   }
 
-  void _guardConsent(Object epoch) {
+  void _guardConsent(Object epoch, {bool processing = true}) {
     _guard(epoch);
-    if (!_consentAllowed) throw const _Stopped(_notVerified);
+    if (!_consentAllowed || processing && !_processingConsentAllowed) {
+      throw const _Stopped(_notVerified);
+    }
   }
 
   T _value<T>(Result<T> result) => switch (result) {
@@ -589,7 +613,7 @@ class ProactiveNotificationController
         settings: requested,
         expectedRevision: before.revision,
       );
-    }, needsConsent: enabled);
+    }, needsProcessingConsent: enabled);
     _guard(epoch);
     if (result case Failure<ProactiveSettings>(:final failure)) {
       if (_definite(failure)) {
@@ -624,7 +648,7 @@ class ProactiveNotificationController
         installationRef: _installation!,
         registrationValue: value,
       );
-    }, needsConsent: true);
+    }, needsProcessingConsent: true);
     _guard(epoch);
     if (result case Failure<ProactiveRegistration>(:final failure)) {
       if (_definite(failure)) {
@@ -1000,7 +1024,9 @@ class ProactiveNotificationController
     _failure = null;
     _show();
     try {
-      if (await _consent(epoch) == null) return;
+      // Read authority is the original source receipt, not the processor
+      // selected for new requests in this app build.
+      if (await _consent(epoch, processing: false) == null) return;
       _guard(epoch);
       final result = await _call(
         epoch,
@@ -1008,7 +1034,7 @@ class ProactiveNotificationController
             _resolver!(token: token, deliveryRef: reference, abort: abort),
         needsConsent: true,
       );
-      _guardConsent(epoch);
+      _guardConsent(epoch, processing: false);
       if (_pendingDelivery != reference) return;
       final target = _value(result);
       if (!isProactiveUuid(target.conversationId) ||

@@ -1,13 +1,14 @@
 import { parseOutput } from "../../ai-runtime/domain/parse-output.js";
 import type { FirstFlowClaim, FirstFlowIntent, FirstFlowIntentCommand, FirstFlowModel,
-  FirstFlowModelInput, FirstFlowRegistrationCommand, FirstFlowReservation, FirstFlowResult,
+  FirstFlowCloudExecution, FirstFlowCloudRun, FirstFlowModelInput, FirstFlowRegistrationCommand, FirstFlowReservation, FirstFlowResult,
   FirstFlowSender, FirstFlowSettingsInput, FirstFlowStore, ProactiveActor } from "../ports/first-flow.js";
 
 export interface FirstFlowApplicationOptions {
   readonly store: FirstFlowStore;
   /** Integration MUST inject the shared host lane used by chat and Persona
    * preview. A new per-feature model adapter is not an admission gate. */
-  readonly model: FirstFlowModel;
+  readonly model?: FirstFlowModel;
+  readonly cloudExecution?: FirstFlowCloudExecution;
   readonly sender: FirstFlowSender;
   readonly newMessageId: () => string;
   readonly nowMs?: () => number;
@@ -26,6 +27,7 @@ export class FirstFlowApplication {
 
   constructor(private readonly options: FirstFlowApplicationOptions) {
     this.now = options.nowMs ?? Date.now;
+    if (!!options.model === !!options.cloudExecution) throw Error("Exactly one first-flow execution kind required");
     if (!Number.isSafeInteger(options.modelTimeoutMs ?? 45000) || (options.modelTimeoutMs ?? 45000) < 1 ||
       (options.modelTimeoutMs ?? 45000) > 45000) throw Error("Invalid F0 capacity");
   }
@@ -96,7 +98,8 @@ export class FirstFlowApplication {
     this.active = { owner: actor.principal.firebaseUid, intentId, abort };
     let timer: ReturnType<typeof setTimeout> | undefined;
     let deadline = Number.POSITIVE_INFINITY;
-    const live = (): boolean => this.current(actor) && !combined.aborted && this.now() < deadline;
+    let cloudRun: FirstFlowCloudRun | undefined;
+    const live = (): boolean => this.current(actor) && !combined.aborted && this.now() < deadline && (!cloudRun || cloudRun.current());
     const operationActor: ProactiveActor = { principal: actor.principal,
       verifyCurrentAuth: () => actor.verifyCurrentAuth(), current: live };
     try {
@@ -107,7 +110,14 @@ export class FirstFlowApplication {
       deadline = Math.min(expiry, this.now() + (this.options.modelTimeoutMs ?? 45000));
       timer = setTimeout(() => abort.abort(), Math.max(1, deadline - this.now())); timer.unref();
       if (!live()) return { kind: "terminated" };
-      if (read.value.state === "published") return this.dispatch(operationActor, read.value, combined);
+      if (read.value.processing === "cloud") {
+        if (!this.options.cloudExecution) return {kind:"denied"};
+        const opened = await this.options.cloudExecution.open(actor,read.value,{signal:combined,deadline,remainingMs:()=>Math.max(0,deadline-this.now())});
+        if (opened.kind !== "ok") return opened;
+        cloudRun = opened.value;
+      } else if (this.options.cloudExecution) return {kind:"denied"};
+      if (!live()) return {kind:"terminated"};
+      if (read.value.state === "published") return await this.dispatch(operationActor, read.value, combined);
       if (read.value.state !== "queued") return { kind: "conflict" };
 
       const reserved = await this.call(operationActor, () => this.options.store.reserve(operationActor, intentId, read.value.revision), true);
@@ -116,7 +126,9 @@ export class FirstFlowApplication {
       const allowed = await this.authorized(operationActor);
       // Terminal metadata cleanup uses a freshly verified original owner, not
       // an expired delivery deadline/signal. It is invoked only before model
-      // submission or after its physical promise settles. Publish/dispatch
+      // submission or after local physical/cloud logical completion. A cloud
+      // completion leaves unknown monetary/rate holds with the shared owner.
+      // Publish/dispatch
       // continue to require operationActor and can never borrow this scope.
       if (allowed.kind !== "ok") { await this.fail(actor, reservation); return allowed; }
       if (!live()) {
@@ -131,9 +143,20 @@ export class FirstFlowApplication {
       let raw: Uint8Array;
       this.modelPending = true;
       try {
-        // generate settles only once physical generation has stopped. Do NOT
-        // race this promise against abort/deadline and release the host lane.
-        raw = await this.options.model.generate(modelInput, {
+        // Local generate settles only once physical generation has stopped.
+        // Cloud returns a logical result; its shared owner retains physical
+        // uncertainty independently and is never released by this application.
+        if (cloudRun) {
+          const generated = await cloudRun.generate(modelInput, async () => {
+            const checked = await this.call(operationActor, () => this.options.store.validateReservation(operationActor,reservation));
+            return checked.kind === "ok";
+          });
+          if (generated.kind !== "ok") {
+            const failed = await this.fail(actor,reservation);
+            return failed.kind === "unknown" ? failed : generated;
+          }
+          raw = generated.value;
+        } else raw = await this.options.model!.generate(modelInput, {
           signal: combined, deadline, remainingMs: () => Math.max(0, deadline - this.now()),
         });
       } catch {
@@ -151,6 +174,7 @@ export class FirstFlowApplication {
         const failed = await this.fail(actor, reservation);
         return failed.kind === "unknown" ? failed : { kind: "unavailable" };
       }
+      if (cloudRun && !await cloudRun.verify()) { await this.fail(actor,reservation); return {kind:"denied"}; }
       const fresh = await this.authorized(operationActor);
       if (fresh.kind !== "ok") { await this.fail(actor, reservation); return fresh; }
       const messageId = this.options.newMessageId();
@@ -166,9 +190,10 @@ export class FirstFlowApplication {
         return published;
       }
       if (!live()) return { kind: "terminated" };
-      return this.dispatch(operationActor, published.value, combined);
+      return await this.dispatch(operationActor, published.value, combined);
     } catch { return { kind: "unavailable" }; }
     finally {
+      cloudRun?.release();
       if (timer) clearTimeout(timer);
       this.active = undefined;
       this.running = false;

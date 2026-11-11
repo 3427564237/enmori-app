@@ -22,7 +22,7 @@ final class BackendEventRecommendationRepository
     final response = await _client.get(
       '/v1/recommendations/events?view=${view.name}${activityAreaCode?.call() == null ? '' : '&activityAreaCode=${Uri.encodeQueryComponent(activityAreaCode!.call()!)}'}',
       contractVersion: 3,
-      readTimeout: const Duration(seconds: 120),
+      readTimeout: const Duration(seconds: 225),
     );
     return switch (response) {
       Failure<JsonObject>(:final failure) => Failure(failure),

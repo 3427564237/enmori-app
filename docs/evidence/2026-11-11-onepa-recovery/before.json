@@ -1,0 +1,20 @@
+{
+  "sourceRepairCommit": "6eefa41",
+  "azureManifest": "b64ad02bb36aaf531be51e86ab7583ab67b63d56",
+  "azureFastProbe": {"path": "/v1/me/profile", "authenticated": false, "http": 401, "tlsSeconds": 0.165596, "firstByteSeconds": 0.245385, "totalSeconds": 0.245549},
+  "operatorOriginalReader": {"durationMs": 7868, "documentStatus": 200, "searchStatuses": [201, 201, 201, 201, 201], "offsets": [0, 10, 20, 30, 40], "rows": 50, "uniqueSourceIds": 50, "futureProjectedRows": 17, "publicUrlsOnly": true},
+  "azureOriginalReader": {"durationMs": 84856, "launchMs": 13809, "contextMs": 1127, "pageMs": 12305, "documentStatus": 200, "searchStatuses": [201, 201], "firstPageRendered": true, "secondPageRendered": false, "aborted": false, "browserCloseMs": 3877, "ownedDescendantsObserved": 19, "ownedRunningRemaining": 0},
+  "azureTargetedMetadataReader": {
+    "durationMs": 70971,
+    "launchMs": 6563, "contextMs": 568, "pageMs": 5858,
+    "documentStatus": 200, "searchStatuses": [201, 201],
+    "grids": [
+      {"expectedOffset": 0, "offset": 0, "limit": 10, "total": 2260, "rows": 10, "validIdCount": 10, "duplicateIds": 0, "orderedIdSha256Prefix": "d3719c7a6baa0ec8"},
+      {"expectedOffset": 10, "offset": 0, "limit": 10, "total": 2260, "rows": 10, "validIdCount": 10, "duplicateIds": 0, "orderedIdSha256Prefix": "d3719c7a6baa0ec8"}
+    ],
+    "error": "Source format changed", "aborted": false,
+    "browserCloseMs": 2119, "ownedDescendantsObserved": 16, "ownedRunningRemaining": 0
+  },
+  "sourceChecks": {"typeScriptBuild": "passed", "targetedTests": 31, "passed": 31, "failed": 0},
+  "boundaries": {"deployed": false, "newDependency": false, "changedHost": false, "aiCalls": 0, "cloudReliabilityProved": false, "phoneAcceptance": false}
+}

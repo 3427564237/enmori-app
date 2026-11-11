@@ -24,9 +24,11 @@ const messageTarget = ProactiveMessageTarget(
 OwnSettings ownConsent({
   OptionalProcessingConsent consent = OptionalProcessingConsent.accepted,
   int revision = 1,
+  CloudAiConsent? cloudConsent,
 }) => OwnSettings(
   checkInVisibility: CheckInVisibility.private,
   consent: consent,
+  cloudAiConsent: cloudConsent,
   revision: revision,
 );
 ProactiveRegistration registered({int revision = 1}) => ProactiveRegistration(
@@ -190,12 +192,16 @@ class MessagingRig {
     bool configured = true,
     bool authenticated = true,
     String? initial,
+    AiClientProcessing processing = AiClientProcessing.local,
+    CloudAiConsent? cloudConsent,
   }) async {
     final r = MessagingRig();
+    r.preferences.value = ownConsent(cloudConsent: cloudConsent);
     r.sdk.initial = initial;
     r.settings.settings = fixtureSettings(mode: ProactiveMode.on, revision: 1);
     r.container = ProviderContainer(
       overrides: [
+        aiClientProcessingProvider.overrideWithValue(processing),
         authRepositoryProvider.overrideWithValue(r.auth),
         proactiveRepositoryProvider.overrideWithValue(r.settings),
         accountPreferencesRepositoryProvider.overrideWithValue(r.preferences),

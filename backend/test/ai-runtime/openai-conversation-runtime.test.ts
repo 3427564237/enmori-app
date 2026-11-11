@@ -556,3 +556,50 @@ for (const action of ['withdrawal', 'cancel'] as const) {
     f.runtime.shutdown();
   });
 }
+
+const followUpProjection = {inputKind: 'proactive_followup' as const,
+  quotedRequest: {occurredAt: '2026-11-10T02:00:00.000Z', text: 'Synthetic historical request: ask about preparation.'},
+  dueAt: '2026-11-11T02:00:00.000Z', timeZone: 'Asia/Singapore'};
+function proactiveHandle(f: ReturnType<typeof fixture>): AsyncConversationModelInput {
+  return {...f.handle(), monetaryConsumer: 'proactive', projection: () => undefined, proactiveProjection: () => followUpProjection};
+}
+
+test('proactive uses the shared monetary/rate owner and unchanged quoted F0 prompt for count and inference', async () => {
+  const requests: {url:string;body:string}[] = [];
+  const f=fixture({counted:true,http:async(url,init)=>{requests.push({url:String(url),body:String(init?.body)});
+    return String(url)===openAiInputTokensEndpoint?countResponse():response();}});
+  await recover(f);let consumer='';const reserve=f.costBudget.reserve.bind(f.costBudget);
+  f.costBudget.reserve=async(input,live)=>{consumer=input.consumer;return reserve(input,live);};
+  assert.equal((await accepted(f.runtime.submit('synthetic',work(proactiveHandle(f)))).outcome).ok,true);
+  assert.equal(consumer,'proactive');assert.equal(f.ledger().attemptCount,1);assert.equal(f.rate.reservations,2);
+  assert.equal(requests.length,2);const count=JSON.parse(requests[0]!.body),paid=JSON.parse(requests[1]!.body);
+  assert.deepEqual(count.input,paid.input);
+  const {buildFirstFlowMessages}=await import('../../src/ai-runtime/infrastructure/local-first-flow-transport.js');
+  assert.deepEqual(paid.input,buildFirstFlowMessages(followUpProjection));
+  assert(!requests[1]!.body.includes('Synthetic request.'));assert(!requests[1]!.body.includes('authorizationScope'));
+  assert.equal(f.ledger().spentNanoUsd,133);assert.equal(f.ledger().reservedNanoUsd,0);f.runtime.shutdown();
+});
+
+test('proactive projection and consumer must agree before any cost claim or network request',async()=>{
+  const f=fixture();await recover(f);
+  for(const handle of [{...proactiveHandle(f),proactiveProjection:undefined},{...f.handle(),proactiveProjection:()=>followUpProjection}]){
+    assert.equal((await accepted(f.runtime.submit('synthetic',work(handle as unknown as AsyncConversationModelInput))).outcome).ok,false);
+  }
+  assert.equal(f.httpCalls,0);assert.equal(f.ledger().attemptCount,0);f.runtime.shutdown();
+});
+
+test('proactive withdrawal during Count emits no inference and preserves the original conservative monetary hold',async()=>{
+  const countStarted=deferred<void>(),gate=deferred<Response>();
+  const f=fixture({counted:true,http:async(url)=>{assert.equal(String(url),openAiInputTokensEndpoint);countStarted.resolve();return gate.promise;}});
+  await recover(f);const pending=accepted(f.runtime.submit('synthetic',work(proactiveHandle(f))));
+  await countStarted.promise;f.revokeConsent();gate.resolve(countResponse());assert.equal((await pending.outcome).ok,false);
+  assert.equal(f.httpCalls,1);assert.equal(f.ledger().attemptCount,1);assert.equal(f.ledger().spentNanoUsd,0);
+  assert.equal(f.ledger().reservedNanoUsd,600);f.runtime.shutdown();
+});
+
+test('proactive unknown inference keeps its original money hold and shared owner does not become a second consumer runtime',async()=>{
+  const f=fixture({http:async()=>{throw Error('synthetic unknown network outcome');}});await recover(f);
+  assert.equal((await accepted(f.runtime.submit('synthetic',work(proactiveHandle(f)))).outcome).ok,false);
+  assert.equal(f.httpCalls,1);assert.equal(f.ledger().attemptCount,1);assert.equal(f.ledger().reservedNanoUsd,600);
+  assert.equal(f.ledger().spentNanoUsd,0);assert.equal(f.owner.state.remoteUnknown,1);f.runtime.shutdown();
+});

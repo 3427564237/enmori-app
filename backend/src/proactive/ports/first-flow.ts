@@ -2,6 +2,16 @@ import type { AuthPrincipal, IdentityVerificationResult } from "../../shared/por
 import type { FullPrecisionInstant } from "../../ai-conversation/domain/real-effect-expiry.js";
 import type { PersonaProjection, PresentationMetadata } from "../../ai-conversation/ports/conversation-lifecycle.js";
 import type { GenerationTransport } from "../../ai-runtime/ports/generation-transport.js";
+import type { RequestBudget } from "../../ai-runtime/ports/generation-transport.js";
+
+export type FirstFlowProcessing = { readonly processing: "local" } | {
+  readonly processing: "cloud"; readonly provider: "openai"; readonly disclosureVersion: "openai_cloud_v1";
+};
+export function firstFlowPurposeGeneration(scope: string): number | undefined {
+  const match = /^v1\.(0|[1-9][0-9]*)\.([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/.exec(scope);
+  const value = match ? Number(match[1]) : NaN;
+  return Number.isSafeInteger(value) && value >= 0 ? value : undefined;
+}
 
 /** S-PM 2026-10-25 first-flow decision. Inner contracts, never wire schemas or
  * Firebase/vendor objects. All timestamps below are canonical server UTC. */
@@ -46,7 +56,7 @@ export interface FirstFlowSourceRef {
   readonly id: string;
   readonly version: string;
 }
-export interface FirstFlowIntentCommand {
+export type FirstFlowIntentCommand = FirstFlowProcessing & {
   /** Canonical owner-scoped Idempotency-Key; a fresh confirmation uses a new ID. */
   readonly intentId: string;
   readonly conversationId: string;
@@ -54,10 +64,9 @@ export interface FirstFlowIntentCommand {
   readonly category: "explicit_follow_up";
   readonly dueAt: string;
   readonly timeZone: string;
-  readonly processing: "local";
   readonly expectedSettingsRevision: number;
 }
-export interface FirstFlowIntent {
+export type FirstFlowIntent = (FirstFlowProcessing & { readonly cloudAiConsentGeneration?: number }) & {
   readonly intentId: string;
   readonly revision: number;
   readonly state: FirstFlowState;
@@ -67,7 +76,6 @@ export interface FirstFlowIntent {
   readonly dueAt: string;
   readonly expiresAt: string;
   readonly timeZone: string;
-  readonly processing: "local";
   readonly settingsRevision: number;
   readonly grantGeneration: number;
   readonly authorizationScope: string;
@@ -178,6 +186,8 @@ export interface FirstFlowStore extends FirstFlowSourceAuthority {
   markRead(actor: ProactiveActor, conversationId: string, expectedRevision: number, readThroughSequence: number): Promise<FirstFlowResult<FirstFlowReadState>>;
   /** Atomic queued -> reserved + current source/settings/topic/budget validation. */
   reserve(actor: ProactiveActor, intentId: string, expectedRevision: number): Promise<FirstFlowResult<FirstFlowReservation>>;
+  /** Read-only exact reservation/source revalidation before cloud effects. */
+  validateReservation(actor: ProactiveActor, reservation: FirstFlowReservation): Promise<FirstFlowResult<void>>;
   failGeneration(actor: ProactiveActor, reservation: FirstFlowReservation): Promise<FirstFlowResult<FirstFlowIntent>>;
   /** Atomic canonical message + source_use_v2 + published/outbox + one budget
    * charge. Genuine assistant, no fake user, no old retention-anchor advance. */
@@ -201,6 +211,17 @@ export interface FirstFlowModelInput {
 /** Reuses the existing physical-settlement GenerationTransport contract: abort
  * is not proof that the underlying local generation has stopped. */
 export type FirstFlowModel = GenerationTransport<FirstFlowModelInput>;
+/** Logical cloud completion, never proof that an unknown provider stopped.
+ * Shared runtime/quota/monetary owners retain all unknown remote reservations. */
+export interface FirstFlowCloudRun {
+  current(): boolean;
+  verify(): Promise<boolean>;
+  generate(input: FirstFlowModelInput, checkpoint: () => Promise<boolean>): Promise<FirstFlowResult<Uint8Array>>;
+  release(): void;
+}
+export interface FirstFlowCloudExecution {
+  open(actor: ProactiveActor, intent: FirstFlowIntent, budget: RequestBudget): Promise<FirstFlowResult<FirstFlowCloudRun>>;
+}
 export type FirstFlowSenderOutcome = { readonly kind: "accepted" | "rejected" | "unknown" | "not_attempted" };
 /** Acquire OAuth first, await fresh claim, then check current(claim) after that
  * await and immediately before the single FCM message POST. No token output. */

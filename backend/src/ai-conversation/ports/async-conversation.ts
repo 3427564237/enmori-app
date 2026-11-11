@@ -142,7 +142,9 @@ export type AsyncConversationGates = ConversationGates;
 /** Backend-local dispatch handle, NEVER serialized into a model payload. */
 export interface AsyncConversationModelInput {
   /** Trusted application-only resource accounting; never copied from a client body. */
-  readonly monetaryConsumer?: "persona";
+  readonly monetaryConsumer?: "persona" | "proactive";
+  /** Trusted internal variant only; no source/account/intent metadata enters it. */
+  readonly proactiveProjection?: () => import("../../proactive/ports/first-flow.js").FirstFlowModelInput | undefined;
   readonly processing?: "cloud";
   readonly provider?: import('../../account/domain/cloud-ai-consent.js').CloudAiProcessing['provider'];
   readonly disclosureVersion?: import('../../account/domain/cloud-ai-consent.js').CloudAiProcessing['disclosureVersion'];

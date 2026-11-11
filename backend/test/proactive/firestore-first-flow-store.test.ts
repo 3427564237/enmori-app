@@ -7,6 +7,7 @@ import { MetadataFirestoreGateway } from "../support/metadata-firestore-gateway.
 import test from "node:test";
 import { FirestoreFirstFlowStore } from "../../src/proactive/infrastructure/firestore-first-flow-store.js";
 import { FirestoreConversationStore } from "../../src/ai-conversation/infrastructure/firestore-conversation-store.js";
+import { OPENAI_CLOUD_PROCESSING } from "../../src/account/domain/cloud-ai-consent.js";
 import { createAuthBindingDocumentId } from "../../src/shared/infrastructure/firebase/firestore-records.js";
 import type { FirestoreGateway, FirestoreTransactionGateway as Tx, StoredDocument as Row, StoredDocumentSnapshot as Snapshot } from "../../src/shared/infrastructure/firebase/firestore-gateway.js";
 import type { FirstFlowResult, FirstFlowSettingsInput, FirstFlowIntent, FirstFlowReservation, ProactiveActor } from "../../src/proactive/ports/first-flow.js";
@@ -19,22 +20,24 @@ const environment={ENMORI_ENVIRONMENT:"test",ENMORI_CONTROLLED_PROFILE_DIRECTORY
 const settings:FirstFlowSettingsInput={mode:"on",categories:["explicit_follow_up"],timeZone:"UTC",quiet:{kind:"window",startMinute:1320,endMinute:480},maximumInRolling24h:1,cooldownMinutes:480,pushEnabled:true,preview:"generic"};
 function value<T>(r:FirstFlowResult<T>):T{assert.equal(r.kind,"ok");if(r.kind!=="ok")throw Error("Expected ok");return r.value;}
 
-function fixture(configured=true, serviceLeaseMs?:number){
+function fixture(configured=true, serviceLeaseMs?:number, cloud=false){
   const g=new MetadataFirestoreGateway(start);let live=true,checks=0;
   g.put(`auth_bindings/${createAuthBindingDocumentId(principal.firebaseUid)!}`,{accountId:owner});
   g.put(base,{username:"first_flow_owner",optionalProcessingConsent:"accepted",checkInVisibility:"private",onboardingCompletedAt:new Date(start).toISOString(),purposeRevocationGeneration:0});
+  if(cloud)g.put(base,{...g.rows.get(base)!.data,cloudAiConsent:{state:"accepted",disclosureVersion:"openai_cloud_v1"},cloudAiConsentGeneration:3});
   g.put(`${base}/persona_state/current`,{stateRevision:0,livePersonaIds:[]});
   const cutoff={seconds:Math.floor(start/1000)-100+90*86400,nanoseconds:0};
   g.put(`${root}/messages/${user}`,{role:"user",sequence:1,text:"Synthetic request: follow up later",acceptedAssistantMessageId:assistant},start-200000);
   g.put(`${root}/messages/${assistant}`,{role:"assistant",sequence:2,text:"Synthetic original response",replyToUserMessageId:user,availability:"available",presentationMode:"default",appendBefore:{seconds:Math.floor(start/1000)-200+90*86400,nanoseconds:0}},start-100000);
   g.put(`${root}/message_sources/${assistant}`,{sources:[]});
   g.put(root,{state:"live",lifecycleVersion:1,nextSequence:3,latestMessageId:assistant});
-  const conversations=new FirestoreConversationStore(g,environment,()=>g.now);
+  const conversations=new FirestoreConversationStore(g,environment,()=>g.now,undefined,cloud?OPENAI_CLOUD_PROCESSING:undefined);
   const store=new FirestoreFirstFlowStore(g,environment,{ownerAccountId:owner,utcMilliseconds:()=>g.now,
+    ...(cloud?{cloudProcessing:OPENAI_CLOUD_PROCESSING}:{}),
     conversationTransaction:(tx,p,o,current)=>conversations.firstFlowTransaction(tx,p,o,current),
     ...(configured?{installationRef:installation,...(serviceLeaseMs===undefined?{registrationLeaseExpiresAt:new Date(start+45*60000).toISOString()}:{registrationLeaseDurationMs:serviceLeaseMs})}: {})});
   const actor:ProactiveActor={principal,current:()=>live,verifyCurrentAuth:async()=>{checks++;return {kind:"verified",principal};}};
-  const create=async(n=10)=>value(await store.createIntent(actor,{intentId:id(n),conversationId:topic,sourceMessageId:user,category:"explicit_follow_up",dueAt:new Date(start+60000).toISOString(),timeZone:"UTC",processing:"local",expectedSettingsRevision:1}));
+  const create=async(n=10)=>value(await store.createIntent(actor,{intentId:id(n),conversationId:topic,sourceMessageId:user,category:"explicit_follow_up",dueAt:new Date(start+60000).toISOString(),timeZone:"UTC",...(cloud?{processing:"cloud" as const,...OPENAI_CLOUD_PROCESSING}:{processing:"local" as const}),expectedSettingsRevision:1}));
   const enable=async()=>value(await store.replaceSettings(actor,0,settings));
   const reserve=async(i:FirstFlowIntent)=>{g.now=start+60000;return value(await store.reserve(actor,i.intentId,i.revision));};
   const publish=async(r:FirstFlowReservation,n=20)=>value(await store.publish(actor,{reservation:r,messageId:id(n),text:"Synthetic follow up",presentation:{presentationMode:"default"}}));
@@ -269,4 +272,84 @@ test("ordinary roster rotates beyond a full page without reading private message
   const second=await roster.page(first.next);assert.equal(second.actors.length,2);assert.equal(second.next,undefined);
   assert.equal(new Set([...first.actors,...second.actors]).size,27);
   assert(seen.every(path=>path==="auth_bindings"||path.endsWith("/proactive_state/current")));
+});
+
+test('OpenAI intent stores only its exact marker and server generation; receipt v3 carries original provenance',async()=>{
+  const f=fixture(true,undefined,true);await f.enable();const intent=await f.create();
+  assert.equal(intent.processing,'cloud');assert.equal(intent.cloudAiConsentGeneration,3);
+  assert.equal(f.g.rows.get(`${base}/proactive_occurrences/${intent.intentId}`)?.data.cloudAiConsentGeneration,3);
+  const reserved=await f.reserve(intent);assert.equal((await f.store.validateReservation(f.actor,reserved)).kind,'ok');
+  const published=await f.publish(reserved);
+  const receipt=f.g.rows.get(`${root}/message_sources/${id(20)}`)!.data;
+  assert.equal(receipt.schemaVersion,'source_use_v3');assert.equal(receipt.purpose,'explicit_follow_up');
+  assert.equal(receipt.processing,'cloud');assert.equal(receipt.provider,'openai');assert.equal(receipt.disclosureVersion,'openai_cloud_v1');
+  assert.equal(receipt.cloudAiConsentGeneration,3);assert.equal(receipt.purposeRevocationGeneration,0);
+  const list=await f.conversations.listOwnedMessages(principal,owner,topic,undefined,()=>true);
+  assert.equal(list.kind,'confirmed');if(list.kind!=='confirmed')return;
+  const message=list.value.messages.find(m=>m.messageId===published.messageId)!;
+  assert.equal(message.processing,'cloud');assert.equal(message.provider,'openai');
+});
+
+test('cloud F0 exact marker rejects partial, extra, foreign provider, client generation and unmarked local input',async()=>{
+  const f=fixture(true,undefined,true);await f.enable();const command={intentId:id(10),conversationId:topic,sourceMessageId:user,category:'explicit_follow_up',
+    dueAt:new Date(start+60000).toISOString(),timeZone:'UTC',processing:'cloud',...OPENAI_CLOUD_PROCESSING,expectedSettingsRevision:1};
+  const before=f.g.writes;
+  for(const patch of [{provider:undefined},{disclosureVersion:undefined},{provider:'groq',disclosureVersion:'groq_cloud_v1'},
+    {cloudAiConsentGeneration:3},{processing:'local'},{unexpected:true}]){
+    assert.equal((await f.store.createIntent(f.actor,{...command,...patch} as unknown as import('../../src/proactive/ports/first-flow.js').FirstFlowIntentCommand)).kind,'invalid');
+  }
+  const {provider:_p,disclosureVersion:_v,...local}=command;
+  assert.equal((await f.store.createIntent(f.actor,{...local,processing:'local'} as import('../../src/proactive/ports/first-flow.js').FirstFlowIntentCommand)).kind,'denied');
+  assert.equal(f.g.writes,before);
+});
+
+for(const phase of ['reserve','validate','publish','dispatch'])test(`OpenAI withdrawal/reaccept before ${phase} prevents the effect`,async()=>{
+  const f=fixture(true,undefined,true);await f.enable();
+  value(await f.store.replaceRegistration(f.actor,{expectedRevision:0,installationRef:installation,registrationKind:'fcm_token',registrationValue:'synthetic',enabled:true}));
+  const intent=await f.create(),reservation=phase==='reserve'?undefined:await f.reserve(intent),published=phase==='dispatch'?await f.publish(reservation!):undefined;
+  f.g.now=start+60000;f.g.put(base,{...f.g.rows.get(base)!.data,cloudAiConsentGeneration:4});const before=f.g.writes;
+  const result=phase==='reserve'?await f.store.reserve(f.actor,intent.intentId,intent.revision):phase==='validate'?await f.store.validateReservation(f.actor,reservation!):
+    phase==='publish'?await f.store.publish(f.actor,{reservation:reservation!,messageId:id(20),text:'must not publish',presentation:{presentationMode:'default'}}):
+    await f.store.claimDispatch(f.actor,published!.intentId,published!.revision);
+  assert.notEqual(result.kind,'ok');assert.equal(f.g.writes,before);
+});
+
+test('cloud withdrawal leaves protective pause/off/cancel/delete and local history readable, but closes new enable/rotate',async()=>{
+  const f=fixture(true,undefined,true);await f.enable();const intent=await f.create();
+  value(await f.store.replaceRegistration(f.actor,{expectedRevision:0,installationRef:installation,registrationKind:'fcm_token',registrationValue:'synthetic',enabled:true}));
+  f.g.put(base,{...f.g.rows.get(base)!.data,cloudAiConsent:{state:'declined',disclosureVersion:'openai_cloud_v1'},cloudAiConsentGeneration:4});
+  const before=f.g.writes;
+  assert.equal((await f.store.replaceSettings(f.actor,1,settings)).kind,'denied');
+  assert.equal((await f.store.replaceRegistration(f.actor,{expectedRevision:1,installationRef:installation,registrationKind:'fcm_token',registrationValue:'rotated',enabled:true})).kind,'denied');
+  assert.equal(f.g.writes,before);assert.equal((await f.store.intent(f.actor,intent.intentId)).kind,'ok');
+  value(await f.store.cancelIntent(f.actor,intent.intentId,intent.revision));
+  value(await f.store.replaceSettings(f.actor,1,{...settings,mode:'paused'}));
+  value(await f.store.replaceSettings(f.actor,2,{...settings,mode:'off'}));
+  value(await f.store.deleteRegistration(f.actor,installation,1));
+  assert.equal((await f.conversations.listOwnedMessages(principal,owner,topic,undefined,()=>true)).kind,'confirmed');
+});
+
+test('restart preserves queued cloud generation but fails started work and never reclaims unknown delivery',async()=>{
+  const f=fixture(true,undefined,true);await f.enable();await f.create(10);const reserved=await f.reserve(await f.create(11));
+  const restarted=new FirestoreFirstFlowStore(f.g,environment,{ownerAccountId:owner,cloudProcessing:OPENAI_CLOUD_PROCESSING,utcMilliseconds:()=>f.g.now,
+    conversationTransaction:(tx,p,o,current)=>f.conversations.firstFlowTransaction(tx,p,o,current)});
+  value(await restarted.recover(f.actor));assert.equal(value(await restarted.intent(f.actor,id(10))).state,'queued');
+  assert.equal(value(await restarted.intent(f.actor,id(10))).cloudAiConsentGeneration,3);
+  assert.equal(value(await restarted.intent(f.actor,reserved.intent.intentId)).state,'failed');
+  assert.notEqual((await restarted.reserve(f.actor,reserved.intent.intentId,reserved.intent.revision)).kind,'ok');
+  f.g.put(base,{...f.g.rows.get(base)!.data,cloudAiConsentGeneration:4});
+  assert.equal((await restarted.reserve(f.actor,id(10),1)).kind,'denied');
+});
+
+test('cloud withdrawal permits strict push-off while mode stays on, without opening zone/quiet or re-enable changes',async()=>{
+  const f=fixture(true,undefined,true);await f.enable();
+  value(await f.store.replaceRegistration(f.actor,{expectedRevision:0,installationRef:installation,registrationKind:'fcm_token',registrationValue:'synthetic',enabled:true}));
+  f.g.put(base,{...f.g.rows.get(base)!.data,cloudAiConsent:{state:'declined',disclosureVersion:'openai_cloud_v1'},cloudAiConsentGeneration:4});
+  value(await f.store.deleteRegistration(f.actor,installation,1));
+  for(const patch of [{timeZone:'Australia/Sydney'},{quiet:{kind:'disabled' as const}},{preview:'hidden' as const}])
+    assert.equal((await f.store.replaceSettings(f.actor,1,{...settings,pushEnabled:false,...patch})).kind,'denied');
+  const disabled=value(await f.store.replaceSettings(f.actor,1,{...settings,pushEnabled:false}));
+  assert.equal(disabled.mode,'on');assert.equal(disabled.pushEnabled,false);
+  assert.equal((await f.store.replaceSettings(f.actor,2,settings)).kind,'denied');
+  assert.equal((await f.store.replaceSettings(f.actor,2,{...settings,pushEnabled:false})).kind,'denied');
 });

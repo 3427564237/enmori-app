@@ -81,12 +81,16 @@ export class FirestoreConversationStore implements RealConversationStore {
         return {kind:e.kind === "conversation_unavailable"||e.kind==="source_unavailable" ? "not_found" : e.kind==="source_changed"?"denied":e.kind};
       }
     };
-    const capture = async (conversationId: string, sourceMessageId: string, original?: FirstFlowSource) => {
+    const capture = async (conversationId: string, sourceMessageId: string, original?: FirstFlowSource, intent?: FirstFlowReservation["intent"]) => {
       check(); const started = this.utcMilliseconds(), location = this.location(owner,conversationId);
       if (!UUID.test(sourceMessageId)) refuse("unavailable");
       const account = parseReadAuthority(await this.owner(tx,principal,owner,check),owner);
       if (!account) refuse("unavailable");
       if (account.consent !== "accepted") refuse("denied");
+      if (intent?.processing === "cloud" && (intent.provider !== this.cloudProcessing.provider ||
+          intent.disclosureVersion !== this.cloudProcessing.disclosureVersion ||
+          !hasCloudAiConsent(account.cloudAiConsent,account.consent,this.cloudProcessing) ||
+          !nonnegative(intent.cloudAiConsentGeneration) || intent.cloudAiConsentGeneration !== account.cloudAiConsentGeneration)) refuse("denied");
       const inv = await this.inventory(tx,location,false,check); if (!inv) refuse("conversation_unavailable");
       const user = this.requireUser(inv,sourceMessageId), message = this.message(user), version = messageSourceVersion(user);
       if (!version || user.data.pendingOperationId !== undefined || !message.text) refuse("unavailable");
@@ -110,17 +114,17 @@ export class FirestoreConversationStore implements RealConversationStore {
           source.purposeRevocationGeneration !== original.purposeRevocationGeneration)) refuse("denied");
       check(); return {source,inv,location};
     };
-    const validate = async (reservation: FirstFlowReservation) => {
+    const validate = async (reservation: FirstFlowReservation, cloudEffect = true) => {
       const {intent,source} = reservation;
       if (intent.conversationId !== source.conversationId || intent.sourceMessageId !== source.sourceMessageId ||
           intent.topicLifecycleVersion !== source.topicLifecycleVersion || intent.requiredSources.length !== 1 ||
           intent.requiredSources[0]?.kind !== "conversation_message" || intent.requiredSources[0].id !== source.sourceMessageId ||
           intent.requiredSources[0].version !== source.sourceVersion) refuse("denied");
-      return capture(source.conversationId,source.sourceMessageId,source);
+      return capture(source.conversationId,source.sourceMessageId,source,cloudEffect?intent:undefined);
     };
     return {
       source:(id,messageId)=>wrap(async()=> (await capture(id,messageId)).source),
-      validate:reservation=>wrap(async()=>{await validate(reservation);}),
+      validate:(reservation,cloudEffect)=>wrap(async()=>{await validate(reservation,cloudEffect);}),
       append:input=>wrap(async()=>{
         const {inv,location} = await validate(input.reservation);
         if (!UUID.test(input.messageId) || !validText(input.text) || !UUID.test(input.reservation.intent.intentId) ||
@@ -134,8 +138,9 @@ export class FirestoreConversationStore implements RealConversationStore {
         tx.create(path,{role:"assistant",origin:"proactive",sequence,availability:"available",text:input.text,
           occurrenceId:input.reservation.intent.intentId,category:"explicit_follow_up",presentationMode:input.presentation.presentationMode,
           ...(input.presentation.presentationMode === "persona" ? {presentationProjectionVersion:input.presentation.presentationProjectionVersion} : {}),appendBefore:inv.cutoff});
-        tx.create(`${parentPath(location)}/message_sources/${input.messageId}`,{schemaVersion:"source_use_v2",purpose:"explicit_follow_up",
-          processing:"local",sources:[{kind:"conversation_message",id:source.sourceMessageId,version:source.sourceVersion,cardRef:randomUUID()}],
+        tx.create(`${parentPath(location)}/message_sources/${input.messageId}`,{schemaVersion:input.reservation.intent.processing==="cloud"?"source_use_v3":"source_use_v2",purpose:"explicit_follow_up",
+          processing:input.reservation.intent.processing,...(input.reservation.intent.processing==="cloud"?{provider:input.reservation.intent.provider,
+            disclosureVersion:input.reservation.intent.disclosureVersion,cloudAiConsentGeneration:input.reservation.intent.cloudAiConsentGeneration!}:{}),sources:[{kind:"conversation_message",id:source.sourceMessageId,version:source.sourceVersion,cardRef:randomUUID()}],
           requiredCategories:["conversation_history"],purposeRevocationGeneration:source.purposeRevocationGeneration});
         tx.set(parentPath(location),{...inv.parent,nextSequence:sequence+1,latestMessageId:input.messageId});
         return {sequence};

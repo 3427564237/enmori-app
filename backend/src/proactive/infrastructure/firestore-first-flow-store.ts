@@ -1,3 +1,4 @@
+import { OPENAI_CLOUD_PROCESSING, hasCloudAiConsent, type CloudAiProcessing } from '../../account/domain/cloud-ai-consent.js';
 import { createHash, randomUUID } from "node:crypto";
 import type { FirestoreGateway, FirestoreTransactionGateway as Tx, StoredDocument as Row } from "../../shared/infrastructure/firebase/firestore-gateway.js";
 import { createAuthBindingDocumentId, parseAuthBinding, parseAccountProjection } from "../../shared/infrastructure/firebase/firestore-records.js";
@@ -10,6 +11,7 @@ import type { ProactiveActor, FirstFlowFailure, FirstFlowResult, FirstFlowSettin
 
 export interface FirstFlowStoreOptions {
   readonly ownerAccountId: string;
+  readonly cloudProcessing?: CloudAiProcessing;
   readonly conversationTransaction: (tx: Tx, principal: AuthPrincipal, ownerAccountId: string, current: () => boolean) => FirstFlowConversationTransaction;
   readonly utcMilliseconds?: () => number;
   /** Only the named installation and absolute approved test-end +15min lease.
@@ -78,10 +80,10 @@ function parseIntent(row:Row|undefined):FirstFlowIntent|undefined{
   if(!row)return undefined;
   if(!exact(row,["intentId","revision","state","conversationId","sourceMessageId","category","dueAt","expiresAt","timeZone","processing","settingsRevision",
     "grantGeneration","authorizationScope","topicLifecycleVersion","requiredSources","requiredCategories","createdAt","dispatchState"],
-    ["messageId","messageSequence","publishedAt","attemptedAt","providerAcceptedAt","registrationRevision"])||
+    ["messageId","messageSequence","publishedAt","attemptedAt","providerAcceptedAt","registrationRevision",...(row.processing==="cloud"?["provider","disclosureVersion","cloudAiConsentGeneration"]:[])])||
     ![row.intentId,row.conversationId,row.sourceMessageId].every(v=>typeof v==="string"&&UUID.test(v))||scopeGeneration(row.authorizationScope)===undefined||
     !uint(row.revision)||row.revision<1||!["queued","reserved","prepared","published","cancelled","failed","expired"].includes(String(row.state))||
-    row.category!=="explicit_follow_up"||row.processing!=="local"||!iso(row.dueAt)||!iso(row.expiresAt)||row.dueAt>=row.expiresAt||!iso(row.createdAt)||!timeZone(row.timeZone)||
+    row.category!=="explicit_follow_up"||!(row.processing==="local"||row.processing==="cloud"&&row.provider==="openai"&&row.disclosureVersion==="openai_cloud_v1"&&uint(row.cloudAiConsentGeneration))||!iso(row.dueAt)||!iso(row.expiresAt)||row.dueAt>=row.expiresAt||!iso(row.createdAt)||!timeZone(row.timeZone)||
     !uint(row.settingsRevision)||!uint(row.grantGeneration)||!uint(row.topicLifecycleVersion)||row.topicLifecycleVersion<1||
     !Array.isArray(row.requiredSources)||row.requiredSources.length!==1||!object(row.requiredSources[0])||
     !exact(row.requiredSources[0],["kind","id","version"])||row.requiredSources[0].kind!=="conversation_message"||row.requiredSources[0].id!==row.sourceMessageId||
@@ -114,6 +116,7 @@ export class FirestoreFirstFlowStore implements FirstFlowStore {
   private lastNow=Number.NEGATIVE_INFINITY;
   constructor(private readonly gateway:FirestoreGateway,environment:Readonly<Record<string,string|undefined>>,private readonly options:FirstFlowStoreOptions){
     requireFeatureEnvironment(environment);
+    if(options.cloudProcessing && (options.cloudProcessing.provider!=="openai" || options.cloudProcessing.disclosureVersion!=="openai_cloud_v1")) throw Error("Invalid proactive cloud processor");
     if(!UUID.test(options.ownerAccountId))throw new Error("Fixed first-flow owner required");
     if(options.installationRef!==undefined&&!UUID.test(options.installationRef))throw new Error("Invalid fixed installation");
     if(options.registrationLeaseExpiresAt!==undefined&&!iso(options.registrationLeaseExpiresAt))throw new Error("Invalid absolute registration lease");
@@ -131,7 +134,7 @@ export class FirestoreFirstFlowStore implements FirstFlowStore {
     try{auth=await actor.verifyCurrentAuth();}catch{refuse("unavailable");}current(actor);
     if(auth.kind!=="verified")refuse(auth.kind==="dependency_unavailable"?"unavailable":"denied");if(auth.principal.firebaseUid!==actor.principal.firebaseUid)refuse("denied");
   }
-  private async run<T>(actor:ProactiveActor,work:(tx:Tx,conversation:FirstFlowConversationTransaction)=>Promise<T>,requirePurpose=true):Promise<FirstFlowResult<T>>{
+  private async run<T>(actor:ProactiveActor,work:(tx:Tx,conversation:FirstFlowConversationTransaction,account:Row)=>Promise<T>,requirePurpose=true):Promise<FirstFlowResult<T>>{
     try{
       await this.fresh(actor);current(actor);
       const value=await this.gateway.runTransaction(async tx=>{
@@ -140,11 +143,16 @@ export class FirestoreFirstFlowStore implements FirstFlowStore {
         const owner=parseAuthBinding(binding);if(!owner)refuse("unavailable");if(owner!==this.options.ownerAccountId)refuse("denied");
         const account=await this.read(actor,()=>tx.get(`accounts/${owner}`));
         if(!account||!parseAccountProjection(account)||!uint(account.purposeRevocationGeneration))refuse("unavailable");if(requirePurpose&&account.optionalProcessingConsent!=="accepted")refuse("denied");
-        const result=await work(tx,this.options.conversationTransaction(tx,actor.principal,owner,()=>actor.current()));current(actor);
+        const result=await work(tx,this.options.conversationTransaction(tx,actor.principal,owner,()=>actor.current()),account);current(actor);
         if(this.now()-started>5000)refuse("unavailable");return result;
       },{maxAttempts:1});
       current(actor);return {kind:"ok",value};
     }catch(e){return {kind:e instanceof Refusal?e.kind:"unknown"};}
+  }
+  private cloudGrant(account:Row):number {
+    if(!this.options.cloudProcessing||!hasCloudAiConsent(account.cloudAiConsent,account.optionalProcessingConsent,OPENAI_CLOUD_PROCESSING))refuse("denied");
+    if(!uint(account.cloudAiConsentGeneration))refuse("unavailable");
+    return account.cloudAiConsentGeneration;
   }
   private state(tx:Tx,a:ProactiveActor):Promise<State>{return this.read(a,async()=>parseState(await tx.get(this.statePath())));}
   private intentRow(tx:Tx,a:ProactiveActor,id:string):Promise<FirstFlowIntent>{return this.read(a,async()=>{const row=parseIntent(await tx.get(this.intentPath(id)));if(!row)refuse("not_found");if(row.intentId!==id)refuse("unavailable");return row;});}
@@ -169,20 +177,23 @@ export class FirestoreFirstFlowStore implements FirstFlowStore {
       for(const time of s.rollingAttemptTimes){const delta=now-Date.parse(time);if(delta<0)refuse("unavailable");if(delta<24*3600000||delta<480*60000)refuse("frequency");}
     }
   }
-  private async validateSource(c:FirstFlowConversationTransaction,i:FirstFlowIntent,original?:FirstFlowSource):Promise<FirstFlowSource>{
+  private async validateSource(c:FirstFlowConversationTransaction,i:FirstFlowIntent,original?:FirstFlowSource,cloudEffect=true):Promise<FirstFlowSource>{
     const source=original??ok(await c.source(i.conversationId,i.sourceMessageId));
     if(source.purposeRevocationGeneration!==scopeGeneration(i.authorizationScope))refuse("denied");
-    ok(await c.validate({intent:i,source}));return source;
+    ok(await c.validate({intent:i,source},cloudEffect));return source;
   }
   source(a:ProactiveActor,conversationId:string,sourceMessageId:string):Promise<FirstFlowResult<FirstFlowSource>>{return this.run(a,async(_tx,c)=>ok(await c.source(conversationId,sourceMessageId)));}
   settings(a:ProactiveActor):Promise<FirstFlowResult<FirstFlowSettings>>{return this.run(a,async tx=>publicSettings(await this.state(tx,a)),false);}
   replaceSettings(a:ProactiveActor,expectedRevision:number,input:FirstFlowSettingsInput):Promise<FirstFlowResult<FirstFlowSettings>>{
-    return this.run(a,async tx=>{
+    return this.run(a,async(tx,_c,account)=>{
       const normalized=settingsInput(input as unknown as Row);if(!uint(expectedRevision)||!normalized)refuse("invalid");
       if(normalized.pausedUntil!==undefined&&Date.parse(normalized.pausedUntil)<=this.now())refuse("invalid");
       const old=await this.state(tx,a);if(old.revision!==expectedRevision)refuse("revision_conflict");
-      const intents:FirstFlowIntent[]=[];for(const id of old.activeIntentIds)intents.push(await this.intentRow(tx,a,id));
       const eligibility=(s:FirstFlowSettingsInput)=>JSON.stringify([s.mode,s.pausedUntil??null,s.categories,s.timeZone,s.quiet,s.maximumInRolling24h,s.cooldownMinutes,s.pushEnabled]);
+      const onlyDisablePush=old.pushEnabled&&!normalized.pushEnabled&&old.preview===normalized.preview&&
+        eligibility({...old,pushEnabled:false})===eligibility(normalized);
+      if(this.options.cloudProcessing&&((normalized.mode==="on"&&!onlyDisablePush)||(normalized.pushEnabled&&!old.pushEnabled)))this.cloudGrant(account);
+      const intents:FirstFlowIntent[]=[];for(const id of old.activeIntentIds)intents.push(await this.intentRow(tx,a,id));
       const changed=eligibility(old)!==eligibility(normalized);
       let state:State={...normalized,revision:bump(old.revision),grantGeneration:changed?bump(old.grantGeneration):old.grantGeneration,activeIntentIds:old.activeIntentIds,rollingAttemptTimes:old.rollingAttemptTimes,
         ...(old.inFlightOccurrenceId?{inFlightOccurrenceId:old.inFlightOccurrenceId}:{})};
@@ -198,26 +209,28 @@ export class FirestoreFirstFlowStore implements FirstFlowStore {
     },input.mode!=="off");
   }
   createIntent(a:ProactiveActor,input:FirstFlowIntentCommand):Promise<FirstFlowResult<FirstFlowIntent>>{
-    return this.run(a,async(tx,c)=>{
-      if(!exact(input as unknown as Row,["intentId","conversationId","sourceMessageId","category","dueAt","timeZone","processing","expectedSettingsRevision"])||
-        ![input.intentId,input.conversationId,input.sourceMessageId].every(id=>UUID.test(id))||input.category!=="explicit_follow_up"||input.processing!=="local"||
+    return this.run(a,async(tx,c,account)=>{
+      if(!exact(input as unknown as Row,["intentId","conversationId","sourceMessageId","category","dueAt","timeZone","processing","expectedSettingsRevision",...(input.processing==="cloud"?["provider","disclosureVersion"]:[])])||
+        ![input.intentId,input.conversationId,input.sourceMessageId].every(id=>UUID.test(id))||input.category!=="explicit_follow_up"||!(input.processing==="local"||input.processing==="cloud"&&input.provider==="openai"&&input.disclosureVersion==="openai_cloud_v1")||
         !iso(input.dueAt)||!timeZone(input.timeZone)||!uint(input.expectedSettingsRevision))refuse("invalid");
+      if((input.processing==="cloud")!==!!this.options.cloudProcessing)refuse("denied");
+      const generation=input.processing==="cloud"?this.cloudGrant(account):undefined;
       const previous=parseIntent(await this.read(a,()=>tx.get(this.intentPath(input.intentId))));
       if(previous){if(previous.conversationId!==input.conversationId||previous.sourceMessageId!==input.sourceMessageId||previous.dueAt!==input.dueAt||previous.timeZone!==input.timeZone||
-        previous.settingsRevision!==input.expectedSettingsRevision)refuse("conflict");await this.validateSource(c,previous);return previous;}
+        previous.settingsRevision!==input.expectedSettingsRevision||previous.processing!==input.processing||previous.processing==="cloud"&&(input.processing!=="cloud"||previous.provider!==input.provider||previous.disclosureVersion!==input.disclosureVersion))refuse("conflict");await this.validateSource(c,previous);return previous;}
       const state=await this.state(tx,a);if(state.revision!==input.expectedSettingsRevision)refuse("revision_conflict");this.enabled(state);
       if(state.timeZone!==input.timeZone)refuse("denied");if(state.activeIntentIds.length>=3)refuse("frequency");
       const source=ok(await c.source(input.conversationId,input.sourceMessageId)),now=this.now(),due=Date.parse(input.dueAt),cutoff=source.topicCutoff.seconds*1000+Math.floor(source.topicCutoff.nanoseconds/1e6);
       if(!(now<due&&due<cutoff))refuse("invalid");const expires=Math.min(cutoff,due+2*3600000);if(expires<=due)refuse("invalid");
       const intent:FirstFlowIntent={intentId:input.intentId,revision:1,state:"queued",conversationId:input.conversationId,sourceMessageId:input.sourceMessageId,
-        category:"explicit_follow_up",dueAt:input.dueAt,expiresAt:new Date(expires).toISOString(),timeZone:input.timeZone,processing:"local",settingsRevision:state.revision,
+        category:"explicit_follow_up",dueAt:input.dueAt,expiresAt:new Date(expires).toISOString(),timeZone:input.timeZone,...(input.processing==="cloud"?{processing:"cloud" as const,...OPENAI_CLOUD_PROCESSING,cloudAiConsentGeneration:generation!}:{processing:"local" as const}),settingsRevision:state.revision,
         grantGeneration:state.grantGeneration,authorizationScope:`v1.${source.purposeRevocationGeneration}.${randomUUID()}`,topicLifecycleVersion:source.topicLifecycleVersion,
         requiredSources:[{kind:"conversation_message",id:source.sourceMessageId,version:source.sourceVersion}],requiredCategories:["conversation_history"],createdAt:new Date(now).toISOString(),dispatchState:"not_started"};
       current(a);tx.create(this.intentPath(intent.intentId),intent as unknown as Row);this.stageState(tx,{...state,activeIntentIds:[...state.activeIntentIds,intent.intentId]});return intent;
     });
   }
-  intent(a:ProactiveActor,id:string):Promise<FirstFlowResult<FirstFlowIntent>>{return this.run(a,async(tx,c)=>{const i=await this.intentRow(tx,a,id);await this.validateSource(c,i);return i;});}
-  activeIntents(a:ProactiveActor):Promise<FirstFlowResult<readonly FirstFlowIntent[]>>{return this.run(a,async(tx,c)=>{const s=await this.state(tx,a),rows:FirstFlowIntent[]=[];for(const id of s.activeIntentIds){const i=await this.intentRow(tx,a,id);await this.validateSource(c,i);rows.push(i);}return rows;});}
+  intent(a:ProactiveActor,id:string):Promise<FirstFlowResult<FirstFlowIntent>>{return this.run(a,async(tx,c)=>{const i=await this.intentRow(tx,a,id);await this.validateSource(c,i,undefined,false);return i;});}
+  activeIntents(a:ProactiveActor):Promise<FirstFlowResult<readonly FirstFlowIntent[]>>{return this.run(a,async(tx,c)=>{const s=await this.state(tx,a),rows:FirstFlowIntent[]=[];for(const id of s.activeIntentIds){const i=await this.intentRow(tx,a,id);await this.validateSource(c,i,undefined,false);rows.push(i);}return rows;});}
   cancelIntent(a:ProactiveActor,id:string,expectedRevision:number):Promise<FirstFlowResult<FirstFlowIntent>>{
     return this.run(a,async tx=>{
       const s=await this.state(tx,a),i=await this.intentRow(tx,a,id);if(!uint(expectedRevision))refuse("invalid");if(i.revision!==expectedRevision)refuse("revision_conflict");
@@ -249,7 +262,8 @@ export class FirestoreFirstFlowStore implements FirstFlowStore {
     return this.registrationView(row);
   },false);}
   replaceRegistration(a:ProactiveActor,input:FirstFlowRegistrationCommand):Promise<FirstFlowResult<FirstFlowRegistration>>{
-    return this.run(a,async tx=>{
+    return this.run(a,async(tx,_c,account)=>{
+      if(this.options.cloudProcessing)this.cloudGrant(account);
       if(!exact(input as unknown as Row,["expectedRevision","installationRef","registrationKind","registrationValue","enabled"])||!uint(input.expectedRevision)||input.enabled!==true||
         input.registrationKind!=="fcm_token"||typeof input.registrationValue!=="string"||!input.registrationValue.trim()||!input.registrationValue.isWellFormed()||Buffer.byteLength(input.registrationValue,"utf8")>4096)refuse("invalid");
       const now=this.now(),lease=this.options.registrationLeaseDurationMs!==undefined
@@ -295,6 +309,12 @@ export class FirestoreFirstFlowStore implements FirstFlowStore {
     return this.run(a,async(tx,c)=>{const s=await this.state(tx,a),i=await this.intentRow(tx,a,id);if(!uint(expectedRevision))refuse("invalid");if(i.revision!==expectedRevision)refuse("revision_conflict");
       if(i.state!=="queued")refuse("conflict");this.ensureActive(s,i);this.timing(s,i,true);const source=await this.validateSource(c,i);
       this.timing(s,i,true);const next={...i,revision:bump(i.revision),state:"reserved" as const};current(a);this.stageIntent(tx,next);this.stageState(tx,{...s,inFlightOccurrenceId:id});return {intent:next,source};});
+  }
+  validateReservation(a:ProactiveActor,r:FirstFlowReservation):Promise<FirstFlowResult<void>>{
+    return this.run(a,async(tx,c)=>{const s=await this.state(tx,a),i=await this.intentRow(tx,a,r.intent.intentId);
+      if(i.state!=="reserved"||i.revision!==r.intent.revision||i.authorizationScope!==r.intent.authorizationScope||s.inFlightOccurrenceId!==i.intentId)refuse("revision_conflict");
+      this.ensureActive(s,i);this.timing(s,i,true);await this.validateSource(c,i,r.source);
+    });
   }
   failGeneration(a:ProactiveActor,r:FirstFlowReservation):Promise<FirstFlowResult<FirstFlowIntent>>{
     return this.run(a,async tx=>{const s=await this.state(tx,a),i=await this.intentRow(tx,a,r.intent.intentId);if(i.authorizationScope!==r.intent.authorizationScope||i.revision!==r.intent.revision||i.state!=="reserved")refuse("revision_conflict");

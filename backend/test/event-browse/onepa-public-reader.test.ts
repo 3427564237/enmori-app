@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { setImmediate } from "node:timers/promises";
 import type { Browser } from "playwright";
 import { OnePaPublicReader } from "../../src/event-browse/infrastructure/onepa-public-reader.js";
 const sitemap = "https://www.onepa.gov.sg/sitemap.xml";
@@ -46,6 +47,7 @@ function fake(
   } as unknown as Browser;
   return {
     state,
+    browser,
     reader: new OnePaPublicReader(
       async () => {
         state.launches++;
@@ -134,4 +136,125 @@ test("already complete public payloads do not launch Chromium", async () => {
     /<loc>/,
   );
   assert.equal(launches, 0);
+});
+
+test("cancellation during launch rejects promptly and closes the late browser without opening a context", { timeout: 1000 }, async () => {
+  let release!: (browser: Browser) => void;
+  let started!: () => void;
+  const entered = new Promise<void>(resolve => { started = resolve; });
+  const launched = new Promise<Browser>(resolve => { release = resolve; });
+  let closed = 0, contexts = 0;
+  const browser = {
+    newContext: async () => { contexts++; throw Error("must not initialize after cancellation"); },
+    close: async () => { closed++; },
+  } as unknown as Browser;
+  const reader = new OnePaPublicReader(() => { started(); return launched; }, async () => "");
+  const caller = new AbortController();
+  const read = reader.read(sitemap, caller.signal);
+  await entered;
+  caller.abort();
+  try {
+    await assert.rejects(read, /Source unavailable/);
+    await assert.rejects(reader.read(sitemap, new AbortController().signal), /Source unavailable/);
+    assert.equal(closed, 0, "cleanup cannot claim the still-pending launch has closed");
+  } finally { release(browser); }
+  await setImmediate();
+  assert.equal(contexts, 0);
+  assert.equal(closed, 1);
+});
+
+test("cancellation during context initialization closes the sole browser and fences admission until cleanup", { timeout: 1000 }, async () => {
+  let entered!: () => void, rejectContext!: (error: Error) => void, finishClose!: () => void;
+  const contextStarted = new Promise<void>(resolve => { entered = resolve; });
+  const context = new Promise<never>((_, reject) => { rejectContext = reject; });
+  const closing = new Promise<void>(resolve => { finishClose = resolve; });
+  let launches = 0, closes = 0;
+  const browser = {
+    newContext: () => { entered(); return context; },
+    close: async () => { closes++; rejectContext(Error("Browser closed")); await closing; },
+  } as unknown as Browser;
+  const reader = new OnePaPublicReader(async () => { launches++; return browser; }, async () => "");
+  const caller = new AbortController(), read = reader.read(sitemap, caller.signal);
+  await contextStarted;
+  caller.abort();
+  try {
+    await assert.rejects(read, /Source unavailable/);
+    await setImmediate();
+    assert.equal(closes, 1);
+    await assert.rejects(reader.read(sitemap, new AbortController().signal), /Source unavailable/);
+    assert.equal(launches, 1);
+  } finally { finishClose(); }
+  await setImmediate();
+  await assert.rejects(reader.read(sitemap, new AbortController().signal));
+  assert.equal(launches, 2, "a settled failed reader must not poison independent later reads");
+});
+
+test("one cancelled initialization cannot close a shared browser while another reader is live", { timeout: 1000 }, async () => {
+  let finishHealthy!: () => void, secondStarted!: () => void, rejectSecond!: (error: Error) => void;
+  const healthyReady = new Promise<void>(resolve => { finishHealthy = resolve; });
+  const secondEntered = new Promise<void>(resolve => { secondStarted = resolve; });
+  const second = new Promise<never>((_, reject) => { rejectSecond = reject; });
+  let contexts = 0, closes = 0;
+  const browser = {
+    newContext: async () => {
+      if (++contexts === 2) { secondStarted(); return second; }
+      return {
+        route: async () => {}, close: async () => {},
+        newPage: async () => ({
+          goto: async () => {}, url: () => sitemap,
+          waitForFunction: async () => {
+            await healthyReady;
+            return { jsonValue: async () => "<loc>https://www.onepa.gov.sg/sitemap.xml</loc>", dispose: async () => {} };
+          },
+        }),
+      };
+    },
+    close: async () => { closes++; rejectSecond(Error("Browser closed")); },
+  } as unknown as Browser;
+  const reader = new OnePaPublicReader(async () => browser, async () => "");
+  const healthy = reader.read(sitemap, new AbortController().signal);
+  const caller = new AbortController(), cancelled = reader.read(sitemap, caller.signal);
+  await secondEntered;
+  caller.abort();
+  try {
+    await assert.rejects(cancelled, /Source unavailable/);
+    assert.equal(closes, 0);
+  } finally { finishHealthy(); }
+  assert.match(await healthy, /<loc>/);
+  await setImmediate();
+  assert.equal(closes, 1);
+});
+
+test("the last cancelled reader cannot start a deferred browser launch", async () => {
+  const caller = new AbortController();
+  let launches = 0;
+  const reader = new OnePaPublicReader(async () => {
+    launches++;
+    throw Error("must not launch");
+  }, async () => {
+    queueMicrotask(() => queueMicrotask(() => caller.abort()));
+    return "";
+  });
+  await assert.rejects(reader.read(sitemap, caller.signal), /Source unavailable/);
+  await setImmediate();
+  assert.equal(launches, 0);
+});
+
+test("a deferred shared launch still serves the live reader after its first caller cancels", async () => {
+  const caller = new AbortController(), fixture = fake();
+  let launches = 0, staticReads = 0;
+  const reader = new OnePaPublicReader(async () => {
+    launches++;
+    return fixture.browser;
+  }, async () => {
+    if (staticReads++ === 0) queueMicrotask(() => queueMicrotask(() => caller.abort()));
+    return "";
+  });
+  const cancelled = reader.read(sitemap, caller.signal);
+  const healthy = reader.read(sitemap, new AbortController().signal);
+  await assert.rejects(cancelled, /Source unavailable/);
+  assert.match(await healthy, /<loc>/);
+  assert.equal(launches, 1);
+  assert.equal(fixture.state.contextsClosed, 1);
+  assert.equal(fixture.state.browsersClosed, 1);
 });

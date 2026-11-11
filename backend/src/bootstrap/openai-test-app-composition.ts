@@ -1,3 +1,6 @@
+import { CloudFirstFlowExecution } from '../proactive/application/cloud-first-flow-execution.js';
+import { FirestoreCloudConsentGateway } from '../account/infrastructure/firestore-cloud-consent-gateway.js';
+import type { RegisteredFirstFlowConfiguration } from './first-flow-composition.js';
 import { CloudPreviewPersona } from '../personas/application/cloud-preview-persona.js';
 import { FirestorePersonaPreviewAuthority } from '../personas/infrastructure/firestore-persona-preview-authority.js';
 import { randomUUID } from 'node:crypto';
@@ -24,6 +27,7 @@ export interface OpenAiTestAppConfiguration {
   readonly rateScope: string;
   readonly ratePolicy: CloudQuotaPolicy;
   readonly apiKey: string;
+  readonly firstFlow?: RegisteredFirstFlowConfiguration;
 }
 
 const configuration = Object.freeze({ model: 'gpt-6.1-sol', promptProfile: 'goal-grounding-v1', reasoningEffort: 'low',
@@ -40,6 +44,7 @@ export function createOpenAiTestAppComposition(config: OpenAiTestAppConfiguratio
   }, avatar);
   let owned = false, admitting = true;
   let personaPreview: CloudPreviewPersona | undefined;
+  let proactive: {execution:CloudFirstFlowExecution;current:()=>boolean} | undefined;
   let openAi: ReturnType<typeof createOpenAiConversationRuntime> | undefined;
   const ownsHost = () => owned;
   const testUid = config?.firebaseUid;
@@ -66,12 +71,15 @@ export function createOpenAiTestAppComposition(config: OpenAiTestAppConfiguratio
               cloudConsent: services.dispatchConsent, randomAttemptId: randomUUID, http: fetch });
             if ((await budget.recover()).kind === 'confirmed') await openAi.owner.recover();
             personaPreview = new CloudPreviewPersona(new FirestorePersonaPreviewAuthority(gateway), services.authority, openAi.runtime, () => clock.now());
+            if(config.firstFlow) proactive={execution:new CloudFirstFlowExecution(
+              new FirestorePersonaPreviewAuthority(new FirestoreCloudConsentGateway(gateway,epoch,ownsHost)),services.authority,openAi.runtime),
+              current:()=>owned&&admitting};
             return openAi.runtime;
           },
         };
       },
     } : undefined;
-  return { selection, identity: testIdentity, get personaPreview() { return personaPreview; }, get preferences() { return preferences; },
+  return { selection, identity: testIdentity, get proactive(){return proactive;}, get personaPreview() { return personaPreview; }, get preferences() { return preferences; },
     closeAdmission() { admitting = false; }, release() { owned = false; }, state: () => openAi?.owner.state,
     rateLimitPending: () => openAi?.rateLimitPending() === true };
 }

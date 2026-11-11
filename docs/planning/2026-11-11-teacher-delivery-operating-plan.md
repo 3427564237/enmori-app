@@ -1,0 +1,45 @@
+# Android teacher delivery and two-month operation
+
+Status: execution plan and current evidence; not a Release/UAT or two-month availability claim. Authority: [LI's delivery decision and platform/funding clarification](../decisions/2026-11-11-li-two-month-teacher-delivery.md). The [minimal OpenAI scheduled follow-up contract is approved](../decisions/2026-11-11-li-openai-proactive-integration.md).
+
+## Deliverable and order
+
+Finish the compatible Android/backend candidate first, preserving the completed v62 repairs and v63 Admin increment. Verify onePA, explicit scheduled OpenAI follow-up, notification lifecycle, Persona preview, discovery-profile navigation, Friend Activity and Admin access at their appropriate evidence layers. Do not classify an empty friend feed or an unavailable source as a positive demonstration.
+
+The planned Monday handoff is 16 November 2026. Its minimum operating window ends 16 January 2027; move that end if the actual handoff moves. Record the final source, signed APK hash/certificate, deployed backend package and rollback package together. Only LI's explicit final freeze closes Android development. After that freeze, assess iOS reuse, plugin/native gaps, available Mac/Xcode/signing access, distribution to the actual teachers, effort and cost. **No iOS development or build starts in this round.** Teacher device type remains unknown; Android-only delivery cannot establish iPhone compatibility.
+
+If LI confirms teacher access, prepare a distinct teacher Admin and ordinary account with the existing least-privilege application roles. Keep passwords outside Git and in the private delivery packet. Do not reuse the operator identity, grant Azure/Firebase administration, or silently accept optional processing/OpenAI/notification permissions. Existing demo accounts remain available for the present rehearsal; prospective teacher accounts have not been created.
+
+## Funding evidence — read only, 11 November
+
+The current Azure subscription was matched to its billing profile through the billing subscription identifier; identifiers and authentication material are omitted here. ARM reports Azure for Students, state Enabled and **spendingLimit On**. Its existing Japan East Linux Basic B1 plan has one worker. The app has Always On enabled, no Health Check path, and Auto Heal disabled. No settings, service plan or payment details were changed.
+
+The matched Consumption credit summary reports USD100.00 current balance, USD-5.99 pending eligible charges and **USD94.01 estimated balance**. This is a point-in-time account observation; it does not establish the credit expiry date or guarantee that another resource will not consume it.
+
+The [Azure Retail Prices API](https://learn.microsoft.com/en-us/rest/api/cost-management/retail-prices/azure-retail-prices) returned the Japan East `Azure App Service Basic Plan - Linux` / `B1` Consumption meter at **USD0.019 per hour** on 11 November. At that rate, 61 days (16 November to 16 January) cost USD27.816; 66 days from 11 November cost USD30.096. These are plan-only estimates, excluding other Azure resources, networking, taxes or future price changes. Keep the spending limit and existing plan unless a concrete change is separately approved. Verify the credit expiry before final handoff; [Microsoft's student-credit guidance](https://learn.microsoft.com/en-us/azure/cost-management-billing/manage/azurestudents-subscription-disabled) identifies both balance exhaustion and expiry as service-stop conditions.
+
+LI plans to manually purchase **S$10** of OpenAI credit after the present credit expires. Verify the actual checkout currency, credited USD amount, any prior negative balance and new expiry then. No automatic recharge or card operation is authorized. The [OpenAI prepaid guide](https://help.openai.com/en/articles/8264644-setting-up-and-managing-prepaid-api-billing) states that purchased credits expire after one year and that API cutoff can lag balance exhaustion; retain the application's own conservative monetary enforcement.
+
+The live application ledger was read at 2026-11-11T10:43:52Z: original cap USD3.40, confirmed spend USD0.1012267, outstanding worst-case holds USD0.004096, 105 attempts and 103 settlements. Current balance/pricing evidence validity ends **12 November 00:00 SGT**, and the retained credit grant expires **18 November 00:00 SGT**. These are separate from LI's reported provider expiry of 19 November. Do not extend either silently. The original grant's five-percent gifted-credit formula does not define a paid successor grant. A successor needs its explicit contract/operator installation after actual payment verification, preserving all old attempts and unknown holds.
+
+The selected runtime's ceilings remain 8,192 input and 2,048 output tokens. Using the existing verified grant's conservative maximum input rate USD2.50/M and output rate USD10/M, one full-ceiling reservation is USD0.04096. Thus USD1 covers 24 such reservations, ignoring other consumers; actual smaller complete requests can cost less. This is a conservative capacity calculation from the current grant, not a promised message count for an unpurchased S$10 balance. All authenticated accounts currently share the same cap, including Conversation, preview and proactive work; there is no reserved teacher allowance.
+
+## Long-running gaps at the initial audit
+
+The following table preserves the initial audit. Later evidence supersedes its implementation/deployment status only: [v64 deployment](../evidence/2026-11-11-onepa-proactive-v64-deployment.md) now verifies live onePA and proactive management routes, the reviewed Backend integration and retained Admin access. The signed v64 APK exists, but the phone's system rejected its first installation attempt and readback remained v63. Paid due execution, physical notifications, restart recovery, funding continuation and two-month acceptance remain open. No iOS work has started.
+
+| Boundary | Current evidence | Required outcome |
+| --- | --- | --- |
+| OpenAI after a platform restart | One-use expected-fence startup claim; no automatic takeover | A concrete reviewed ownership/recovery design that cannot leave two consent writers or replay paid work; then isolated and real restart evidence |
+| Monetary validity | Short-lived verified gift grant | Explicit same-cycle verification until expiry, followed by an approved paid-credit grant and maintenance procedure; no reset or auto-refill |
+| onePA | Existing reader succeeds locally against the official source; Azure acquisition remains unresolved | Verify launch, navigation, source response and projection on Azure, including cancellation and owned-resource cleanup |
+| Proactive | Approved cloud integration is being implemented | Exact consent-generation checks through publish/dispatch; queued restart and unknown no-replay checks; actual authorized notification evidence separately |
+| Device registration | Existing explicit registration lasts at most 30 days | Show expiry and the existing explicit renewal path; one registration does not establish two months of push delivery |
+| Australia/Singapore | UTC due instants and confirmed IANA zones in existing contract | Test both country timezone examples, DST transition/zone change and quiet hours; physical network/device observations remain separate |
+| Admin | v63 source/build evidence exists, not yet live | Coordinated updated APK/backend before Event category assignment; runtime/audit screens and restricted role checks |
+| Recovery and retained data | Existing rollback package and cloud data remain | Verify a recovery procedure without reviving deleted/expired data or replacing financial/tombstone state; no new unrestricted data export/retention |
+| Handoff | Teacher devices and accounts not finalized | Supported-device instructions, version identifiers, private credentials when requested and named maintenance responsibility |
+
+Azure [routine maintenance guidance](https://learn.microsoft.com/en-us/azure/app-service/routine-maintenance-downtime) requires applications to tolerate restarts. [Health Check guidance](https://learn.microsoft.com/en-us/azure/app-service/monitor-instances-health-check) distinguishes single-instance monitoring/replacement from multi-instance rerouting. Do not equate Always On, an ARM Running state, or a health-page response with tested AI/scheduler availability. Adding a health endpoint or changing live platform settings is not selected by this plan.
+
+Run source and emulator checks first, then a coordinated candidate build and controlled deployment. Paid synthetic calls, actual FCM delivery, retained-data phone use and cross-region teacher checks need their own recorded evidence and applicable authorization. Keep current operational gaps visible instead of labelling this plan a completed two-month service.

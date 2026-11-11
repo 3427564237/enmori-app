@@ -84,23 +84,23 @@ test('clearing the source while joining rejects the old waiter without a new tra
   source.clear();pending.resolve([item]);await oldBrowse;await joined;assert.equal(batches,0);
 });
 
-test('multi-provider snapshot allows the ninety-second provider outcome before ranking',async t=>{
+test('multi-provider snapshot allows the 180-second provider outcome before ranking',async t=>{
   t.mock.timers.enable({apis:['setTimeout']});
   let calls=0,settled=false;
   const source=new ControlledSourceProjection({
     status:()=>[{provider:'ticketmaster',available:true},{provider:'onepa',available:false}],
     firstBatch:async()=>[item],detail:async()=>undefined,
-    batch:async(_at,page,abort)=>{calls++;assert.equal(page,0);await wait(90000,abort);return {items:[item]};},
+    batch:async(_at,page,abort)=>{calls++;assert.equal(page,0);await wait(180000,abort);return {items:[item]};},
   });
   const read=source.recommendationSnapshot(at,signal());
   void read.then(()=>{settled=true;},()=>{settled=true;});
-  t.mock.timers.tick(45000);await flush();assert.equal(settled,false);
-  t.mock.timers.tick(45000);await flush();
+  t.mock.timers.tick(90000);await flush();assert.equal(settled,false);
+  t.mock.timers.tick(90000);await flush();
   const result=await read;
   assert.equal(result.current(),true);assert.deepEqual(result.items,[item]);assert.equal(calls,1);
 });
 
-test('multi-provider snapshot still fails closed at its 110-second total deadline',async t=>{
+test('multi-provider snapshot still fails closed at its 210-second total deadline',async t=>{
   t.mock.timers.enable({apis:['setTimeout']});
   const pending=deferred<{items:readonly BrowseOccurrence[]}>();let settled=false,calls=0;
   const source=new ControlledSourceProjection({
@@ -110,7 +110,7 @@ test('multi-provider snapshot still fails closed at its 110-second total deadlin
   });
   const read=source.recommendationSnapshot(at,signal());
   const rejected=assert.rejects(read);void rejected.then(()=>{settled=true;});
-  t.mock.timers.tick(109999);await flush();assert.equal(settled,false);
+  t.mock.timers.tick(209999);await flush();assert.equal(settled,false);
   t.mock.timers.tick(1);await flush();await rejected;
   pending.resolve({items:[item]});await flush();
   assert.equal(source.ready(at),false);assert.equal(calls,1);

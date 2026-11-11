@@ -34,7 +34,11 @@ function openAiTestAppConfiguration(env) {
       typeof apiKey !== 'string' || !/^sk-[A-Za-z0-9_-]{20,508}$/.test(apiKey)) return null;
   let input;
   try { input = JSON.parse(raw); } catch { return null; }
-  if (!exactRecord(input, ['claim', 'firebaseUid', 'grant', 'rateScope', 'ratePolicy'])) return null;
+  if (!exactRecord(input, ['claim', 'firebaseUid', 'grant', 'rateScope', 'ratePolicy', ...(Object.hasOwn(input ?? {}, 'firstFlow') ? ['firstFlow'] : [])])) return null;
+  const firstFlow=input.firstFlow;
+  if(firstFlow!==undefined && (!exactRecord(firstFlow,['audience','worker','push']) || firstFlow.audience!=='registered_accounts' ||
+      !exactRecord(firstFlow.worker,['mode','intervalMs']) || firstFlow.worker.mode!=='service' || firstFlow.worker.intervalMs!==60000 ||
+      !exactRecord(firstFlow.push,['leaseDurationMs']) || firstFlow.push.leaseDurationMs!==2592000000)) return null;
   const {claim, firebaseUid, rateScope, ratePolicy} = input;
   if (!exactRecord(claim, ['expectedFence', 'expiresAtMs']) || !isCostInteger(claim.expiresAtMs) || claim.expiresAtMs === 0) return null;
   const {expectedFence} = claim;
@@ -47,7 +51,7 @@ function openAiTestAppConfiguration(env) {
       !rateWindow(ratePolicy.minute, 60000, 60, 614400) || !rateWindow(ratePolicy.day, 86400000, 1000, 10240000) ||
       ratePolicy.day.maxRequests < ratePolicy.minute.maxRequests || ratePolicy.day.maxTokens < ratePolicy.minute.maxTokens) return null;
   const grant = decodeCloudCostGrant(input.grant);
-  return grant?.capNanoUsd === 3_400_000_000 ? {claim, firebaseUid, grant, rateScope, ratePolicy, apiKey} : null;
+  return grant?.capNanoUsd === 3_400_000_000 ? {claim, firebaseUid, grant, rateScope, ratePolicy, apiKey, ...(firstFlow?{firstFlow}:{})} : null;
 }
 
 export function azureConfiguration(env, nodeVersion = process.versions.node) {
@@ -105,7 +109,7 @@ export async function startAzureBackend(env = process.env) {
     const eventCredentialPath = join(directory, 'event-credential.json');
     writeFileSync(eventCredentialPath, JSON.stringify({apiKey: env.ENMORI_TICKETMASTER_KEY, termsAccepted: true}), {mode: 0o600});
     writeFileSync(join(directory, 'event-source.json'), JSON.stringify({credentialFile: eventCredentialPath, musicInterestTagId: config.musicInterestTagId}), {mode: 0o600});
-    const events = retainedCoreEvents(directory, true, () => runtime?.eventBrowseControl?.observation().enabled === true, 90000);
+    const events = retainedCoreEvents(directory, true, () => runtime?.eventBrowseControl?.observation().enabled === true, 180000);
     assert.equal(events.configuration, 'configured');
     const backendEnvironment = Object.fromEntries(Object.keys(env).filter(name => !openAiSettings.has(name)).map(name => [name, env[name]]));
     runtime = await createRemoteGroupRuntime({

@@ -38,11 +38,11 @@ export function parseFirstFlowSettings(x: unknown): { expectedRevision: number; 
   } };
 }
 function intentCommand(body: unknown, key: unknown): FirstFlowIntentCommand | undefined {
-  if (!record(body) || !exact(body, ["conversationId", "sourceMessageId", "category", "dueAt", "timeZone", "processing", "expectedSettingsRevision"]) ||
+  if (!record(body) || !exact(body, ["conversationId", "sourceMessageId", "category", "dueAt", "timeZone", "processing", "expectedSettingsRevision", ...(body.processing === "cloud" ? ["provider", "disclosureVersion"] : [])]) ||
     !uuid(key) || !uuid(body.conversationId) || !uuid(body.sourceMessageId) || body.category !== "explicit_follow_up" ||
-    body.processing !== "local" || !utc(body.dueAt) || !zone(body.timeZone) || !version(body.expectedSettingsRevision)) return undefined;
+    !(body.processing === "local" || body.processing === "cloud" && body.provider === "openai" && body.disclosureVersion === "openai_cloud_v1") || !utc(body.dueAt) || !zone(body.timeZone) || !version(body.expectedSettingsRevision)) return undefined;
   return { intentId: key, conversationId: body.conversationId, sourceMessageId: body.sourceMessageId,
-    category: "explicit_follow_up", dueAt: body.dueAt, timeZone: body.timeZone, processing: "local", expectedSettingsRevision: body.expectedSettingsRevision };
+    category: "explicit_follow_up", dueAt: body.dueAt, timeZone: body.timeZone, ...(body.processing === "cloud" ? {processing: "cloud" as const, provider: "openai" as const, disclosureVersion: "openai_cloud_v1" as const} : {processing: "local" as const}), expectedSettingsRevision: body.expectedSettingsRevision };
 }
 
 /** Explicit wire allowlists. Never spread store records into responses. */
@@ -150,7 +150,7 @@ export async function registerFirstFlowRoutes(app: FastifyInstance, identity: Id
     });
     scope.post("/v1/me/proactive-intents", options, async (req, res) => {
       if (rawHeaderCount(req, "idempotency-key") !== 1 || !uuid(req.headers["idempotency-key"])) return requestFailure(req, res, "IDEMPOTENCY_KEY_INVALID");
-      if (!clean(req, true, true) || !record(req.body) || !exact(req.body, ["conversationId", "sourceMessageId", "category", "dueAt", "timeZone", "processing", "expectedSettingsRevision"])) return requestFailure(req, res);
+      if (!clean(req, true, true) || !record(req.body) || !exact(req.body, ["conversationId", "sourceMessageId", "category", "dueAt", "timeZone", "processing", "expectedSettingsRevision", ...(req.body.processing === "cloud" ? ["provider", "disclosureVersion"] : [])])) return requestFailure(req, res);
       const parsed = intentCommand(req.body, req.headers["idempotency-key"]);
       return parsed ? deliver(req, res, await service.createIntent(actor(req), parsed), firstFlowIntentView, 201) : failure(req, res, "invalid");
     });

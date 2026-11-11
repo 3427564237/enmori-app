@@ -1,3 +1,4 @@
+import { FirestoreCloudConsentGateway } from '../account/infrastructure/firestore-cloud-consent-gateway.js';
 import { createAdminComposition } from './admin-composition.js';
 import { OwnAvatar } from "../account/application/own-avatar.js";
 import { FirestoreOwnAvatarRepository } from "../account/infrastructure/firestore-own-avatar-repository.js";
@@ -229,10 +230,13 @@ async function createControlledRuntime(
         }
       } catch { healthy = false; }
     }
-    const firstFlow = firstFlowConfiguration && chat && healthy && modelLane && isolatedEnvironment
-      ? createFirstFlowComposition({ configuration: firstFlowConfiguration, environment: isolatedEnvironment,
-        conversation: chat, lane: modelLane, auth: getAuth(firebaseApp), healthy: () => healthy && maintenanceHealthy,
-        ...(firstFlowConfiguration.push ? { credential: firebaseApp.options.credential ?? applicationDefault() } : {}) }) : undefined;
+    const selectedFirstFlow=firstFlowConfiguration??cloudTestApp?.firstFlow;
+    const firstFlow = selectedFirstFlow && chat && healthy && (modelLane||cloud?.proactive) && isolatedEnvironment
+      ? createFirstFlowComposition({ configuration: selectedFirstFlow, environment: isolatedEnvironment,
+        conversation: cloud?.proactive?{store:chat.store,gateway:new FirestoreCloudConsentGateway(chat.gateway,chat.epoch,cloud.proactive.current)}:chat,
+        ...(cloud?.proactive?{cloudExecution:cloud.proactive.execution}:{lane:modelLane!}),
+        auth: getAuth(firebaseApp), healthy: () => healthy && maintenanceHealthy && (cloud?.proactive?.current()??true),
+        ...(selectedFirstFlow.push ? { credential: firebaseApp.options.credential ?? applicationDefault() } : {}) }) : undefined;
     const stopAi = async () => {
       cloud?.closeAdmission();
       previewAccepting = false;
