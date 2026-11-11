@@ -2,6 +2,8 @@
 
 Status: **proposal for root review and then LI confirmation**. No implementation, real grant, payment, cloud mutation, or paid request is authorized by this document. Prepared on 11 November 2026 against the existing [monetary contract](../../api/openai-budget-contract.md), [5 November trial decision](../decisions/2026-11-05-li-sol-test-app-acceptance.md), [teacher-delivery decision](../decisions/2026-11-11-li-two-month-teacher-delivery.md), and [operating plan](2026-11-11-teacher-delivery-operating-plan.md).
 
+Subsequent explicit decision: [LI approved implementing this exact proposal without automatic recharge](../decisions/2026-11-11-li-teacher-stability-implementation.md). The original proposal below is retained. Its actual-purchase verification and concrete cap/validity installation conditions still apply; no future balance has been invented or armed by that approval.
+
 ## Recommendation and authority boundary
 
 After LI manually purchases the planned **S$10** and the actual credited USD amount, spendable balance, deductions and expiry are verified, install **one separate paid-credit grant**. Use `ai_cloud_cost_budget/{grantId}` and its own `attempts` subcollection. Leave `ai_cloud_cost_budget/current` and every old attempt in place. Do not represent purchased credit as a gift, extend the old gift expiry, reset old counters, copy old attempts into a clean ledger, or treat a restart as new funding.

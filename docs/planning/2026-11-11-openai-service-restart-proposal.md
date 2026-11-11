@@ -2,6 +2,8 @@
 
 Status: proposal for LI confirmation, not authorization to claim a live owner. Basis: [two-month teacher delivery](../decisions/2026-11-11-li-two-month-teacher-delivery.md) and [operating evidence](2026-11-11-teacher-delivery-operating-plan.md).
 
+Subsequent explicit decision: [LI approved this exact implementation proposal](../decisions/2026-11-11-li-teacher-stability-implementation.md). The original proposal and its migration/test conditions below are retained; approval does not make unverified live ownership or future funding ready.
+
 ## Problem and scope
 
 The current one-use expected-fence claim is appropriate for an operator-controlled trial. After Azure replaces its process, that claim cannot open AI again. Merely making its expiry longer or reading the latest fence and stealing it would not establish exclusive ownership. The [5 November decision](../decisions/2026-11-05-li-sol-test-app-acceptance.md) explicitly forbids automatic takeover; this proposal supersedes that restriction only for the single configured existing Azure service after an initial verified stop/drain and migration. Local service, old binaries, other regions and other hosts remain excluded.
