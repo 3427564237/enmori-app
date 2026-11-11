@@ -40,10 +40,9 @@ export function createOpenAiTestAppComposition(config: OpenAiTestAppConfiguratio
   let openAi: ReturnType<typeof createOpenAiConversationRuntime> | undefined;
   const ownsHost = () => owned;
   const testUid = config?.firebaseUid;
-  const testIdentity: IdentityVerifier = { async verifyIdToken(token) {
-    const result = await identity.verifyIdToken(token);
-    return result.kind === 'verified' && result.principal.firebaseUid !== testUid ? { kind: 'forbidden' } : result;
-  } };
+  // LI's 11 November demo decision opens the existing flow to every verified
+  // account. Consent and account-owned context remain checked downstream.
+  const testIdentity = identity;
   const selection: OpenAiConversationSelection | undefined = config?.claim && typeof testUid === 'string' &&
     testUid.length > 0 && testUid.length <= 128 && testUid.isWellFormed() ? {
       claim: config.claim,

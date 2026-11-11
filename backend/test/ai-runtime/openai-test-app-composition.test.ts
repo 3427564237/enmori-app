@@ -47,7 +47,7 @@ test('armed process keeps ordinary reads/profile updates but cannot write Settin
   }
   const testApp = createOpenAiTestAppComposition(config, gateway, environment, avatar, identity);
   assert.equal((await testApp.preferences.saveProfile(profile)).ok, true);
-  assert.deepEqual(await testApp.identity.verifyIdToken('other'), { kind: 'forbidden' });
+  assert.deepEqual(await testApp.identity.verifyIdToken('other'), { kind: 'verified', principal: { firebaseUid: 'other' } });
   assert.deepEqual(await testApp.identity.verifyIdToken(principal.firebaseUid), { kind: 'verified', principal });
 });
 
@@ -70,4 +70,11 @@ test('confirmed owner keeps Settings through failed monetary recovery; replaceme
   runtime.shutdown();
   assert.equal((await owner.preferences.getSettings(principal)).ok, true);
   assert.equal((await owner.preferences.saveSettings({ ...settings, expectedRevision: 1 })).ok, false);
+});
+
+test('all-account admission preserves upstream authentication rejection', async () => {
+  const { gateway, avatar } = fixture();
+  const rejected: IdentityVerifier = { async verifyIdToken() { return { kind: 'invalid' }; } };
+  const app = createOpenAiTestAppComposition(config, gateway, environment, avatar, rejected);
+  assert.deepEqual(await app.identity.verifyIdToken('invalid'), { kind: 'invalid' });
 });
