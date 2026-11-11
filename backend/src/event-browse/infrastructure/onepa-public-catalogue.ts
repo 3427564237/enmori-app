@@ -1,5 +1,6 @@
 /// <reference lib="dom" />
 import { chromium, type Browser, type Response } from "playwright";
+import { isDeepStrictEqual } from "node:util";
 import { permittedBrowserResource } from "./public-event-pages.js";
 export interface OnePaListItem {
   readonly product: unknown;
@@ -64,20 +65,26 @@ export async function readOnePaCatalogue(
     const completed = new Map<number, SearchGrid>();
     const response = (offset: number) => {
       const observed = new WeakMap<Response, SearchGrid>();
+      // Playwright invokes asynchronous response predicates concurrently.
+      // Preserve response arrival order so a fast later body cannot hide an
+      // earlier malformed target response whose body is still downloading.
+      let validation = Promise.resolve(false);
       return page.waitForResponse(
-        async (r) => {
+        (r) => {
           if (new URL(r.url()).origin !== "https://www.onepa.gov.sg" ||
               new URL(r.url()).pathname !== "/-api/search/query" || r.status() !== 201) return false;
-          const grid = await searchGrid(r);
-          if (grid.offset === offset) { observed.set(r, grid); return true; }
-          // A slow rendered page can emit a late duplicate of a completed
-          // query while Next Page is in flight. It is not the requested page.
-          // Only an exact, previously validated page identity may be ignored.
-          const previous = completed.get(grid.offset);
-          if (grid.offset < offset && previous && previous.total_item === grid.total_item &&
-              previous.content.length === grid.content.length &&
-              previous.content.every((p, i) => p.id === grid.content[i]?.id)) return false;
-          throw Error("Source format changed");
+          validation = validation.then(async () => {
+            const grid = await searchGrid(r);
+            if (grid.offset === offset) { observed.set(r, grid); return true; }
+            // A slow rendered page can emit a late duplicate of a completed
+            // query while Next Page is in flight. It is not the requested page.
+            // Only exact, previously validated page content may be ignored.
+            const previous = completed.get(grid.offset);
+            if (grid.offset < offset && previous && previous.total_item === grid.total_item &&
+                isDeepStrictEqual(previous.content, grid.content)) return false;
+            throw Error("Source format changed");
+          });
+          return validation;
         },
         { timeout: 60000 },
       ).then(r => observed.get(r)!);

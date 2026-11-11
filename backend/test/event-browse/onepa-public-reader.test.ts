@@ -47,6 +47,7 @@ function fake(
   } as unknown as Browser;
   return {
     state,
+    browser,
     reader: new OnePaPublicReader(
       async () => {
         state.launches++;
@@ -222,4 +223,38 @@ test("one cancelled initialization cannot close a shared browser while another r
   assert.match(await healthy, /<loc>/);
   await setImmediate();
   assert.equal(closes, 1);
+});
+
+test("the last cancelled reader cannot start a deferred browser launch", async () => {
+  const caller = new AbortController();
+  let launches = 0;
+  const reader = new OnePaPublicReader(async () => {
+    launches++;
+    throw Error("must not launch");
+  }, async () => {
+    queueMicrotask(() => queueMicrotask(() => caller.abort()));
+    return "";
+  });
+  await assert.rejects(reader.read(sitemap, caller.signal), /Source unavailable/);
+  await setImmediate();
+  assert.equal(launches, 0);
+});
+
+test("a deferred shared launch still serves the live reader after its first caller cancels", async () => {
+  const caller = new AbortController(), fixture = fake();
+  let launches = 0, staticReads = 0;
+  const reader = new OnePaPublicReader(async () => {
+    launches++;
+    return fixture.browser;
+  }, async () => {
+    if (staticReads++ === 0) queueMicrotask(() => queueMicrotask(() => caller.abort()));
+    return "";
+  });
+  const cancelled = reader.read(sitemap, caller.signal);
+  const healthy = reader.read(sitemap, new AbortController().signal);
+  await assert.rejects(cancelled, /Source unavailable/);
+  assert.match(await healthy, /<loc>/);
+  assert.equal(launches, 1);
+  assert.equal(fixture.state.contextsClosed, 1);
+  assert.equal(fixture.state.browsersClosed, 1);
 });

@@ -72,7 +72,11 @@ export class OnePaPublicReader {
     signal.addEventListener("abort", abort, { once: true });
     try {
       if (signal.aborted) { abort(); throw Error("Source unavailable"); }
-      const browser = await (this.browser ??= Promise.resolve().then(() => this.launch()));
+      const browser = await (this.browser ??= Promise.resolve().then(() => {
+        if (this.closing || ![...this.readers].some(reader => !reader.aborted))
+          throw Error("Source unavailable");
+        return this.launch();
+      }));
       if (signal.aborted) throw Error("Source unavailable");
       context = await browser.newContext({
         serviceWorkers: "block",
