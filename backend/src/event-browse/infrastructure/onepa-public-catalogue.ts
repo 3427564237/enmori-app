@@ -44,7 +44,7 @@ export async function readOnePaCatalogue(
     void browser.close().catch(() => {});
   };
   signal.addEventListener("abort", abort, { once: true });
-  const timer = setTimeout(abort, 90000);
+  const timer = setTimeout(abort, 180000);
   try {
     if (signal.aborted) throw Error("Source unavailable");
     const context = await browser.newContext({
