@@ -1,5 +1,5 @@
 /// <reference lib="dom" />
-import { chromium, type Browser } from "playwright";
+import { chromium, type Browser, type BrowserContext } from "playwright";
 import {
   permittedBrowserResource,
   permittedPublicPage,
@@ -9,6 +9,8 @@ import {
 /** Ordinary public rendering, with no saved profile or challenge interaction. */
 export class OnePaPublicReader {
   private browser: Promise<Browser> | undefined;
+  private closing: Promise<void> | undefined;
+  private readonly readers = new Set<AbortSignal>();
   private active = 0;
   constructor(
     private readonly launch: () => Promise<Browser> = () =>
@@ -41,25 +43,41 @@ export class OnePaPublicReader {
     } catch {
       /* A bounded normal-rendering attempt follows below. */
     }
-    if (signal.aborted || this.active >= 4) throw Error("Source unavailable");
+    if (signal.aborted || this.active >= 4 || this.closing)
+      throw Error("Source unavailable");
     this.active++;
-    let context;
+    this.readers.add(signal);
+    let cancel!: () => void;
+    const cancelled = new Promise<never>((_, reject) => {
+      cancel = () => reject(Error("Source unavailable"));
+    });
+    // The caller stops waiting immediately, while render keeps ownership of
+    // pending initialization and cleanup until it has actually settled.
+    return Promise.race([this.render(url, signal, cancel), cancelled]);
+  };
+  private async render(url: string, signal: AbortSignal, cancel: () => void) {
+    let context: BrowserContext | undefined;
+    let contextClosing: Promise<void> | undefined;
+    const closeContext = () => context
+      ? (contextClosing ??= context.close().catch(() => {}))
+      : Promise.resolve();
+    const abort = () => {
+      cancel();
+      void closeContext();
+      // Initializing a context cannot be cancelled separately in Playwright.
+      // Close the browser only after every shared reader has lost authority;
+      // an independent live reader must not be interrupted by another caller.
+      if ([...this.readers].every((reader) => reader.aborted)) void this.close();
+    };
+    signal.addEventListener("abort", abort, { once: true });
     try {
-      const browser = await (this.browser ??= this.launch());
+      if (signal.aborted) { abort(); throw Error("Source unavailable"); }
+      const browser = await (this.browser ??= Promise.resolve().then(() => this.launch()));
+      if (signal.aborted) throw Error("Source unavailable");
       context = await browser.newContext({
         serviceWorkers: "block",
         acceptDownloads: false,
       });
-    } catch {
-      if (--this.active === 0) await this.close().catch(() => {});
-      throw Error("Source unavailable");
-    }
-    const abort = () => {
-      void context.close().catch(() => {});
-    };
-    const timer = setTimeout(abort, 20000);
-    signal.addEventListener("abort", abort, { once: true });
-    try {
       if (signal.aborted) throw Error("Source unavailable");
       await context.route("**/*", (route) => {
         const request = route.request();
@@ -107,15 +125,21 @@ export class OnePaPublicReader {
       if (!links.length) throw Error("Source unavailable");
       return `<urlset>${links.map((link) => `<loc>${link}</loc>`).join("")}</urlset>`;
     } finally {
-      clearTimeout(timer);
+      await closeContext();
       signal.removeEventListener("abort", abort);
-      await context.close().catch(() => {});
-      if (--this.active === 0) await this.close().catch(() => {});
+      this.readers.delete(signal);
+      if (--this.active === 0) {
+        await this.close();
+        this.browser = undefined;
+        this.closing = undefined;
+      } else if ([...this.readers].every((reader) => reader.aborted)) {
+        void this.close();
+      }
     }
-  };
-  private async close() {
-    const browser = this.browser;
-    this.browser = undefined;
-    await (await browser)?.close();
+  }
+  private close(): Promise<void> {
+    return this.closing ??= (async () => {
+      await (await this.browser)?.close();
+    })().catch(() => {});
   }
 }

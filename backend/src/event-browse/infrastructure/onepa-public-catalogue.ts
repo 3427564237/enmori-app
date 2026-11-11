@@ -1,21 +1,44 @@
 /// <reference lib="dom" />
-import { chromium } from "playwright";
+import { chromium, type Browser, type Response } from "playwright";
 import { permittedBrowserResource } from "./public-event-pages.js";
 export interface OnePaListItem {
   readonly product: unknown;
   readonly url: string;
 }
+interface SearchGrid {
+  readonly offset: number;
+  readonly limit: number;
+  readonly total_item: number;
+  readonly content: readonly { id: string; [key: string]: any }[];
+}
+async function searchGrid(response: Response): Promise<SearchGrid> {
+  const payload = await response.body();
+  if (payload.length > 2500000) throw Error("Source too large");
+  const raw = JSON.parse(payload.toString("utf8"));
+  const grids = Array.isArray(raw?.widgets)
+    ? raw.widgets.filter((w: any) => w?.entity === "product" && w?.type === "content_grid")
+    : [];
+  const grid = grids[0];
+  if (grids.length !== 1 || !Number.isSafeInteger(grid.offset) || grid.offset < 0 || grid.offset % 10 !== 0 ||
+      grid.limit !== 10 || !Array.isArray(grid.content) || grid.content.length > 10 ||
+      !Number.isSafeInteger(grid.total_item) || grid.total_item < 0 ||
+      grid.content.some((p: any) => typeof p?.id !== "string" || !/^PA-Event-\d+$/.test(p.id)) ||
+      new Set(grid.content.map((p: any) => p.id)).size !== grid.content.length)
+    throw Error("Source format changed");
+  return grid;
+}
 /** Read the provider's anonymous, rendered search list; never fan out to
  * individual details. The provider's own Next Page action supplies pagination. */
 export async function readOnePaCatalogue(
   signal: AbortSignal,
-): Promise<readonly OnePaListItem[]> {
-  if (signal.aborted) throw Error("Source unavailable");
-  const browser = await chromium.launch({
+  launch: () => Promise<Browser> = () => chromium.launch({
     headless: false,
     args: ["--start-minimized"],
     timeout: 30000,
-  });
+  }),
+): Promise<readonly OnePaListItem[]> {
+  if (signal.aborted) throw Error("Source unavailable");
+  const browser = await launch();
   const abort = () => {
     void browser.close().catch(() => {});
   };
@@ -38,16 +61,29 @@ export async function readOnePaCatalogue(
     });
     const page = await context.newPage();
     const result: OnePaListItem[] = [];
-    const response = () =>
-      page.waitForResponse(
-        (r) =>
-          new URL(r.url()).origin === "https://www.onepa.gov.sg" &&
-          new URL(r.url()).pathname === "/-api/search/query" &&
-          r.status() === 201,
+    const completed = new Map<number, SearchGrid>();
+    const response = (offset: number) => {
+      const observed = new WeakMap<Response, SearchGrid>();
+      return page.waitForResponse(
+        async (r) => {
+          if (new URL(r.url()).origin !== "https://www.onepa.gov.sg" ||
+              new URL(r.url()).pathname !== "/-api/search/query" || r.status() !== 201) return false;
+          const grid = await searchGrid(r);
+          if (grid.offset === offset) { observed.set(r, grid); return true; }
+          // A slow rendered page can emit a late duplicate of a completed
+          // query while Next Page is in flight. It is not the requested page.
+          // Only an exact, previously validated page identity may be ignored.
+          const previous = completed.get(grid.offset);
+          if (grid.offset < offset && previous && previous.total_item === grid.total_item &&
+              previous.content.length === grid.content.length &&
+              previous.content.every((p, i) => p.id === grid.content[i]?.id)) return false;
+          throw Error("Source format changed");
+        },
         { timeout: 60000 },
-      );
+      ).then(r => observed.get(r)!);
+    };
     for (let index = 0; index < 5; index++) {
-      const pending = response();
+      const pending = response(index * 10);
       // Observe the rejection even if navigation/action fails first.
       void pending.catch(() => {});
       if (index === 0)
@@ -59,30 +95,9 @@ export async function readOnePaCatalogue(
         await page
           .getByRole("link", { name: "Next Page", exact: true })
           .click({ timeout: 15000 });
-      const payload = await (await pending).body();
-      if (payload.length > 2500000) throw Error("Source too large");
-      const raw = JSON.parse(payload.toString("utf8"));
-      const grid = raw.widgets?.find(
-        (w: any) => w.entity === "product" && w.type === "content_grid",
-      );
-      if (
-        !grid ||
-        grid.offset !== index * 10 ||
-        grid.limit !== 10 ||
-        !Array.isArray(grid.content) ||
-        grid.content.length > 10 ||
-        !Number.isSafeInteger(grid.total_item) ||
-        grid.total_item < 0
-      )
-        throw Error("Source format changed");
+      const grid = await pending;
       if (grid.content.length === 0) break;
-      const ids = grid.content.map((p: any) => p.id);
-      if (
-        ids.some(
-          (id: unknown) => typeof id !== "string" || !/^PA-Event-\d+$/.test(id),
-        )
-      )
-        throw Error("Source format changed");
+      const ids = grid.content.map((p) => p.id);
       await page.waitForFunction(
         (ids: string[]) =>
           ids.every((id) =>
@@ -123,6 +138,7 @@ export async function readOnePaCatalogue(
           url,
         });
       }
+      completed.set(grid.offset, grid);
       if (signal.aborted) throw Error("Source unavailable");
       if (grid.offset + grid.content.length >= grid.total_item) break;
     }
