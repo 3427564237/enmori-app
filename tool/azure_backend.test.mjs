@@ -95,7 +95,7 @@ test('Azure lifecycle passes only the explicit arm, probes permissions, and sani
   }});
   t.mock.module(new URL('./retained_core_events.mjs', import.meta.url), {exports: {retainedCoreEvents: (directory, requested, enabled, batchTimeoutMs) => {
     assert.equal(requested, true);
-    assert.equal(batchTimeoutMs, 90000);
+    assert.equal(batchTimeoutMs, 180000);
     const config = JSON.parse(readFileSync(`${directory}/event-source.json`));
     assert.equal(statSync(config.credentialFile).mode & 0o777, 0o600);
     return {configuration: 'configured', input: {source: {}, musicInterestTagId: config.musicInterestTagId}};
