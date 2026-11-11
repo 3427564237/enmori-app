@@ -1,0 +1,1197 @@
+{
+  "sourceRepairCommit": "778dbdff9fef9885949d69f421effbba019251a8",
+  "authorityDecisionCommit": "7ca03d6",
+  "compiledReaderSha256": "ef7cdff50ab8eb3f82ef9d2d4dd90fb74d4d5fa3c4ededfdee11472e31dc66ff",
+  "loadedFrom": "in-memory data URL; no deployed file changed",
+  "callerBudgetMs": 180000,
+  "watchdogMs": 210000,
+  "guardTimeoutMs": 240000,
+  "environment": {
+    "pwd": "/home",
+    "node": "v24.22.1",
+    "sourceCommit": "b64ad02bb36aaf531be51e86ab7583ab67b63d56",
+    "displaySet": "false"
+  },
+  "result": {
+    "probe": "candidate onePA catalogue 778dbdf",
+    "stage": "result",
+    "elapsedMs": 135901,
+    "ok": true,
+    "sourceRows": 50,
+    "acceptedFutureRows": 17,
+    "publicUrlsOnly": true,
+    "sourceIdentityCount": 50
+  },
+  "searchOffsetsObserved": [
+    0,
+    0,
+    10,
+    20,
+    30,
+    40
+  ],
+  "searchNetworkTtfbMs": [
+    279.083,
+    328.568,
+    427.714,
+    335.891,
+    340.721,
+    341.278
+  ],
+  "searchNetworkRequestToBodyEndMs": [
+    457.729,
+    437.6,
+    487.343,
+    462.633,
+    442.036,
+    559.101
+  ],
+  "searchWaitMs": [
+    23367,
+    23159,
+    19921,
+    13816,
+    15095
+  ],
+  "renderMs": [
+    3376,
+    2447,
+    278,
+    904,
+    4453
+  ],
+  "sampledOwnedCpuPercentOneCoreMax": 79,
+  "sampledCgroupCpuPercentOneCoreMax": 79,
+  "sampledCgroupMemoryUsageBytesMax": 690192384,
+  "cleanup": {
+    "probe": "owned watchdog",
+    "phase": "complete",
+    "code": 0,
+    "signal": null,
+    "deadlineHit": false,
+    "observedOwnedProcesses": 17,
+    "ownedRunningRemaining": 0,
+    "stderrBytes": 0
+  },
+  "sourceChecks": {
+    "typeScriptBuild": "passed",
+    "targetedTests": 34,
+    "passed": 34,
+    "failed": 0
+  },
+  "observations": [
+    {
+      "probe": "owned watchdog",
+      "phase": "resource-sample",
+      "elapsedMs": 28,
+      "ownedRunning": 2,
+      "ownedCpuTicksObserved": 2,
+      "ticksPerSecond": 100,
+      "ownedCpuPercentOneCore": null,
+      "sumOwnedRssBytes": 2359296,
+      "cgroupCpuNanoseconds": 240200417300,
+      "cgroupCpuPercentOneCore": null,
+      "cgroupMemoryUsageBytes": 124022784
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "catalogue-begin",
+      "elapsedMs": 306
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "launch-1-begin",
+      "elapsedMs": 317
+    },
+    {
+      "probe": "owned watchdog",
+      "phase": "resource-sample",
+      "elapsedMs": 10129,
+      "ownedRunning": 7,
+      "ownedCpuTicksObserved": 322,
+      "ticksPerSecond": 100,
+      "ownedCpuPercentOneCore": 32,
+      "sumOwnedRssBytes": 447438848,
+      "cgroupCpuNanoseconds": 243695686500,
+      "cgroupCpuPercentOneCore": 35,
+      "cgroupMemoryUsageBytes": 522522624
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "launch-1-done",
+      "elapsedMs": 8752,
+      "durationMs": 8434
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "newContext-begin",
+      "elapsedMs": 8878
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "newContext-done",
+      "elapsedMs": 9749,
+      "durationMs": 871
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "newPage-begin",
+      "elapsedMs": 9769
+    },
+    {
+      "probe": "owned watchdog",
+      "phase": "resource-sample",
+      "elapsedMs": 20502,
+      "ownedRunning": 12,
+      "ownedCpuTicksObserved": 628,
+      "ticksPerSecond": 100,
+      "ownedCpuPercentOneCore": 29,
+      "sumOwnedRssBytes": 839045120,
+      "cgroupCpuNanoseconds": 247589861700,
+      "cgroupCpuPercentOneCore": 38,
+      "cgroupMemoryUsageBytes": 631574528
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "newPage-done",
+      "elapsedMs": 16983,
+      "durationMs": 7215
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "searchResponse-1-begin",
+      "elapsedMs": 17865
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "navigation-1-begin",
+      "elapsedMs": 18037
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "request",
+      "elapsedMs": 19069,
+      "requestNumber": 1,
+      "kind": "document",
+      "method": "GET"
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "response-timing",
+      "elapsedMs": 19624,
+      "requestNumber": 1,
+      "kind": "document",
+      "status": 200,
+      "requestEventToResponseEventMs": 555,
+      "timing": {
+        "startTime": 1794395943778.162,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": 27.282,
+        "responseStart": 226.764,
+        "responseEnd": -1
+      }
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "http",
+      "elapsedMs": 19625,
+      "kind": "document",
+      "status": 200
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "request-finished",
+      "elapsedMs": 20355,
+      "requestNumber": 1,
+      "kind": "document",
+      "eventDurationMs": 1286,
+      "timing": {
+        "startTime": 1794395943778.162,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": 27.282,
+        "responseStart": 226.764,
+        "responseEnd": 702.722
+      }
+    },
+    {
+      "probe": "owned watchdog",
+      "phase": "resource-sample",
+      "elapsedMs": 30231,
+      "ownedRunning": 12,
+      "ownedCpuTicksObserved": 991,
+      "ticksPerSecond": 100,
+      "ownedCpuPercentOneCore": 37,
+      "sumOwnedRssBytes": 875544576,
+      "cgroupCpuNanoseconds": 251774241700,
+      "cgroupCpuPercentOneCore": 43,
+      "cgroupMemoryUsageBytes": 656003072
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "navigation-1-done",
+      "elapsedMs": 31902,
+      "durationMs": 13865
+    },
+    {
+      "probe": "owned watchdog",
+      "phase": "resource-sample",
+      "elapsedMs": 40085,
+      "ownedRunning": 12,
+      "ownedCpuTicksObserved": 1667,
+      "ticksPerSecond": 100,
+      "ownedCpuPercentOneCore": 69,
+      "sumOwnedRssBytes": 960073728,
+      "cgroupCpuNanoseconds": 258594664000,
+      "cgroupCpuPercentOneCore": 69,
+      "cgroupMemoryUsageBytes": 683601920
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "request",
+      "elapsedMs": 37895,
+      "requestNumber": 2,
+      "kind": "search",
+      "method": "POST"
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "response-timing",
+      "elapsedMs": 40213,
+      "requestNumber": 2,
+      "kind": "search",
+      "status": 201,
+      "requestEventToResponseEventMs": 2324,
+      "timing": {
+        "startTime": 1794395962495.516,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": 113.389,
+        "responseStart": 392.472,
+        "responseEnd": -1
+      }
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "http",
+      "elapsedMs": 40220,
+      "kind": "search",
+      "status": 201
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "request-finished",
+      "elapsedMs": 40584,
+      "requestNumber": 2,
+      "kind": "search",
+      "eventDurationMs": 2696,
+      "timing": {
+        "startTime": 1794395962495.516,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": 113.389,
+        "responseStart": 392.472,
+        "responseEnd": 571.118
+      }
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "body-metadata",
+      "elapsedMs": 41221,
+      "status": 201,
+      "bodyNumber": 1,
+      "bytes": 31024,
+      "json": true,
+      "topType": "object",
+      "topKeys": [
+        "dt",
+        "ts",
+        "widgets"
+      ],
+      "widgetsType": "array",
+      "widgetCount": 1,
+      "productGridCount": 1,
+      "gridKeys": [
+        "content",
+        "entity",
+        "limit",
+        "offset",
+        "rfk_id",
+        "total_item",
+        "type",
+        "used_in"
+      ],
+      "offset": 0,
+      "offsetType": "number",
+      "limit": 10,
+      "limitType": "number",
+      "page": null,
+      "totalItem": 2260,
+      "totalItemType": "number",
+      "contentType": "array",
+      "rows": 10,
+      "validIdCount": 10,
+      "duplicateIds": 0,
+      "idDigest": "d3719c7a6baa0ec8"
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "searchResponse-1-done",
+      "elapsedMs": 41232,
+      "durationMs": 23367
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "render-expected",
+      "elapsedMs": 41233,
+      "renderNumber": 1,
+      "expectedIds": 10,
+      "idDigest": "d3719c7a6baa0ec8"
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "render-1-begin",
+      "elapsedMs": 41233
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "render-1-done",
+      "elapsedMs": 44608,
+      "durationMs": 3376
+    },
+    {
+      "probe": "owned watchdog",
+      "phase": "resource-sample",
+      "elapsedMs": 50144,
+      "ownedRunning": 12,
+      "ownedCpuTicksObserved": 2236,
+      "ticksPerSecond": 100,
+      "ownedCpuPercentOneCore": 57,
+      "sumOwnedRssBytes": 975364096,
+      "cgroupCpuNanoseconds": 264388768700,
+      "cgroupCpuPercentOneCore": 58,
+      "cgroupMemoryUsageBytes": 690192384
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "searchResponse-2-begin",
+      "elapsedMs": 47032
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "nextPage-1-begin",
+      "elapsedMs": 47042
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "request",
+      "elapsedMs": 48461,
+      "requestNumber": 3,
+      "kind": "search",
+      "method": "POST"
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "response-timing",
+      "elapsedMs": 51797,
+      "requestNumber": 3,
+      "kind": "search",
+      "status": 201,
+      "requestEventToResponseEventMs": 3335,
+      "timing": {
+        "startTime": 1794395973052.004,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": 7.906,
+        "responseStart": 336.474,
+        "responseEnd": -1
+      }
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "http",
+      "elapsedMs": 51807,
+      "kind": "search",
+      "status": 201
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "request-finished",
+      "elapsedMs": 51935,
+      "requestNumber": 3,
+      "kind": "search",
+      "eventDurationMs": 3474,
+      "timing": {
+        "startTime": 1794395973052.004,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": 7.906,
+        "responseStart": 336.474,
+        "responseEnd": 445.506
+      }
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "body-metadata",
+      "elapsedMs": 52111,
+      "status": 201,
+      "bodyNumber": 2,
+      "bytes": 31023,
+      "json": true,
+      "topType": "object",
+      "topKeys": [
+        "dt",
+        "ts",
+        "widgets"
+      ],
+      "widgetsType": "array",
+      "widgetCount": 1,
+      "productGridCount": 1,
+      "gridKeys": [
+        "content",
+        "entity",
+        "limit",
+        "offset",
+        "rfk_id",
+        "total_item",
+        "type",
+        "used_in"
+      ],
+      "offset": 0,
+      "offsetType": "number",
+      "limit": 10,
+      "limitType": "number",
+      "page": null,
+      "totalItem": 2260,
+      "totalItemType": "number",
+      "contentType": "array",
+      "rows": 10,
+      "validIdCount": 10,
+      "duplicateIds": 0,
+      "idDigest": "d3719c7a6baa0ec8"
+    },
+    {
+      "probe": "owned watchdog",
+      "phase": "resource-sample",
+      "elapsedMs": 60111,
+      "ownedRunning": 12,
+      "ownedCpuTicksObserved": 3021,
+      "ticksPerSecond": 100,
+      "ownedCpuPercentOneCore": 79,
+      "sumOwnedRssBytes": 985747456,
+      "cgroupCpuNanoseconds": 272295713600,
+      "cgroupCpuPercentOneCore": 79,
+      "cgroupMemoryUsageBytes": 684511232
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "nextPage-1-done",
+      "elapsedMs": 58550,
+      "durationMs": 11507
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "request",
+      "elapsedMs": 64672,
+      "requestNumber": 4,
+      "kind": "search",
+      "method": "POST"
+    },
+    {
+      "probe": "owned watchdog",
+      "phase": "resource-sample",
+      "elapsedMs": 70148,
+      "ownedRunning": 12,
+      "ownedCpuTicksObserved": 3813,
+      "ticksPerSecond": 100,
+      "ownedCpuPercentOneCore": 79,
+      "sumOwnedRssBytes": 949735424,
+      "cgroupCpuNanoseconds": 280272950800,
+      "cgroupCpuPercentOneCore": 79,
+      "cgroupMemoryUsageBytes": 688943104
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "response-timing",
+      "elapsedMs": 66806,
+      "requestNumber": 4,
+      "kind": "search",
+      "status": 201,
+      "requestEventToResponseEventMs": 2135,
+      "timing": {
+        "startTime": 1794395989261.7002,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": 0.891,
+        "responseStart": 428.605,
+        "responseEnd": -1
+      }
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "http",
+      "elapsedMs": 66807,
+      "kind": "search",
+      "status": 201
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "request-finished",
+      "elapsedMs": 67003,
+      "requestNumber": 4,
+      "kind": "search",
+      "eventDurationMs": 2331,
+      "timing": {
+        "startTime": 1794395989261.7002,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": 0.891,
+        "responseStart": 428.605,
+        "responseEnd": 488.234
+      }
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "body-metadata",
+      "elapsedMs": 70190,
+      "status": 201,
+      "bodyNumber": 3,
+      "bytes": 30872,
+      "json": true,
+      "topType": "object",
+      "topKeys": [
+        "dt",
+        "ts",
+        "widgets"
+      ],
+      "widgetsType": "array",
+      "widgetCount": 1,
+      "productGridCount": 1,
+      "gridKeys": [
+        "content",
+        "entity",
+        "limit",
+        "offset",
+        "rfk_id",
+        "total_item",
+        "type",
+        "used_in"
+      ],
+      "offset": 10,
+      "offsetType": "number",
+      "limit": 10,
+      "limitType": "number",
+      "page": null,
+      "totalItem": 2260,
+      "totalItemType": "number",
+      "contentType": "array",
+      "rows": 10,
+      "validIdCount": 10,
+      "duplicateIds": 0,
+      "idDigest": "ffd1b5764d9d468f"
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "searchResponse-2-done",
+      "elapsedMs": 70192,
+      "durationMs": 23159
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "render-expected",
+      "elapsedMs": 70192,
+      "renderNumber": 2,
+      "expectedIds": 10,
+      "idDigest": "ffd1b5764d9d468f"
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "render-2-begin",
+      "elapsedMs": 70192
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "render-2-done",
+      "elapsedMs": 72640,
+      "durationMs": 2447
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "searchResponse-3-begin",
+      "elapsedMs": 72898
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "nextPage-2-begin",
+      "elapsedMs": 72899
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "nextPage-2-done",
+      "elapsedMs": 74814,
+      "durationMs": 1915
+    },
+    {
+      "probe": "owned watchdog",
+      "phase": "resource-sample",
+      "elapsedMs": 80141,
+      "ownedRunning": 12,
+      "ownedCpuTicksObserved": 4358,
+      "ticksPerSecond": 100,
+      "ownedCpuPercentOneCore": 55,
+      "sumOwnedRssBytes": 890122240,
+      "cgroupCpuNanoseconds": 285791302900,
+      "cgroupCpuPercentOneCore": 55,
+      "cgroupMemoryUsageBytes": 663384064
+    },
+    {
+      "probe": "owned watchdog",
+      "phase": "resource-sample",
+      "elapsedMs": 90136,
+      "ownedRunning": 12,
+      "ownedCpuTicksObserved": 4705,
+      "ticksPerSecond": 100,
+      "ownedCpuPercentOneCore": 35,
+      "sumOwnedRssBytes": 786505728,
+      "cgroupCpuNanoseconds": 289439414800,
+      "cgroupCpuPercentOneCore": 36,
+      "cgroupMemoryUsageBytes": 601427968
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "request",
+      "elapsedMs": 87027,
+      "requestNumber": 5,
+      "kind": "search",
+      "method": "POST"
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "response-timing",
+      "elapsedMs": 90457,
+      "requestNumber": 5,
+      "kind": "search",
+      "status": 201,
+      "requestEventToResponseEventMs": 3431,
+      "timing": {
+        "startTime": 1794396011627.126,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": 91.347,
+        "responseStart": 427.238,
+        "responseEnd": -1
+      }
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "http",
+      "elapsedMs": 90493,
+      "kind": "search",
+      "status": 201
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "request-finished",
+      "elapsedMs": 90695,
+      "requestNumber": 5,
+      "kind": "search",
+      "eventDurationMs": 3668,
+      "timing": {
+        "startTime": 1794396011627.126,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": 91.347,
+        "responseStart": 427.238,
+        "responseEnd": 553.98
+      }
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "body-metadata",
+      "elapsedMs": 92781,
+      "status": 201,
+      "bodyNumber": 4,
+      "bytes": 30706,
+      "json": true,
+      "topType": "object",
+      "topKeys": [
+        "dt",
+        "ts",
+        "widgets"
+      ],
+      "widgetsType": "array",
+      "widgetCount": 1,
+      "productGridCount": 1,
+      "gridKeys": [
+        "content",
+        "entity",
+        "limit",
+        "offset",
+        "rfk_id",
+        "total_item",
+        "type",
+        "used_in"
+      ],
+      "offset": 20,
+      "offsetType": "number",
+      "limit": 10,
+      "limitType": "number",
+      "page": null,
+      "totalItem": 2260,
+      "totalItemType": "number",
+      "contentType": "array",
+      "rows": 10,
+      "validIdCount": 10,
+      "duplicateIds": 0,
+      "idDigest": "c2670e0db0248ffc"
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "searchResponse-3-done",
+      "elapsedMs": 92819,
+      "durationMs": 19921
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "render-expected",
+      "elapsedMs": 92821,
+      "renderNumber": 3,
+      "expectedIds": 10,
+      "idDigest": "c2670e0db0248ffc"
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "render-3-begin",
+      "elapsedMs": 92821
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "render-3-done",
+      "elapsedMs": 93099,
+      "durationMs": 278
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "searchResponse-4-begin",
+      "elapsedMs": 93169
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "nextPage-3-begin",
+      "elapsedMs": 93171
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "nextPage-3-done",
+      "elapsedMs": 94644,
+      "durationMs": 1473
+    },
+    {
+      "probe": "owned watchdog",
+      "phase": "resource-sample",
+      "elapsedMs": 100205,
+      "ownedRunning": 12,
+      "ownedCpuTicksObserved": 5398,
+      "ticksPerSecond": 100,
+      "ownedCpuPercentOneCore": 69,
+      "sumOwnedRssBytes": 785494016,
+      "cgroupCpuNanoseconds": 296525823600,
+      "cgroupCpuPercentOneCore": 70,
+      "cgroupMemoryUsageBytes": 617005056
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "request",
+      "elapsedMs": 102671,
+      "requestNumber": 6,
+      "kind": "search",
+      "method": "POST"
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "response-timing",
+      "elapsedMs": 104996,
+      "requestNumber": 6,
+      "kind": "search",
+      "status": 201,
+      "requestEventToResponseEventMs": 2326,
+      "timing": {
+        "startTime": 1794396027251.692,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": 1.405,
+        "responseStart": 342.126,
+        "responseEnd": -1
+      }
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "http",
+      "elapsedMs": 105022,
+      "kind": "search",
+      "status": 201
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "request-finished",
+      "elapsedMs": 105233,
+      "requestNumber": 6,
+      "kind": "search",
+      "eventDurationMs": 2562,
+      "timing": {
+        "startTime": 1794396027251.692,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": 1.405,
+        "responseStart": 342.126,
+        "responseEnd": 443.441
+      }
+    },
+    {
+      "probe": "owned watchdog",
+      "phase": "resource-sample",
+      "elapsedMs": 110155,
+      "ownedRunning": 12,
+      "ownedCpuTicksObserved": 6113,
+      "ticksPerSecond": 100,
+      "ownedCpuPercentOneCore": 72,
+      "sumOwnedRssBytes": 780926976,
+      "cgroupCpuNanoseconds": 303749427600,
+      "cgroupCpuPercentOneCore": 73,
+      "cgroupMemoryUsageBytes": 620392448
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "body-metadata",
+      "elapsedMs": 106985,
+      "status": 201,
+      "bodyNumber": 5,
+      "bytes": 30530,
+      "json": true,
+      "topType": "object",
+      "topKeys": [
+        "dt",
+        "ts",
+        "widgets"
+      ],
+      "widgetsType": "array",
+      "widgetCount": 1,
+      "productGridCount": 1,
+      "gridKeys": [
+        "content",
+        "entity",
+        "limit",
+        "offset",
+        "rfk_id",
+        "total_item",
+        "type",
+        "used_in"
+      ],
+      "offset": 30,
+      "offsetType": "number",
+      "limit": 10,
+      "limitType": "number",
+      "page": null,
+      "totalItem": 2260,
+      "totalItemType": "number",
+      "contentType": "array",
+      "rows": 10,
+      "validIdCount": 10,
+      "duplicateIds": 0,
+      "idDigest": "0a77c3964888d55d"
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "searchResponse-4-done",
+      "elapsedMs": 106986,
+      "durationMs": 13816
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "render-expected",
+      "elapsedMs": 107013,
+      "renderNumber": 4,
+      "expectedIds": 10,
+      "idDigest": "0a77c3964888d55d"
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "render-4-begin",
+      "elapsedMs": 107013
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "render-4-done",
+      "elapsedMs": 107917,
+      "durationMs": 904
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "searchResponse-5-begin",
+      "elapsedMs": 107987
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "nextPage-4-begin",
+      "elapsedMs": 107987
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "nextPage-4-done",
+      "elapsedMs": 108596,
+      "durationMs": 609
+    },
+    {
+      "probe": "owned watchdog",
+      "phase": "resource-sample",
+      "elapsedMs": 120179,
+      "ownedRunning": 12,
+      "ownedCpuTicksObserved": 6900,
+      "ticksPerSecond": 100,
+      "ownedCpuPercentOneCore": 79,
+      "sumOwnedRssBytes": 779972608,
+      "cgroupCpuNanoseconds": 311700157300,
+      "cgroupCpuPercentOneCore": 79,
+      "cgroupMemoryUsageBytes": 619274240
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "request",
+      "elapsedMs": 118107,
+      "requestNumber": 7,
+      "kind": "search",
+      "method": "POST"
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "response-timing",
+      "elapsedMs": 121868,
+      "requestNumber": 7,
+      "kind": "search",
+      "status": 201,
+      "requestEventToResponseEventMs": 3761,
+      "timing": {
+        "startTime": 1794396042688.014,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": 38.443,
+        "responseStart": 379.721,
+        "responseEnd": -1
+      }
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "http",
+      "elapsedMs": 121871,
+      "kind": "search",
+      "status": 201
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "request-finished",
+      "elapsedMs": 122762,
+      "requestNumber": 7,
+      "kind": "search",
+      "eventDurationMs": 4655,
+      "timing": {
+        "startTime": 1794396042688.014,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": 38.443,
+        "responseStart": 379.721,
+        "responseEnd": 597.544
+      }
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "body-metadata",
+      "elapsedMs": 123054,
+      "status": 201,
+      "bodyNumber": 6,
+      "bytes": 31595,
+      "json": true,
+      "topType": "object",
+      "topKeys": [
+        "dt",
+        "ts",
+        "widgets"
+      ],
+      "widgetsType": "array",
+      "widgetCount": 1,
+      "productGridCount": 1,
+      "gridKeys": [
+        "content",
+        "entity",
+        "limit",
+        "offset",
+        "rfk_id",
+        "total_item",
+        "type",
+        "used_in"
+      ],
+      "offset": 40,
+      "offsetType": "number",
+      "limit": 10,
+      "limitType": "number",
+      "page": null,
+      "totalItem": 2260,
+      "totalItemType": "number",
+      "contentType": "array",
+      "rows": 10,
+      "validIdCount": 10,
+      "duplicateIds": 0,
+      "idDigest": "503388cafdd55f4f"
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "searchResponse-5-done",
+      "elapsedMs": 123082,
+      "durationMs": 15095
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "render-expected",
+      "elapsedMs": 123091,
+      "renderNumber": 5,
+      "expectedIds": 10,
+      "idDigest": "503388cafdd55f4f"
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "render-5-begin",
+      "elapsedMs": 123091
+    },
+    {
+      "probe": "owned watchdog",
+      "phase": "resource-sample",
+      "elapsedMs": 130259,
+      "ownedRunning": 12,
+      "ownedCpuTicksObserved": 7484,
+      "ticksPerSecond": 100,
+      "ownedCpuPercentOneCore": 58,
+      "sumOwnedRssBytes": 749162496,
+      "cgroupCpuNanoseconds": 317671232700,
+      "cgroupCpuPercentOneCore": 59,
+      "cgroupMemoryUsageBytes": 590680064
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "render-5-done",
+      "elapsedMs": 127544,
+      "durationMs": 4453
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "browser-close-begin",
+      "elapsedMs": 128442
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "browser-close-done",
+      "elapsedMs": 133462,
+      "durationMs": 5020
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "catalogue-done",
+      "elapsedMs": 133464,
+      "durationMs": 133158
+    },
+    {
+      "probe": "owned watchdog",
+      "phase": "resource-sample",
+      "elapsedMs": 140203,
+      "ownedRunning": 3,
+      "ownedCpuTicksObserved": 7546,
+      "ticksPerSecond": 100,
+      "ownedCpuPercentOneCore": 6,
+      "sumOwnedRssBytes": 133410816,
+      "cgroupCpuNanoseconds": 320520337300,
+      "cgroupCpuPercentOneCore": 29,
+      "cgroupMemoryUsageBytes": 443965440
+    },
+    {
+      "probe": "candidate onePA catalogue 778dbdf",
+      "stage": "result",
+      "elapsedMs": 135901,
+      "ok": true,
+      "sourceRows": 50,
+      "acceptedFutureRows": 17,
+      "publicUrlsOnly": true,
+      "sourceIdentityCount": 50
+    },
+    {
+      "probe": "owned watchdog",
+      "phase": "resource-sample",
+      "elapsedMs": 141189,
+      "ownedRunning": 0,
+      "ownedCpuTicksObserved": 7546,
+      "ticksPerSecond": 100,
+      "ownedCpuPercentOneCore": 0,
+      "sumOwnedRssBytes": 0,
+      "cgroupCpuNanoseconds": 320752976400,
+      "cgroupCpuPercentOneCore": 24,
+      "cgroupMemoryUsageBytes": 361328640
+    },
+    {
+      "probe": "owned watchdog",
+      "phase": "complete",
+      "code": 0,
+      "signal": null,
+      "deadlineHit": false,
+      "observedOwnedProcesses": 17,
+      "ownedRunningRemaining": 0,
+      "stderrBytes": 0
+    }
+  ],
+  "boundaries": {
+    "deployed": false,
+    "appCatalogueCachePopulated": false,
+    "repeatableColdWarmProved": false,
+    "phoneAcceptance": false,
+    "twoMonthReliabilityProved": false
+  }
+}
