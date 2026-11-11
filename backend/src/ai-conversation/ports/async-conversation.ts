@@ -141,6 +141,8 @@ export interface AsyncConversationClock {
 export type AsyncConversationGates = ConversationGates;
 /** Backend-local dispatch handle, NEVER serialized into a model payload. */
 export interface AsyncConversationModelInput {
+  /** Trusted application-only resource accounting; never copied from a client body. */
+  readonly monetaryConsumer?: "persona";
   readonly processing?: "cloud";
   readonly provider?: import('../../account/domain/cloud-ai-consent.js').CloudAiProcessing['provider'];
   readonly disclosureVersion?: import('../../account/domain/cloud-ai-consent.js').CloudAiProcessing['disclosureVersion'];

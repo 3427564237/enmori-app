@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 import '../../../core/network/backend_api_client.dart';
 import '../../../core/result/result.dart';
+import '../../account/domain/cloud_ai_consent.dart';
 import '../domain/persona.dart';
 import '../domain/persona_preview_repository.dart';
 
@@ -16,6 +17,7 @@ final class BackendPersonaPreviewRepository
     required Uri baseUri,
     required this.tokenProvider,
     required this.client,
+    this.processing = AiClientProcessing.local,
     Duration timeout = const Duration(seconds: 60),
   }) : _baseUri = baseUri,
        _timeout = timeout {
@@ -33,6 +35,7 @@ final class BackendPersonaPreviewRepository
   final Uri _baseUri;
   final AuthTokenProvider tokenProvider;
   final http.Client client;
+  final AiClientProcessing processing;
   final Duration _timeout;
 
   @override
@@ -41,6 +44,9 @@ final class BackendPersonaPreviewRepository
     required String text,
     required bool Function() isEligible,
   }) async {
+    if (processing == AiClientProcessing.groqCloud) {
+      return const Failure(_unavailable);
+    }
     if (PersonaFields.nameValidationMessage(draft.displayName) != null ||
         !draft.expressionFields.values.every(isPersonaExpressionText) ||
         !isPersonaExpressionText(text) ||
@@ -91,6 +97,11 @@ final class BackendPersonaPreviewRepository
               ...draft.expressionFields,
             },
             'text': text,
+            if (processing == AiClientProcessing.openaiCloud) ...{
+              'processing': 'cloud',
+              'provider': 'openai',
+              'disclosureVersion': CloudAiProvider.openai.disclosureVersion,
+            },
           });
     if (!isEligible()) return const Failure(_authorityChanged);
     final response = await http.Response.fromStream(await client.send(request));

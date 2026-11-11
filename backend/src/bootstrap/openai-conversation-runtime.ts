@@ -163,7 +163,7 @@ export function createOpenAiConversationRuntime(options: OpenAiConversationRunti
         }
         // Reserve metadata before borrowing the projection. The authorized bridge
         // performs fresh checkpoints AFTER this asynchronous monetary mutation.
-        const reserved = await options.costBudget.reserve({ attemptId: options.randomAttemptId(), consumer,
+        const reserved = await options.costBudget.reserve({ attemptId: options.randomAttemptId(), consumer: handle.monetaryConsumer === 'persona' ? 'persona' : consumer,
           model: configuration.model, maxInputTokens: configuration.maxInputTokens, maxOutputTokens: configuration.maxOutputTokens }, live);
         if (reserved.kind !== 'confirmed' || !live()) return unknown();
         const pending = options.costBudget.dispatch(reserved.reservation, async money => {

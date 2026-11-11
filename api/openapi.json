@@ -4976,10 +4976,10 @@
       "post": {
         "operationId": "previewOwnPersonaDraft",
         "x-enmori-environment": "isolated-emulator",
-        "description": "Draft-only one-turn preview, explicitly composed into the retained local AI environment. Original verified Auth and accepted consent are rechecked before generation and delivery; consent revocation generation must remain equal. Current draft expression and current text only: no saved Persona access, activation, history, Notes, candidate queries, or writes. No automatic retry; shares the existing single-model lane. Free text affects expression only and never grants data access. Responses use Cache-Control: no-store.",
+        "description": "Draft-only one-turn preview, explicitly composed into the retained local or approved OpenAI AI environment. Original verified Auth and accepted purpose consent are rechecked before generation and delivery; consent revocation generation must remain equal. OpenAI requires the exact explicit processing/provider/disclosureVersion marker and current OpenAI consent, with its generation and withdrawal fence preserved. Unmarked legacy requests cannot authorize cloud dispatch. Current draft expression and current text only: no saved Persona access, activation, history, Notes, candidate queries, or business writes. No automatic retry; shares the existing runtime, monetary cap and quota. Free text affects expression only and never grants data access. Responses use Cache-Control: no-store.",
         "requestBody": {
           "required": true,
-          "description": "Exact draft and text JSON object; maximum 16384 UTF-8 bytes, no per-field free-text product limit. Text retains the existing 2400 Unicode scalar limit. No identity, Persona ID, version, operation key, history or candidate fields. Unknown fields/query, operation/idempotency headers and wrong types reject without coercion.",
+          "description": "Draft and text JSON object, with all three exact processing/provider/disclosureVersion fields required for OpenAI and absent for local composition; maximum 16384 UTF-8 bytes, no per-field free-text product limit. Text retains the existing 2400 Unicode scalar limit. No identity, Persona ID, version, operation key, history or candidate fields. Unknown fields/query, operation/idempotency headers and wrong types reject without coercion.",
           "content": {
             "application/json": {
               "schema": {
@@ -18235,6 +18235,15 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 2400
+          },
+          "processing": {
+            "const": "cloud"
+          },
+          "provider": {
+            "const": "openai"
+          },
+          "disclosureVersion": {
+            "const": "openai_cloud_v1"
           }
         }
       },

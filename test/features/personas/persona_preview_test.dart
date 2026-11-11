@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:enmori/app/enmori_theme.dart';
+import 'package:enmori/features/account/domain/cloud_ai_consent.dart';
 import 'package:enmori/core/network/backend_api_client.dart';
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/auth/auth_providers.dart';
@@ -105,6 +106,40 @@ void main() {
         });
       },
     );
+
+    test('OpenAI preview explicitly marks the selected processor and no other payload', () async {
+      final requests = <http.Request>[];
+      final client = MockClient((request) async {
+        requests.add(request);
+        return _response({'message': 'Hello'});
+      });
+      addTearDown(client.close);
+      final repository = BackendPersonaPreviewRepository(
+        baseUri: Uri.parse('https://enmori-backend-20261029.azurewebsites.net'),
+        tokenProvider: () async => const Success('synthetic-token'),
+        client: client,
+        processing: AiClientProcessing.openaiCloud,
+      );
+      expect(
+        await repository.preview(
+          draft: _draft,
+          text: 'Hello',
+          isEligible: () => true,
+        ),
+        isA<Success<String>>(),
+      );
+      final body = jsonDecode(requests.single.body) as Map<String, dynamic>;
+      expect(body.keys.toSet(), {
+        'draft',
+        'text',
+        'processing',
+        'provider',
+        'disclosureVersion',
+      });
+      expect(body['processing'], 'cloud');
+      expect(body['provider'], 'openai');
+      expect(body['disclosureVersion'], 'openai_cloud_v1');
+    });
 
     test('invalid text never dispatches and draft strings have no invented length cap', () async {
       var sends = 0;

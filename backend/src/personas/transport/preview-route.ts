@@ -1,3 +1,4 @@
+import { OPENAI_CLOUD_PROCESSING, type CloudAiProcessing } from '../../account/domain/cloud-ai-consent.js';
 import { createHash } from "node:crypto";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import type { IdentityVerifier } from "../../shared/ports/identity-verifier.js";
@@ -7,11 +8,12 @@ import type { PreviewPersona } from "../application/preview-persona.js";
 import { personaExpressionFields } from "../domain/persona-values.js";
 import { personaEditableProperties } from "./schemas.js";
 
-export type PersonaPreviewOperations = Pick<PreviewPersona, "execute">;
+export type PersonaPreviewOperations = Pick<PreviewPersona, "execute"> & { readonly processing?: CloudAiProcessing };
 const fields = ["displayName", "tone", "responseLength", "formatStyle"];
 export const personaPreviewRequestSchema = {
   type: "object", additionalProperties: false, required: ["draft", "text"],
   properties: {
+    processing: { const: "cloud" }, provider: { const: "openai" }, disclosureVersion: { const: "openai_cloud_v1" },
     draft: { type: "object", additionalProperties: false, required: fields, properties: personaEditableProperties },
     text: { type: "string", minLength: 1, maxLength: 2400 },
   },
@@ -113,11 +115,15 @@ export async function registerPersonaPreviewRoute(app: FastifyInstance, identity
     if (!lifetime?.current()) return reply.sent || reply.raw.destroyed ? reply : failure(request, reply, "AI_UNAVAILABLE");
     const body = request.body;
     if (Object.keys(request.query as object).length !== 0 || request.headers["idempotency-key"] !== undefined ||
-        request.headers["ai-operation-key"] !== undefined || !record(body) || Object.keys(body).length !== 2 ||
+        request.headers["ai-operation-key"] !== undefined || !record(body) || Object.keys(body).some(key => !["draft", "text", "processing", "provider", "disclosureVersion"].includes(key)) ||
         !Object.hasOwn(body, "draft") || !Object.hasOwn(body, "text") || !record(body.draft) || typeof body.text !== "string" ||
         Object.keys(body.draft).some(key => !fields.includes(key) && !personaExpressionFields.includes(key as typeof personaExpressionFields[number])) ||
         fields.some(key => !Object.hasOwn(body.draft as object, key)) ||
         Object.values(body.draft).some(value => typeof value !== "string")) return failure(request, reply, "REQUEST_INVALID");
+    const marked = ["processing", "provider", "disclosureVersion"].some(key => Object.hasOwn(body, key));
+    if (marked && (body.processing !== "cloud" || body.provider !== OPENAI_CLOUD_PROCESSING.provider ||
+        body.disclosureVersion !== OPENAI_CLOUD_PROCESSING.disclosureVersion)) return failure(request, reply, "REQUEST_INVALID");
+    if (preview.processing?.provider === 'openai' ? !marked : marked) return failure(request, reply, "AI_CONTEXT_NOT_PERMITTED");
     const principal = request.authPrincipal;
     if (!principal) return failure(request, reply, "AUTH_REQUIRED");
     const token = (request.headers.authorization as string).slice(7);

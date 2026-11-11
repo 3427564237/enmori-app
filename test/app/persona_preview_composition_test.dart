@@ -103,6 +103,52 @@ void main() {
     expect(container.read(connectedPersonaPreviewAccessProvider), isFalse);
   });
 
+  test('OpenAI preview requires current OpenAI acceptance, never old local or Groq consent', () async {
+    for (final consent in [
+      null,
+      CloudAiConsent.accepted,
+      CloudAiConsent.openaiDeclined,
+      CloudAiConsent.openaiAccepted,
+    ]) {
+      final auth = FakeAuthRepository();
+      final preferences = FakeAccountPreferences()
+        ..settings = OwnSettings(
+          checkInVisibility: CheckInVisibility.private,
+          consent: OptionalProcessingConsent.accepted,
+          revision: 0,
+          cloudAiConsent: consent,
+        );
+      final settingsRead = Completer<Result<OwnSettings>>();
+      preferences.settingsReads.add(settingsRead.future);
+      final container = ProviderContainer(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(auth),
+          accountPreferencesRepositoryProvider.overrideWithValue(preferences),
+          aiClientProcessingProvider.overrideWithValue(
+            AiClientProcessing.openaiCloud,
+          ),
+        ],
+      );
+      final subscription = container.listen(
+        connectedPersonaPreviewAccessProvider,
+        (_, _) {},
+      );
+      expect(container.read(connectedPersonaPreviewAccessProvider), isFalse);
+      auth.emit(AuthSessionAuthenticated(subject: 'same-owner'));
+      await container.pump();
+      expect(container.read(connectedPersonaPreviewAccessProvider), isFalse);
+      settingsRead.complete(Success(preferences.settings));
+      await container.pump();
+      expect(
+        container.read(connectedPersonaPreviewAccessProvider),
+        consent == CloudAiConsent.openaiAccepted,
+      );
+      subscription.close();
+      container.dispose();
+      await auth.close();
+    }
+  });
+
   test('same-UID replacement denies preview until fresh settings and drops the old reply', () async {
     final auth = FakeAuthRepository(),
         preferences = FakeAccountPreferences()..settings = _accepted;

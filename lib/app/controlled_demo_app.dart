@@ -138,6 +138,7 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       processing: widget.aiProcessing,
     );
     _personaPreview = BackendPersonaPreviewRepository(
+      processing: widget.aiProcessing,
       baseUri: widget.baseUri,
       tokenProvider: widget.auth.getIdToken,
       client: widget.client,
@@ -321,9 +322,7 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       ),
       personaPreviewRepositoryProvider.overrideWithValue(_personaPreview),
       personaPreviewAccessProvider.overrideWith(
-        (ref) =>
-            widget.aiProcessing.cloudProvider == null &&
-            ref.watch(connectedPersonaPreviewAccessProvider),
+        (ref) => ref.watch(connectedPersonaPreviewAccessProvider),
       ),
       aiClientProcessingProvider.overrideWithValue(widget.aiProcessing),
       aiConversationRepositoryProvider.overrideWithValue(_ai),

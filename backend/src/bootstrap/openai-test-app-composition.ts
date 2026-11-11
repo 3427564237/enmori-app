@@ -1,3 +1,5 @@
+import { CloudPreviewPersona } from '../personas/application/cloud-preview-persona.js';
+import { FirestorePersonaPreviewAuthority } from '../personas/infrastructure/firestore-persona-preview-authority.js';
 import { randomUUID } from 'node:crypto';
 import { OwnAccountPreferences } from '../account/application/own-account-preferences.js';
 import type { OwnAvatar } from '../account/application/own-avatar.js';
@@ -37,6 +39,7 @@ export function createOpenAiTestAppComposition(config: OpenAiTestAppConfiguratio
     getSettings: uid => ordinary.getSettings(uid), saveSettings: async () => dependencyUnavailable,
   }, avatar);
   let owned = false, admitting = true;
+  let personaPreview: CloudPreviewPersona | undefined;
   let openAi: ReturnType<typeof createOpenAiConversationRuntime> | undefined;
   const ownsHost = () => owned;
   const testUid = config?.firebaseUid;
@@ -62,12 +65,13 @@ export function createOpenAiTestAppComposition(config: OpenAiTestAppConfiguratio
               ownsHost: () => owned && admitting, apiKey: config.apiKey, configuration, countInputTokens: true, consumer: 'test_app',
               cloudConsent: services.dispatchConsent, randomAttemptId: randomUUID, http: fetch });
             if ((await budget.recover()).kind === 'confirmed') await openAi.owner.recover();
+            personaPreview = new CloudPreviewPersona(new FirestorePersonaPreviewAuthority(gateway), services.authority, openAi.runtime, () => clock.now());
             return openAi.runtime;
           },
         };
       },
     } : undefined;
-  return { selection, identity: testIdentity, get preferences() { return preferences; },
+  return { selection, identity: testIdentity, get personaPreview() { return personaPreview; }, get preferences() { return preferences; },
     closeAdmission() { admitting = false; }, release() { owned = false; }, state: () => openAi?.owner.state,
     rateLimitPending: () => openAi?.rateLimitPending() === true };
 }

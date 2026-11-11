@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../features/account/domain/account_repository.dart';
+import '../features/account/account_preferences_providers.dart';
+import '../features/account/domain/cloud_ai_consent.dart';
 import '../features/account/presentation/account_preferences_controller.dart';
 import '../features/auth/auth_providers.dart';
 import '../features/auth/domain/auth_repository.dart';
@@ -16,6 +18,9 @@ final connectedPersonaPreviewAccessProvider = Provider<bool>((ref) {
   final settings = ref.watch(
     accountPreferencesControllerProvider(PreferencesView.settings),
   );
-  return settings.phase == PreferencesPhase.ready &&
+  final processing = ref.watch(aiClientProcessingProvider);
+  return processing != AiClientProcessing.groqCloud &&
+      processing.allowsCloudConsent(settings.settings?.cloudAiConsent) &&
+      settings.phase == PreferencesPhase.ready &&
       settings.settings?.consent == OptionalProcessingConsent.accepted;
 });

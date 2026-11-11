@@ -17,6 +17,7 @@ import type { CloudCostGrant } from '../../src/ai-runtime/ports/cloud-cost-budge
 import { MetadataFirestoreGateway } from '../support/metadata-firestore-gateway.js';
 import { syntheticCostGrant, syntheticCostUsage } from '../support/cloud-cost-fixtures.js';
 import { accepted, deferred, FakeClock, flush } from './support.js';
+import { CloudPreviewPersona } from '../../src/personas/application/cloud-preview-persona.js';
 
 const epoch = { processEpoch: '11111111-1111-4111-8111-111111111111', generation: 1 };
 const limits: CloudAdmissionLimits = { windowMs: 60000, maxRequests: 100, maxTokens: 20000, tokensPerRequest: 200 };
@@ -505,3 +506,53 @@ test('exhausted shared budget cannot call HTTP while ordinary profile/settings r
   assert.equal((await services.preferences.getSettings(principal)).ok, true);
   assert.equal((await services.preferences.saveProfile({ principal, displayName: 'Synthetic', profileVisibility: 'private', expectedRevision: 0 })).ok, true);
 });
+
+test('trusted Persona preview charges the existing shared monetary consumer without a new runtime', async () => {
+  const f = fixture(); await recover(f);
+  const handle = {...f.handle(), monetaryConsumer: 'persona' as const};
+  const request = accepted(f.runtime.submit('preview-owner', {purpose: 'ai_assistant_message_v1', prepare: async () => handle,
+    checkCandidate: async () => ({ok: true, value: undefined})}));
+  assert.equal((await request.outcome).ok, true);
+  const attempts = [...f.gateway.rows].filter(([path]) => path.startsWith(cloudCostBudgetPath + '/attempts/'));
+  assert.equal(attempts.length, 1); assert.equal(attempts[0]![1].data.consumer, 'persona');
+  f.runtime.shutdown();
+});
+
+for (const action of ['withdrawal', 'cancel'] as const) {
+  test(`Persona ${action} fences late shared-runtime output while preserving original accounting`, async () => {
+    const pending = deferred<Response>(), called = deferred<void>();
+    const f = fixture({http: async () => {called.resolve(); return pending.promise;}}); await recover(f);
+    let consentCurrent = true;
+    const preview = new CloudPreviewPersona({read: async () => ({kind: 'success', value: {
+      ownerId: 'preview-owner', purposeRevocationGeneration: 1}})}, {
+      processing: OPENAI_CLOUD_PROCESSING,
+      async read() {
+        if (!consentCurrent) return {kind: 'denied'};
+        let released = false;
+        return {kind: 'authorized', generation: 1, purposeGeneration: 1,
+          current: () => consentCurrent && !released, release() {released = true;}};
+      },
+    }, f.runtime, () => f.clock.now());
+    const principal = {firebaseUid: 'preview-uid'}, abort = new AbortController(), delivered: string[] = [];
+    const result = preview.execute({principal, tokenInstance: 'synthetic', verifyCurrentAuth: async () => ({kind: 'verified', principal})},
+      {displayName: 'Draft', tone: 'warm', responseLength: 'concise', formatStyle: 'plain'}, 'Hello',
+      {signal: abort.signal, current: () => true, accept(message) {delivered.push(message); return true;}});
+    await called.promise;
+    assert.equal(f.ledger().reservedNanoUsd, 600); assert.equal(f.ledger().attemptCount, 1);
+    if (action === 'cancel') {
+      abort.abort(); assert.deepEqual(await result, {kind: 'terminated'});
+      assert.equal(f.ledger().reservedNanoUsd, 600);
+    } else consentCurrent = false;
+    pending.resolve(response());
+    assert.notEqual((await result).kind, 'success'); await flush();
+    assert.deepEqual(delivered, []); assert.equal(f.httpCalls, 1);
+    assert.equal(f.ledger().attemptCount, 1);
+    // Cancellation does not prove physical completion or release an unknown
+    // reservation. A live withdrawn request can still confirm original usage.
+    assert.equal(f.ledger().reservedNanoUsd, action === 'cancel' ? 600 : 0);
+    assert.equal(f.ledger().spentNanoUsd, action === 'cancel' ? 0 : 133);
+    const attempts = [...f.gateway.rows].filter(([path]) => path.startsWith(cloudCostBudgetPath + '/attempts/'));
+    assert.equal(attempts[0]![1].data.consumer, 'persona');
+    f.runtime.shutdown();
+  });
+}

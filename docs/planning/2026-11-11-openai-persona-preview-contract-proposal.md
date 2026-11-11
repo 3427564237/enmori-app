@@ -1,6 +1,6 @@
 # OpenAI Persona draft preview — minimal contract proposal
 
-Status: awaiting LI confirmation. This proposal does not enable cloud preview or grant consent.
+Status: approved by LI with “按最小方案修复试聊”; see the [11 November decision](../decisions/2026-11-11-li-openai-persona-preview.md). The proposal originally awaited confirmation and did not enable cloud preview or grant consent. Implementation authority does not grant an end user's OpenAI consent.
 
 Purpose: restore the existing Persona editor's draft-only “Try preview” for the already selected OpenAI demo service. Existing Persona create/edit/activate and selected-Persona Conversation already work independently.
 

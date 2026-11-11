@@ -252,10 +252,10 @@ async function createControlledRuntime(
         maintenanceHealthy, pending: modelLane?.state.pending ?? ((state?.remotePending ?? 0) > 0 || cloud?.rateLimitPending() === true),
         outcomeUnknown: modelLane?.state.outcomeUnknown ?? (state?.remoteUnknown ?? 0) > 0 };
     };
-    const personaPreview = chat && healthy && chatTransport ? new PreviewPersona(
+    const personaPreview = cloud?.personaPreview ?? (chat && healthy && chatTransport ? new PreviewPersona(
       new FirestorePersonaPreviewAuthority(gateway), chatTransport,
       () => performance.now(), () => modelLane?.state.pending ?? true,
-    ) : undefined;
+    ) : undefined);
     const initializeOwner = async (uid: string) => {
       await gateway.runTransaction(async tx => {
         const bindingId = createAuthBindingDocumentId(uid);
@@ -299,6 +299,7 @@ async function createControlledRuntime(
             ? chat!.operations.execute(...args) : Promise.resolve({ kind: 'failure' as const, code: 'AI_UNAVAILABLE' as const }),
         } } : {}),
         ...(personaPreview ? { personaPreview: {
+          ...(cloud?.personaPreview ? { processing: cloud.personaPreview.processing } : {}),
           execute: (...args: Parameters<PreviewPersona["execute"]>) => personaPreview.execute(
             args[0], args[1], args[2], { ...args[3],
               current: () => previewAccepting && healthy && args[3].current(),
