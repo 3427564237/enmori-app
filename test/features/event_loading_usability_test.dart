@@ -29,6 +29,7 @@ ActivityBatch _batch(String title, {String? nextCursor}) => ActivityBatch(
 
 class _Repo implements PagedActivityRepository {
   int firstReads = 0;
+  int nextReads = 0;
   Completer<Result<ActivityRead>>? first, next;
   ActivityBatch result = _batch('Garden walk', nextCursor: 'next-page');
   @override
@@ -38,8 +39,10 @@ class _Repo implements PagedActivityRepository {
   }
 
   @override
-  Future<Result<ActivityRead>> readNext(String cursor) async =>
-      next?.future ?? Success(_batch('Later event'));
+  Future<Result<ActivityRead>> readNext(String cursor) async {
+    nextReads++;
+    return next?.future ?? Success(_batch('Later event'));
+  }
 }
 
 Future<void> _mount(
@@ -65,6 +68,39 @@ Future<void> _mount(
 );
 
 void main() {
+  testWidgets(
+    'stopping a pulled refresh dismisses its spinner before HTTP finishes',
+    (tester) async {
+      final repo = _Repo();
+      await _mount(tester, repo);
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const Key('events-search')), 'Garden');
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pump();
+      final pending = Completer<Result<ActivityRead>>();
+      repo.first = pending;
+      await tester.drag(
+        find.byKey(const PageStorageKey('events-browse')),
+        const Offset(0, 400),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(repo.firstReads, 2);
+      expect(find.byType(RefreshProgressIndicator), findsOneWidget);
+      await tester.tap(find.text('Stop waiting'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(pending.isCompleted, isFalse);
+      expect(find.byType(RefreshProgressIndicator), findsNothing);
+      expect(find.text('Stopped waiting for events'), findsOneWidget);
+      pending.complete(Success(_batch('Garden late', nextCursor: 'late-page')));
+      await tester.pumpAndSettle();
+      expect(find.text('Garden late'), findsNothing);
+      expect(repo.nextReads, 0);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets(
     'Singapore browse explains its scope without an inactive area picker',
     (tester) async {

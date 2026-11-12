@@ -43,6 +43,7 @@ final class _ParticipationEventsPageState
   bool _searching = false;
   bool _filtersExpanded = false;
   int _searchGeneration = 0;
+  Completer<void>? _refreshWait;
   @override
   void initState() {
     super.initState();
@@ -60,12 +61,14 @@ final class _ParticipationEventsPageState
     if (state != AppLifecycleState.resumed && mounted) {
       _searchGeneration++;
       _searching = false;
+      _finishRefreshWait();
     }
   }
 
   @override
   void dispose() {
     _searchGeneration++;
+    _finishRefreshWait();
     _search.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -76,6 +79,7 @@ final class _ParticipationEventsPageState
     ref.listen(authSessionProvider, (before, after) {
       if (!identical(before?.asData?.value, after.asData?.value)) {
         _searchGeneration++;
+        _finishRefreshWait();
         _search.clear();
         setState(() {
           _query = '';
@@ -408,8 +412,8 @@ final class _ParticipationEventsPageState
                       : context.tr('Refresh your events', '刷新活动列表'),
                   body: state.stopped
                       ? context.tr(
-                          'This page will ignore the pending response. Reload when you are ready.',
-                          '本页将忽略尚未返回的结果，可以稍后重新加载。',
+                          'The request may still finish, but this page will ignore its response. Reload when you are ready.',
+                          '请求仍可能完成，但本页会忽略它的结果；可以稍后重新加载。',
                         )
                       : context.tr(
                           'This view has expired or was cleared. Reload to see current events.',
@@ -457,8 +461,15 @@ final class _ParticipationEventsPageState
 
   void _stopSearch() {
     _searchGeneration++;
+    _finishRefreshWait();
     ref.read(eventBatchesProvider.notifier).stopSearch();
     setState(() => _searching = false);
+  }
+
+  void _finishRefreshWait() {
+    final wait = _refreshWait;
+    _refreshWait = null;
+    if (wait != null && !wait.isCompleted) wait.complete();
   }
 
   Future<void> _searchAvailable() async {
@@ -481,16 +492,29 @@ final class _ParticipationEventsPageState
   }
 
   Future<void> _reload() async {
+    _finishRefreshWait();
+    final wait = Completer<void>();
+    _refreshWait = wait;
     final generation = ++_searchGeneration;
     final session = ref.read(authSessionProvider);
-    await ref.read(eventBatchesProvider.notifier).load();
-    if (!mounted ||
-        generation != _searchGeneration ||
-        !identical(session, ref.read(authSessionProvider))) {
-      return;
+    Future<void> read() async {
+      await ref.read(eventBatchesProvider.notifier).load();
+      if (!mounted ||
+          generation != _searchGeneration ||
+          !identical(session, ref.read(authSessionProvider))) {
+        return;
+      }
+      if (_query.trim().isNotEmpty || _category != null) {
+        await _searchAvailable();
+      }
     }
-    if (_query.trim().isNotEmpty || _category != null) {
-      await _searchAvailable();
+
+    try {
+      // End the local RefreshIndicator wait without claiming to cancel HTTP.
+      // The generation/session checks still retire any later read or paging.
+      await Future.any([read(), wait.future]);
+    } finally {
+      if (identical(_refreshWait, wait)) _refreshWait = null;
     }
   }
 }
