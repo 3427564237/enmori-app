@@ -1,0 +1,32 @@
+{
+  "mountedManifest": {
+    "readAtUtc": "2026-11-12T12:41:18.501Z",
+    "bytes": 368,
+    "sha256": "9905d3a3d7e652a8f77246a57a532122802f948438923239be56c8e67fcdb865",
+    "sourceCommit": "59464fd26bbff34b139fd338f47c04ae8aaf9fd8",
+    "demoVersion": 66,
+    "renewableServiceOwner": true,
+    "paidCreditSuccessorCode": true
+  },
+  "startAtUtc": "2026-11-12T12:31:53.087209+00:00",
+  "listeningAtUtc": "2026-11-12T12:37:37.2957160Z",
+  "startToListeningSeconds": 344.209,
+  "existingSettingsPreserved": true,
+  "existingLedgerAndAttemptsPreserved": true,
+  "newPaidGenerations": 0,
+  "newFcmDispatches": 0,
+  "newResources": 0,
+  "ownerGeneration": 86,
+  "ownerRenewalObserved": true,
+  "preparedPackage": {
+    "name": "2026111212213766.zip",
+    "baseName": "2026111112460865.zip",
+    "sha256": "e497a02a5103e2a620e3160a28fa567b0e4bafd92c34a2310c72ecd0db2d4e4b",
+    "bytes": 68067023,
+    "sourceCommit": "59464fd26bbff34b139fd338f47c04ae8aaf9fd8",
+    "everyEntryVerified": true,
+    "entryCount": 8561,
+    "selectorAtPrepare": "2026111112460865.zip"
+  },
+  "activePackage": "2026111212213766.zip"
+}

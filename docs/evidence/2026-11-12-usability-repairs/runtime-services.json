@@ -1,0 +1,39 @@
+{
+  "atUtc": "2026-11-12T12:57:48.644Z",
+  "status": 200,
+  "services": [
+    {
+      "service": "backend",
+      "configured": true,
+      "state": "ready",
+      "lastObservedAt": "2026-11-12T12:57:48.563Z"
+    },
+    {
+      "service": "firebase",
+      "configured": true,
+      "state": "ready",
+      "lastObservedAt": "2026-11-12T12:57:48.563Z",
+      "lastSucceededAt": "2026-11-12T12:57:48.563Z"
+    },
+    {
+      "service": "ai",
+      "configured": true,
+      "state": "ready",
+      "lastObservedAt": "2026-11-12T12:57:48.563Z"
+    },
+    {
+      "service": "ticketmaster",
+      "configured": true,
+      "state": "ready",
+      "lastObservedAt": "2026-11-12T12:57:19.695Z",
+      "lastSucceededAt": "2026-11-12T12:57:19.695Z"
+    },
+    {
+      "service": "onepa",
+      "configured": true,
+      "state": "unavailable",
+      "lastObservedAt": "2026-11-12T12:57:16.744Z",
+      "reason": "dependency_unavailable"
+    }
+  ]
+}

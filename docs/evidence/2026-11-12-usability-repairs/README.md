@@ -1,11 +1,37 @@
-# 2026-11-12 usability repairs — source verification
+# 2026-11-12 可用性修复与 v67 验收
 
-Authority: [LI confirmed repair and retest scope](../../decisions/2026-11-12-li-usability-repairs.md). Baseline: `a3c6b5448046fa7f65fb25fd809f4f0c9823d87f`, installed v65. Changes remain within the existing Flutter/Backend contracts and dependencies.
+已完成本轮确认的修复，最终 **v67 已保留数据安装到原 vivo V2405A 手机**，Backend 补丁已在现有 Azure 服务生效。手机已回到首页。依据：[LI 修复与复验范围](../../decisions/2026-11-12-li-usability-repairs.md)、[原 v65 审查](../2026-11-12-usability-audit/README.md)。这是一轮有边界的修复验收，不代表全功能 UAT 或 Release。
 
-The save screen blocks misleading Discard while a request is pending, distinguishes an unknown result from cancellation, and formats saved/draft values readably. Home places its primary Check-in action ahead of asynchronous identity content. Events show bounded waiting/stop feedback, preserve valid cards during pagination, retire prior-generation cards on refresh cancellation, and reduce the default controls/cover placeholder height. Appointment date/time pickers assist the existing civil-time confirmation; receipts retain the resolver's zone/offset. Intent lists identify device-local time rather than inventing a historical zone. Notification registration actions say renew when appropriate. Optional GPS/weather notices are consolidated while retaining actual saved-context behavior.
+| 修复 | 验证结果 |
+| --- | --- |
+| 保存中“放弃”误导 | pending 阻止离开并说明请求已发送；unknown 说明离开不取消，可继续核对。实机以原值保存并立即返回，显示等待结果提示，随后收到成功回执；未改变原资料和同意选项。unknown、取消核对、会话替换等由受控回归覆盖。 |
+| Home 按钮跳动 | 主签到动作在异步内容前，身份区压缩且保留公共/编辑入口。实机加载前后按钮 bounds 均为 `[56,707][1204,875]`，两个原始截图像素行也一致；320/390/660 常规字号回归通过。 |
+| 活动加载 | 已拒绝的 onePA document/search HTTP 错误及时返回不可用，避免继续等待无望的搜索响应。v66 为 **23.430–33.944 秒**、最终 v67 为 **23.334–33.836 秒**内结束加载；原 v65 为 **86.997–99.076 秒**。这些是逐次采样区间，不是延迟 SLA。 |
+| 活动等待/停止/分页 | 有初次、长等待和分页提示；停止只退休本页结果，不承诺取消网络。实机分页读取时仍可打开已有卡片；读取从 19 条扩至 39 条。刷新停止后退休旧卡片。v67 下拉刷新 Stop 后转圈消失，约 45 秒观察无旧卡片回填；受控测试明确完成迟到 Future 后仍不回填或继续分页。 |
+| 活动布局与范围 | 默认收起筛选和排序、保留 My plans 文字入口、压缩无封面占位、保留来源披露。删除不参与该列表查询的地区选择栏，明确“Events across Singapore”；Home 的推荐地区设置不变。实机确认范围说明、首屏标题、Today 无匹配提示及恢复 Any time 正常。 |
+| 签到提示 | 合并 GPS/天气可选提示并保留真实失败原因；天气失败但 GPS 已取得时说明 GPS 保留。实机定位关闭时仅一组原因和继续操作提示，键盘显示正常；测试草稿经确认退出，没有创建签到。 |
+| 预约和通知 UX | 增加日期/时间选择器，保留手填 IANA、明确核对、DST/安静时段规则。回执显示已解析的 civil time、IANA 和对应 offset；历史列表明确设备本地时间及 UTC。已有注册的动作显示续期/重新启用。相关自动化通过，当前手机 AI 同意关闭，因此未开启同意来制造预约或推送验收。 |
 
-Current source diagnosis used one ordinary provider read from the local host and one from the existing Azure app location. Both returned onePA document HTTP 403. Both probes stopped immediately on refusal; no alternate identity, proxy, challenge bypass or new region/resource was used. Azure spent about 20 seconds launching/creating its browser page before receiving 403; the network response itself was fast. The prior production reader ignored the document status and could then wait 60 seconds for a search response that would never arrive. The repair fails explicitly on document/search HTTP errors and retains source unavailable status. It does not claim to restore provider access or shorten successful catalogue coverage.
+实机又发现并完成两项小修正：活动页无效地区栏，以及 Stop 后下拉刷新转圈残留。后者先用真实 pull gesture 测试复现，再加入页面级等待结束信号；底层 HTTP、来源截止、快照、会话和迟到响应约束继续有效。最终独立复核未发现本轮变更新增的 P1/P2 阻断。
 
-Source validation: the two new reader regressions failed before the repair, then all 52 Event Backend tests and all 1,936 recursive Backend tests passed. Flutter integrated regressions: 315/315 across 37 files; whole-project analyze passed. Further focused final checks cover the GPS-retention copy and the exact five-minute Event expiry. Independent cross-review corrected one stale-snapshot Stop edge and found no remaining blocking findings in the scoped source. Existing large-text fixtures are excluded from the final acceptance command; two agents' initial filters accidentally ran pre-existing large-text cases before being corrected. No device large-text or screen-reader setting was changed.
+## 测试与制品
 
-Runtime deployment, signed APK verification and physical-device observations are pending in this source-stage record. Source tests are not a complete UAT or Release acceptance. Private raw logs and account screenshots stay outside the repository under `/home/miku/.local/state/enmori-usability-repairs-20261112/`.
+- 最终客户端提交：`08b25ec63dd6557e794d84733816f45923c3689b`。最终 **37 文件、317/317 Flutter 回归**通过，全项目 analyze 无问题；测试命令和摘要随本报告保存。固定 Flutter 3.47.2，无依赖变更。
+- Backend 提交：`59464fd26bbff34b139fd338f47c04ae8aaf9fd8`。新增两项 HTTP 拒绝回归修复前失败；修复后 **52 项 Event 测试及全部 1,936 项递归 Backend 测试**通过。后续客户端提交没有改 Backend 或依赖。
+- 三名子 agent 分别实现保存/Home、活动、表单，交叉审查源码与状态边界。部署控制流程也有独立审查和 9 项离线检查；已核对未应用的切换恢复另有 6 项检查。
+- APK：`/home/miku/Downloads/ENMORI-usability-v67-release.apk`；包名 `com.enmori.app.group`，versionCode 67，release/non-debuggable，原有 companion 配置启用。
+- APK SHA256：`5435e06383e8a320b42dfd160577f3992a65ddf3247b9512b0c0187a9b8956c3`。签名 SHA256：`0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee`。已拉取安装后的 base.apk，比对字节哈希一致；原 firstInstallTime 保留。
+- v66 为中间验收包；v67 包含最后的范围说明与刷新转圈修正。最后一个未安装的中间 v67 构建已由最终源码重建，交付文件只指向最终哈希。
+- 最终 APK 实机采用原手机 Android 17/API 37、1260×2800、density 560、font_scale 1.0。当前进程日志未见 FATAL EXCEPTION 或 Unhandled Exception；这不等于性能或可靠性压测。
+
+## 运行环境与仍存在的限制
+
+普通 onePA 读取在本机与现有 Azure 环境都收到 HTTP 403；探测均停止于拒绝，没有更换身份、代理、绕过挑战或新建地区资源。Azure 约 20 秒用于启动浏览器/页面，HTTP 响应本身很快。修复保留不可用状态，没有伪造 onePA 数据、缩减五页范围、增加缓存或延长截止。**onePA 访问限制仍未解除**；最后状态为 Backend/Firebase/AI/Ticketmaster ready，onePA unavailable。活动首屏仍有数十秒等待，不能称为即时加载。
+
+地区栏不影响原 `/v1/event-browse` 的新加坡范围请求，改变显示地区也不会移动服务器；本轮明确纠正了这项 UI 误导。实际设备为一台原手机，环境对比是本机与现有 Azure，未声称第二台实机或迁移地区成功。
+
+服务更新使用已核验 ZIP，先停止并确认旧容器退出。首次控制接口 502 后只读确认原切换进程为 0、旧 selector 未变且临时文件不存在，再以完整 ZIP 哈希及 manifest 绑定完成同一目标切换。无盲目重发，无配置、资金、owner 重建或新资源。启动至实际 listening **344.209 秒**；挂载 manifest 与补丁提交一致。既有 owner 进入 generation 86 并续租，原账目和全部 107 个 attempt 保持一致，没有新增付费模型调用或 FCM 发送。普通/Admin/未登录权限和数据保留检查通过。
+
+当前手机 AI 同意保持关闭，预约创建、真实通知到达、真实 AI 回复未作为本轮实机覆盖；预约/通知 UX 主要有自动化证据。未覆盖 iOS、其他 Android/API、其他用户设备/网络、真实社交双账号闭环、完整来源目录或长时间性能。按用户要求排除大字和讲述人验收；两名 agent 的初轮名字过滤曾漏掉旧大字夹具，已修正并重跑，最终命令不包含这些测试，也未改动手机相关设置。
+
+私有原始日志、截图、XML、安装包和运行收据保存在 `/home/miku/.local/state/enmori-usability-repairs-20261112/`；账号内容、令牌、配置和签名材料不进入仓库。一次手动 Stop 操作前请求已自然结束，该观察不计入 Stop 验收；最终连续自动动作记录另行验证了待处理状态和停止效果。

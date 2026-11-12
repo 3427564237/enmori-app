@@ -1,0 +1,31 @@
+{
+  "startedAtUtc": "2026-11-12T12:42:15.255819+00:00",
+  "samples": [
+    {
+      "elapsedSeconds": 2.48,
+      "loading": true,
+      "sourceStatus": [],
+      "unavailable": false
+    },
+    {
+      "elapsedSeconds": 12.978,
+      "loading": true,
+      "sourceStatus": [],
+      "unavailable": false
+    },
+    {
+      "elapsedSeconds": 23.43,
+      "loading": true,
+      "sourceStatus": [],
+      "unavailable": false
+    },
+    {
+      "elapsedSeconds": 33.944,
+      "loading": false,
+      "sourceStatus": [
+        "Ticketmaster: available\nonePA: unavailable"
+      ],
+      "unavailable": false
+    }
+  ]
+}

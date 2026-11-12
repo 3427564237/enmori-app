@@ -1,0 +1,14 @@
+{
+  "atUtc": "2026-11-12T12:52:43.058661+00:00",
+  "sourceCommit": "08b25ec63dd6557e794d84733816f45923c3689b",
+  "path": "/home/miku/Downloads/ENMORI-usability-v67-release.apk",
+  "sha256": "5435e06383e8a320b42dfd160577f3992a65ddf3247b9512b0c0187a9b8956c3",
+  "bytes": 70313804,
+  "versionCode": 67,
+  "versionName": "1.0.0-usability20261112",
+  "package": "com.enmori.app.group",
+  "debuggable": false,
+  "signerSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+  "companionEnabled": true,
+  "existingConfigurationUsed": true
+}

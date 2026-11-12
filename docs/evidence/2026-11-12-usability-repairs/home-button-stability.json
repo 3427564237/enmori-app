@@ -1,0 +1,25 @@
+{
+  "equalBeforeAndAfterAsyncContent": true,
+  "loadedSemanticsBounds": [
+    56,
+    707,
+    1204,
+    875
+  ],
+  "frames": [
+    {
+      "frame": "v66-home-2.png",
+      "wideFilledButtonRows": [
+        707,
+        874
+      ]
+    },
+    {
+      "frame": "v66-home-8.png",
+      "wideFilledButtonRows": [
+        707,
+        874
+      ]
+    }
+  ]
+}
