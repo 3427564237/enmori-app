@@ -65,6 +65,49 @@ Future<void> _mount(
 );
 
 void main() {
+  testWidgets(
+    'Singapore browse explains its scope without an inactive area picker',
+    (tester) async {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day, 12);
+      final repo = _Repo()
+        ..result = ActivityBatch(
+          asOf: _asOf,
+          items: [
+            for (final day in [0, 1])
+              ActivitySummary(
+                browseId: 'day-$day',
+                title: day == 0 ? 'Today event' : 'Tomorrow event',
+                categoryLabel: 'Community',
+                startAt: today
+                    .add(Duration(days: day))
+                    .toUtc()
+                    .toIso8601String(),
+              ),
+          ],
+        );
+      await _mount(tester, repo);
+      await tester.pumpAndSettle();
+      expect(find.text('Events across Singapore'), findsOneWidget);
+      expect(find.byIcon(Icons.place_outlined), findsNothing);
+      expect(find.text('All Singapore'), findsNothing);
+      await tester.tap(find.text('Filters and sort'));
+      await tester.pumpAndSettle();
+      expect(find.byTooltip('Filter event category'), findsOneWidget);
+      expect(find.byType(DropdownButtonFormField<int>), findsOneWidget);
+      await tester.tap(find.byKey(const Key('events-time-today')));
+      await tester.tap(find.text('Filters and sort'));
+      await tester.pumpAndSettle();
+      expect(find.text('Today event'), findsOneWidget);
+      expect(find.text('Tomorrow event'), findsNothing);
+      expect(repo.firstReads, 1);
+      await tester.ensureVisible(find.text('About these events'));
+      await tester.tap(find.text('About these events'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('not their full catalogues'), findsOneWidget);
+    },
+  );
+
   testWidgets('stopping refresh retires the previous source snapshot', (
     tester,
   ) async {

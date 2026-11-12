@@ -1,4 +1,3 @@
-import '../../recommendation_profile/presentation/activity_area_bar.dart';
 import '../../../core/presentation/refresh_on_return.dart';
 
 import 'dart:async';
@@ -181,7 +180,13 @@ final class _ParticipationEventsPageState
                     child: Text(context.tr('Clear search', '清除搜索')),
                   ),
                 ),
-              const ActivityAreaBar(),
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Text(
+                  context.tr('Events across Singapore', '新加坡活动'),
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
               Wrap(
                 spacing: 8,
                 crossAxisAlignment: WrapCrossAlignment.center,
