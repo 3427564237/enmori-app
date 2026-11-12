@@ -46,6 +46,59 @@ final saved = CheckIn(
   location: const GeoPoint(1.3521, 103.8198),
 );
 void main() {
+  testWidgets(
+    'weather permission read failure keeps GPS and explains the actual save',
+    (tester) async {
+      final h = await harness();
+      h.preferences.settings = const OwnSettings(
+        defaultCheckInLocation: true,
+        checkInVisibility: CheckInVisibility.private,
+        consent: OptionalProcessingConsent.rejected,
+        revision: 2,
+      );
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: h.container,
+          child: const MaterialApp(
+            home: CheckInComposerPage(socialStyle: true, located: true),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).first, 'Keep my GPS');
+      final permissions = find.byKey(const Key('check-in-permissions'));
+      await tester.ensureVisible(permissions);
+      await tester.tap(permissions);
+      await tester.pumpAndSettle();
+      h.preferences.settingsReads.add(Future.value(const Failure(unavailable)));
+      await tester.ensureVisible(find.text('Add weather to this Check-in'));
+      await tester.tap(find.text('Add weather to this Check-in'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Allow once'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Done'));
+      await tester.tap(find.text('Done'));
+      await tester.pumpAndSettle();
+      final notice = tester
+          .widget<Text>(find.byKey(const Key('check-in-place-notice')))
+          .data!;
+      expect(notice, contains('Unavailable'));
+      expect(
+        notice,
+        contains('Your GPS point is kept. You can save without weather'),
+      );
+      expect(notice, isNot(contains('save without location')));
+      await tester.ensureVisible(find.text('Save Check-in'));
+      await tester.tap(find.text('Save Check-in'));
+      await tester.pumpAndSettle();
+      expect(
+        h.repository.places.single?.location,
+        const GeoPoint(1.3521, 103.8198),
+      );
+      expect(h.repository.places.single?.includeWeather, isFalse);
+      expect(tester.takeException(), isNull);
+    },
+  );
   test('Home automatic preference survives navigation, caches, revokes late GPS and resets on logout', () async {
     var now = DateTime.utc(2026, 10, 22);
     final h = await harness(now: () => now);
@@ -216,7 +269,14 @@ void main() {
           await tester.pumpAndSettle();
           gps.complete(const Success(GeoPoint(1.3, 103.8)));
         } else {
-          gps.complete(const Failure(unavailable));
+          gps.complete(
+            const Failure(
+              AppFailure(
+                kind: AppFailureKind.serviceUnavailable,
+                message: 'Location services are off. You can continue without location.',
+              ),
+            ),
+          );
         }
         await tester.pumpAndSettle();
         expect(
@@ -232,7 +292,20 @@ void main() {
           isNotNull,
         );
         if (!cancel) {
-          expect(find.textContaining('Location unavailable.'), findsOneWidget);
+          final notice = find.byKey(const Key('check-in-place-notice'));
+          expect(notice, findsOneWidget);
+          final copy = tester.widget<Text>(notice).data!;
+          expect(copy, contains('Location services are off.'));
+          expect(copy, contains('You can save without location or weather'));
+          expect(copy, isNot(contains('You can continue without location.')));
+          expect(
+            find.textContaining('Weather needs a GPS point.'),
+            findsNothing,
+          );
+          expect(
+            find.textContaining('Location unavailable. Save without it'),
+            findsNothing,
+          );
         }
         if (cancel) h.repository.result = const Failure(unavailable);
         await tester.ensureVisible(find.text('Save Check-in'));

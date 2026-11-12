@@ -140,6 +140,8 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('events-filters-toggle')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('events-time-today')));
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('walk-tomorrow')), findsNothing);
@@ -160,7 +162,7 @@ void main() {
       expect(repo.first, 1);
       expect(repo.cursors, isEmpty);
       await tester.scrollUntilVisible(
-        find.byKey(const Key('events-time-all')),
+        find.byKey(const Key('events-search')),
         -300,
         scrollable: _eventsScrollable(),
       );
@@ -493,6 +495,8 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+    await tester.tap(find.byKey(const Key('events-filters-toggle')));
+    await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
       find.byTooltip('Filter event category'),
       250,

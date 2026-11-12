@@ -266,9 +266,10 @@ final class ConnectedOwnHeader extends ConsumerWidget {
       value: Success<OwnProfile>(:final value),
     )) {
       return Padding(
-        padding: const EdgeInsets.only(bottom: 20),
+        padding: const EdgeInsets.only(top: 16, bottom: 4),
         child: OwnProfileHeader(
           profile: value,
+          compact: true,
           onEdit: () async {
             await onEdit();
             if (context.mounted &&

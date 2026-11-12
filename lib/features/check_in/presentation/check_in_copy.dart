@@ -3,6 +3,32 @@ import 'package:flutter/widgets.dart';
 import '../../../core/presentation/enmori_localizations.dart';
 import '../../../core/result/result.dart';
 
+/// The composer adds one shared optional-location/weather recovery message.
+/// Keep the specific reason without repeating that recovery in every sentence.
+String checkInLocationFailureReason(
+  BuildContext context,
+  AppFailure failure,
+) => switch (failure.message) {
+  'Location services are off. You can continue without location.' => context.tr(
+    'Location services are off.',
+    '系统定位服务已关闭。',
+  ),
+  'Location permission was not granted. You can continue without location.' =>
+    context.tr('Location permission was not granted.', '未获得定位权限。'),
+  'Enable precise location for a Check-in point, or continue without it.' =>
+    context.tr(
+      'A Check-in point needs precise location permission.',
+      '签到位置需要精确定位权限。',
+    ),
+  'Location permission changed. You can continue without location.' ||
+  'Precise location permission changed. You can continue without location.' =>
+    context.tr('Location permission has changed.', '定位权限已变化。'),
+  'Current location is unavailable.' ||
+  'Current location is unavailable. You can try again or continue without it.' =>
+    context.tr('Current location is unavailable.', '当前位置暂不可用。'),
+  _ => checkInFailureText(context, failure),
+};
+
 /// Only known application errors are mapped. Never pass user record content here.
 String checkInFailureText(BuildContext context, AppFailure failure) {
   if (!context.usesChinese) return failure.message;

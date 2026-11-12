@@ -60,7 +60,6 @@ final class HomeShellPage extends StatelessWidget {
           key: const Key('route-home'),
           padding: const EdgeInsets.all(24),
           children: [
-            if (profileHeader != null) _HomeSection(child: profileHeader!),
             Text(
               context.tr('Home', "首页"),
               style: Theme.of(context).textTheme.headlineMedium,
@@ -80,6 +79,7 @@ final class HomeShellPage extends StatelessWidget {
               label: Text(context.tr('New Check-in', "新建签到")),
             ),
             if (daySection != null) _HomeSection(child: daySection!),
+            if (profileHeader != null) _HomeSection(child: profileHeader!),
             const SizedBox(height: 12),
             OutlinedButton.icon(
               key: const Key('edit-interests-button'),
@@ -196,7 +196,6 @@ final class HomeShellPage extends StatelessWidget {
             key: const Key('route-home'),
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             children: [
-              if (profileHeader != null) _HomeSection(child: profileHeader!),
               Semantics(
                 header: true,
                 child: Text(
@@ -225,6 +224,7 @@ final class HomeShellPage extends StatelessWidget {
                 label: Text(context.tr('New Check-in', "新建签到")),
               ),
               if (daySection != null) _HomeSection(child: daySection!),
+              if (profileHeader != null) _HomeSection(child: profileHeader!),
               if (weatherSection != null) ...[
                 const SizedBox(height: 16),
                 _HomeSection(child: weatherSection!),

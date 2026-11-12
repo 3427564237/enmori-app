@@ -115,19 +115,6 @@ final class LocatedCheckInActions extends ConsumerWidget {
               ],
             ),
           ),
-        if (place.failure != null &&
-            !showPlaceControls &&
-            !manageOnly &&
-            state.savedId == null)
-          Semantics(
-            liveRegion: true,
-            child: Text(
-              context.tr(
-                'Location unavailable. Save without it, or try again in Permissions.',
-                '位置暂不可用。可直接保存，或在权限设置中重试。',
-              ),
-            ),
-          ),
         if (state.busy)
           LinearProgressIndicator(
             semanticsLabel: context.tr(

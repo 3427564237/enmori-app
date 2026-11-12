@@ -139,6 +139,8 @@ class _ProfileState extends ConsumerState<RecommendationProfilePage> {
 
   Object? _session;
   bool _sessionInitialized = false;
+  bool _allowExit = false;
+  bool _exitDialogOpen = false;
   bool get _current =>
       mounted &&
       identical(_session, ref.read(authSessionProvider).asData?.value);
@@ -179,6 +181,7 @@ class _ProfileState extends ConsumerState<RecommendationProfilePage> {
         !identical(session, ref.read(authSessionProvider).asData?.value)) {
       return;
     }
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     if (result case Success<RecommendationProfile>(:final value)) {
       setState(() {
         _load(value);
@@ -219,30 +222,52 @@ class _ProfileState extends ConsumerState<RecommendationProfilePage> {
       return;
     }
     if (r case Success<RecommendationProfile>(:final value)) {
+      final areas =
+          ref.read(planningAreasProvider).asData?.value ?? <PlanningArea>[];
       final replace = await showDialog<bool>(
         context: context,
-        builder: (c) => AlertDialog(
-          title: Text(context.tr('Review saved version', '核对已保存版本')),
-          content: Text(
-            context.tr(
-              'Home area: ${value.homeAreaCode ?? "unset"}\nBirthday: ${value.birthDate ?? "unset"}\nDiscoverable: ${value.discoverable}\nAutomatic area: ${value.autoActivityLocation}\nUse interests / area / affiliation / age: ${value.matchInterests} / ${value.matchRegion} / ${value.matchAffiliation} / ${value.matchAge}\nReload all saved settings, or keep your draft for an explicit new save.',
-              '常用地区：${value.homeAreaCode ?? "未填写"}\n生日：${value.birthDate ?? "未填写"}\n允许被推荐：${value.discoverable}\n自动活动地区：${value.autoActivityLocation}\n用于匹配（兴趣／地区／组织／年龄）：${value.matchInterests} / ${value.matchRegion} / ${value.matchAffiliation} / ${value.matchAge}\n可加载已保存设置，或保留草稿后明确重新保存。',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(c, false),
-              child: Text(context.tr('Keep draft', '保留草稿')),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(c, true),
-              child: Text(context.tr('Load saved', '加载已保存')),
-            ),
-          ],
+        builder: (c) => Consumer(
+          builder: (context, ref, _) {
+            if (!identical(
+              _session,
+              ref.watch(authSessionProvider).asData?.value,
+            )) {
+              return AlertDialog(
+                title: Text(
+                  context.tr(
+                    'Session changed. Reopen this page.',
+                    '登录状态已变化，请重新打开此页。',
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(c),
+                    child: Text(context.tr('Done', '完成')),
+                  ),
+                ],
+              );
+            }
+            return AlertDialog(
+              title: Text(context.tr('Review saved version', '核对已保存版本')),
+              content: _savedComparison(value, areas),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(c, false),
+                  child: Text(context.tr('Keep draft', '保留草稿')),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(c, true),
+                  child: Text(context.tr('Load saved', '加载已保存')),
+                ),
+              ],
+            );
+          },
         ),
       );
       if (!_current) return;
       setState(() {
+        _busy = false;
+        if (replace == null) return;
         if (replace == true) {
           _load(value);
           _dirty = false;
@@ -251,11 +276,109 @@ class _ProfileState extends ConsumerState<RecommendationProfilePage> {
         }
         _uncertain = false;
         _error = null;
-        _busy = false;
       });
     } else {
-      setState(() => _busy = false);
+      setState(() {
+        _busy = false;
+        _error = context.tr(
+          'Unable to read the saved version. Your draft is kept. Try reading again.',
+          '无法读取已保存版本，草稿已保留，请重试读取。',
+        );
+      });
     }
+  }
+
+  Widget _savedComparison(
+    RecommendationProfile saved,
+    List<PlanningArea> areas,
+  ) {
+    String areaName(String? code) => code == null
+        ? context.tr('Not set', '未填写')
+        : areas.where((area) => area.code == code).firstOrNull?.name ?? code;
+    String enabled(bool value) =>
+        value ? context.tr('On', '开启') : context.tr('Off', '关闭');
+    final rows = [
+      (
+        context.tr('Home area', '常用地区'),
+        areaName(saved.homeAreaCode),
+        areaName(_area),
+      ),
+      (
+        context.tr('Birthday', '生日'),
+        saved.birthDate ?? context.tr('Not set', '未填写'),
+        _birth ?? context.tr('Not set', '未填写'),
+      ),
+      (
+        context.tr('Discoverable', '允许被推荐'),
+        enabled(saved.discoverable),
+        enabled(_discover),
+      ),
+      (
+        context.tr('Automatic area', '自动活动地区'),
+        enabled(saved.autoActivityLocation),
+        enabled(_auto),
+      ),
+      (
+        context.tr('Match interests', '匹配兴趣'),
+        enabled(saved.matchInterests),
+        enabled(_interests),
+      ),
+      (
+        context.tr('Match home area', '匹配地区'),
+        enabled(saved.matchRegion),
+        enabled(_region),
+      ),
+      (
+        context.tr('Match school / organisation', '匹配学校／组织'),
+        enabled(saved.matchAffiliation),
+        enabled(_affiliation),
+      ),
+      (context.tr('Match age', '匹配年龄'), enabled(saved.matchAge), enabled(_age)),
+    ];
+    TableRow row(List<String> values, {bool heading = false}) => TableRow(
+      children: [
+        for (final value in values)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 6, 8, 6),
+            child: Text(
+              value,
+              style: heading
+                  ? const TextStyle(fontWeight: FontWeight.w600)
+                  : null,
+            ),
+          ),
+      ],
+    );
+    return SizedBox(
+      width: 360,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Table(
+              columnWidths: const {0: FlexColumnWidth(1.4)},
+              children: [
+                row([
+                  context.tr('Setting', '设置'),
+                  context.tr('Saved', '已保存'),
+                  context.tr('Your draft', '你的草稿'),
+                ], heading: true),
+                for (final values in rows)
+                  row([values.$1, values.$2, values.$3]),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              context.tr(
+                'Load all saved settings, or keep your draft and save it explicitly.',
+                '可加载所有已保存设置，或保留草稿后明确重新保存。',
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -319,29 +442,71 @@ class _ProfileState extends ConsumerState<RecommendationProfilePage> {
     }
 
     return PopScope(
-      canPop: !_dirty,
+      canPop: _allowExit || (!_dirty && !_busy && !_uncertain),
       onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) return;
+        if (didPop || !_current || _exitDialogOpen) return;
+        if (_busy) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                content: Text(
+                  _uncertain
+                      ? context.tr(
+                          'Reading saved settings. Please wait.',
+                          '正在读取已保存设置，请稍候。',
+                        )
+                      : context.tr(
+                          'Your save has been sent. Wait for the result before leaving.',
+                          '保存请求已发出，请等待结果后再离开。',
+                        ),
+                ),
+              ),
+            );
+          return;
+        }
+        _exitDialogOpen = true;
         final leave = await showDialog<bool>(
           context: context,
           builder: (c) => AlertDialog(
-            title: Text(context.tr('Discard unsaved changes?', '放弃未保存的修改？')),
+            title: Text(
+              _uncertain
+                  ? context.tr('Save result not confirmed', '保存结果尚未确认')
+                  : context.tr('Discard unsaved changes?', '放弃未保存的修改？'),
+            ),
+            content: _uncertain
+                ? Text(
+                    context.tr(
+                      'Your save may already have completed. Leaving will not cancel it. You can reopen this page to check the saved version; your local draft will be lost.',
+                      '保存可能已经完成，离开不会取消这次保存。之后可以重新打开此页核对已保存版本，但当前本地草稿将丢失。',
+                    ),
+                  )
+                : null,
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(c, false),
-                child: Text(context.tr('Keep editing', '继续编辑')),
+                child: Text(
+                  _uncertain
+                      ? context.tr('Stay and check', '留下核对')
+                      : context.tr('Keep editing', '继续编辑'),
+                ),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(c, true),
-                child: Text(context.tr('Discard', '放弃')),
+                child: Text(
+                  _uncertain
+                      ? context.tr('Leave page', '离开此页')
+                      : context.tr('Discard', '放弃'),
+                ),
               ),
             ],
           ),
         );
-        if (leave == true && mounted) {
-          setState(() => _dirty = false);
+        _exitDialogOpen = false;
+        if (leave == true && _current) {
+          setState(() => _allowExit = true);
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) Navigator.pop(context);
+            if (_current) Navigator.pop(context);
           });
         }
       },
@@ -542,7 +707,11 @@ class _ProfileState extends ConsumerState<RecommendationProfilePage> {
             FilledButton(
               onPressed: _busy || _uncertain ? null : _save,
               child: Text(
-                context.tr(_busy ? 'Saving…' : 'Save', _busy ? '保存中…' : '保存'),
+                _busy
+                    ? (_uncertain
+                          ? context.tr('Reading…', '读取中…')
+                          : context.tr('Saving…', '保存中…'))
+                    : context.tr('Save', '保存'),
               ),
             ),
           ],

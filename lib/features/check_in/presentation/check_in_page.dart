@@ -506,15 +506,34 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
                               : _permissions,
                         ),
                       ),
-                      if (placeState?.failure case final failure?)
-                        Text(checkInFailureText(context, failure)),
-                      if (_defaults?.defaultCheckInWeather == true &&
-                          placeState?.place == null &&
-                          placeState?.busy != true)
-                        Text(
-                          context.tr(
-                            'Weather needs a GPS point. You can still save this Check-in.',
-                            '天气需要 GPS 位置。你仍可保存这条签到。',
+                      if (placeState?.busy != true &&
+                          (placeState?.failure != null ||
+                              (_defaults?.defaultCheckInWeather == true &&
+                                  placeState?.place == null)))
+                        Semantics(
+                          liveRegion: true,
+                          child: Text(
+                            key: const Key('check-in-place-notice'),
+                            [
+                              if (placeState?.failure case final failure?)
+                                checkInLocationFailureReason(context, failure),
+                              context.tr(
+                                placeState?.place != null
+                                    ? 'Your GPS point is kept. You can save without weather, or try weather again in Permissions.'
+                                    : _defaults?.defaultCheckInWeather ==
+                                              true &&
+                                          placeState?.place == null
+                                    ? 'You can save without location or weather, or try GPS again in Permissions.'
+                                    : 'You can save without location, or try GPS again in Permissions.',
+                                placeState?.place != null
+                                    ? '已保留 GPS 位置。可直接保存，本次不附加天气；也可在权限设置中重试天气。'
+                                    : _defaults?.defaultCheckInWeather ==
+                                              true &&
+                                          placeState?.place == null
+                                    ? '可直接保存，本次不附加位置和天气；也可在权限设置中重试定位。'
+                                    : '可直接保存，本次不附加位置；也可在权限设置中重试定位。',
+                              ),
+                            ].join('\n'),
                           ),
                         ),
                       const SizedBox(height: 12),

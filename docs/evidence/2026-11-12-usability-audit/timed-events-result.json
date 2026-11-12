@@ -1,0 +1,77 @@
+{
+  "started_at": "2026-11-12T11:57:12.590826+00:00",
+  "samples": [
+    {
+      "elapsed_seconds": 2.117,
+      "loading": true,
+      "statuses": [
+        "Ticketmaster: available",
+        "onePA: unavailable; other source remains available"
+      ]
+    },
+    {
+      "elapsed_seconds": 14.48,
+      "loading": true,
+      "statuses": [
+        "Ticketmaster: available",
+        "onePA: unavailable; other source remains available"
+      ]
+    },
+    {
+      "elapsed_seconds": 26.582,
+      "loading": true,
+      "statuses": [
+        "Ticketmaster: available",
+        "onePA: unavailable; other source remains available"
+      ]
+    },
+    {
+      "elapsed_seconds": 38.652,
+      "loading": true,
+      "statuses": [
+        "Ticketmaster: available",
+        "onePA: unavailable; other source remains available"
+      ]
+    },
+    {
+      "elapsed_seconds": 50.731,
+      "loading": true,
+      "statuses": [
+        "Ticketmaster: available",
+        "onePA: unavailable; other source remains available"
+      ]
+    },
+    {
+      "elapsed_seconds": 62.821,
+      "loading": true,
+      "statuses": [
+        "Ticketmaster: available",
+        "onePA: unavailable; other source remains available"
+      ]
+    },
+    {
+      "elapsed_seconds": 74.913,
+      "loading": true,
+      "statuses": [
+        "Ticketmaster: available",
+        "onePA: unavailable; other source remains available"
+      ]
+    },
+    {
+      "elapsed_seconds": 86.997,
+      "loading": true,
+      "statuses": [
+        "Ticketmaster: available",
+        "onePA: unavailable; other source remains available"
+      ]
+    },
+    {
+      "elapsed_seconds": 99.076,
+      "loading": false,
+      "statuses": [
+        "Ticketmaster: available",
+        "onePA: unavailable; other source remains available"
+      ]
+    }
+  ]
+}

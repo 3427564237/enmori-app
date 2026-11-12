@@ -8,14 +8,14 @@ function grid(offset: number) {
   return { entity: "product", type: "content_grid", offset, limit: 10, total_item: 20,
     content: Array.from({ length: 10 }, (_, i) => ({ id: `PA-Event-${10000000 + offset + i}`, name: "Synthetic event", active: true })) };
 }
-function fake(responses: readonly (readonly unknown[])[], options: { missingLinks?: boolean } = {}) {
+function fake(responses: readonly (readonly unknown[])[], options: { missingLinks?: boolean; documentStatus?: number; searchStatus?: number } = {}) {
   let index = -1, closed = 0, next = 0;
   let predicate!: (response: Response) => boolean | Promise<boolean>;
   let resolve!: (response: Response) => void, reject!: (error: Error) => void;
   const rendered: string[][] = [];
   const emit = async () => {
     for (const value of responses[++index] ?? []) {
-      const response = { url: () => "https://www.onepa.gov.sg/-api/search/query", status: () => 201,
+      const response = { url: () => "https://www.onepa.gov.sg/-api/search/query", status: () => options.searchStatus ?? 201,
         body: async () => Buffer.from(JSON.stringify({ widgets: [value] })) } as unknown as Response;
       try { if (await predicate(response)) { resolve(response); return; } }
       catch (error) { reject(error as Error); return; }
@@ -23,7 +23,7 @@ function fake(responses: readonly (readonly unknown[])[], options: { missingLink
   };
   const page = {
     waitForResponse: (match: typeof predicate) => { predicate = match; return new Promise<Response>((yes, no) => { resolve = yes; reject = no; }); },
-    goto: async () => { void emit(); },
+    goto: async () => { if ((options.documentStatus ?? 200) < 400) void emit(); return { status: () => options.documentStatus ?? 200 }; },
     getByRole: (role: string, selector: { name: string; exact: boolean }) => {
       assert.equal(role, "link"); assert.deepEqual(selector, { name: "Next Page", exact: true });
       return { click: async () => { next++; void emit(); } };
@@ -46,6 +46,26 @@ test("a delayed exact duplicate of the completed page cannot become the Next Pag
   assert.deepEqual(browser.state().rendered, [grid(0).content.map(p => p.id), grid(10).content.map(p => p.id)]);
   assert.equal(browser.state().closed, 1);
   assert.equal(browser.state().next, 1);
+});
+
+test("an explicitly rejected catalogue document fails before waiting for a search response", async () => {
+  for (const documentStatus of [403, 429, 503]) {
+    const browser = fake([], { documentStatus });
+    await assert.rejects(readOnePaCatalogue(AbortSignal.timeout(100), browser.launch), /^Error: Source unavailable$/);
+    assert.equal(browser.state().closed, 1);
+    assert.equal(browser.state().next, 0);
+    assert.deepEqual(browser.state().rendered, []);
+  }
+});
+
+test("an explicitly rejected search fails without returning a partial catalogue", async () => {
+  for (const searchStatus of [403, 429, 503]) {
+    const browser = fake([[grid(0)]], { searchStatus });
+    await assert.rejects(readOnePaCatalogue(AbortSignal.timeout(100), browser.launch), /^Error: Source unavailable$/);
+    assert.equal(browser.state().closed, 1);
+    assert.equal(browser.state().next, 0);
+    assert.deepEqual(browser.state().rendered, []);
+  }
 });
 
 test("unexpected offsets, changed old identities and malformed target pages still fail closed", async () => {
@@ -97,7 +117,7 @@ test("a slow malformed target body cannot lose to a later valid target response"
   const browser = {
     newContext: async () => ({ route: async () => {}, newPage: async () => ({
       waitForResponse: (match: typeof predicate) => { predicate = match; return new Promise<Response>((yes, no) => { resolve = yes; reject = no; }); },
-      goto: async () => emit(), getByRole: () => ({ click: async () => emit() }),
+      goto: async () => { emit(); return { status: () => 200 }; }, getByRole: () => ({ click: async () => emit() }),
       waitForFunction: async () => {},
       locator: () => ({ evaluateAll: async () => grid(index * 10).content.map(p => `https://www.onepa.gov.sg/events/synthetic-${p.id.slice(9)}`) }),
     }) }),

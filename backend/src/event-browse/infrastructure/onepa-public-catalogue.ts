@@ -72,8 +72,12 @@ export async function readOnePaCatalogue(
       return page.waitForResponse(
         (r) => {
           if (new URL(r.url()).origin !== "https://www.onepa.gov.sg" ||
-              new URL(r.url()).pathname !== "/-api/search/query" || r.status() !== 201) return false;
+              new URL(r.url()).pathname !== "/-api/search/query") return false;
           validation = validation.then(async () => {
+            // An explicit refusal/error cannot produce the expected search grid.
+            // Preserve failure and release the healthy source without a timeout.
+            if (r.status() >= 400) throw Error("Source unavailable");
+            if (r.status() !== 201) return false;
             const grid = await searchGrid(r);
             if (grid.offset === offset) { observed.set(r, grid); return true; }
             // A slow rendered page can emit a late duplicate of a completed
@@ -93,12 +97,13 @@ export async function readOnePaCatalogue(
       const pending = response(index * 10);
       // Observe the rejection even if navigation/action fails first.
       void pending.catch(() => {});
-      if (index === 0)
-        await page.goto("https://www.onepa.gov.sg/events/search", {
+      if (index === 0) {
+        const navigation = await page.goto("https://www.onepa.gov.sg/events/search", {
           waitUntil: "domcontentloaded",
           timeout: 60000,
         });
-      else
+        if (!navigation || navigation.status() >= 400) throw Error("Source unavailable");
+      } else
         await page
           .getByRole("link", { name: "Next Page", exact: true })
           .click({ timeout: 15000 });

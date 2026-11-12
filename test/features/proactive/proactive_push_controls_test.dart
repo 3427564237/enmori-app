@@ -136,6 +136,10 @@ void main() {
         );
         expect(r.registrations.puts, 0);
         expect(r.sdk.calls, isNot(contains('token')));
+        expect(
+          find.text(expired ? '重新启用系统通知' : 'Renew notification registration'),
+          findsOneWidget,
+        );
       },
     );
   }
@@ -157,7 +161,7 @@ void main() {
     await tester.tap(find.text('Check notification status'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Registration expiry:'), findsOneWidget);
-    await tester.tap(find.text('Enable system notifications'));
+    await tester.tap(find.text('Renew notification registration'));
     await tester.pumpAndSettle();
     expect(
       find.textContaining('Notification changes are unconfirmed.'),

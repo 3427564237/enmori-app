@@ -42,6 +42,7 @@ final class _ParticipationEventsPageState
   final _search = TextEditingController();
   String _query = '';
   bool _searching = false;
+  bool _filtersExpanded = false;
   int _searchGeneration = 0;
   @override
   void initState() {
@@ -145,7 +146,6 @@ final class _ParticipationEventsPageState
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16),
             children: [
-              const ActivityAreaBar(),
               TextField(
                 key: const Key('events-search'),
                 controller: _search,
@@ -181,117 +181,66 @@ final class _ParticipationEventsPageState
                     child: Text(context.tr('Clear search', '清除搜索')),
                   ),
                 ),
-              const SizedBox(height: 12),
-              if (widget.onOpenPlans != null) ...[
-                OutlinedButton.icon(
-                  onPressed: widget.onOpenPlans,
-                  icon: const Icon(Icons.event_note_outlined),
-                  label: Text(context.tr('My plans', '我的活动计划')),
-                ),
-                const SizedBox(height: 12),
-              ],
-              Text(
-                context.tr(
-                  'Sources: Ticketmaster / onePA · bounded available selection',
-                  '来源：Ticketmaster／onePA · 当前可用活动范围',
-                ),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const SizedBox(height: 8),
+              const ActivityAreaBar(),
               Wrap(
                 spacing: 8,
-                runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  for (final filter in EventTimeFilter.values)
-                    ChoiceChip(
-                      key: Key('events-time-${filter.name}'),
-                      label: Text(switch (filter) {
-                        EventTimeFilter.all => context.tr('Any time', '不限时间'),
-                        EventTimeFilter.today => context.tr('Today', '今天'),
-                        EventTimeFilter.weekend => context.tr(
-                          'This weekend',
-                          '本周末',
-                        ),
-                        EventTimeFilter.sevenDays => context.tr(
-                          'Next 7 days',
-                          '未来七天',
-                        ),
-                      }),
-                      selected: _timeFilter == filter,
-                      onSelected: (_) => setState(() => _timeFilter = filter),
+                  TextButton.icon(
+                    key: const Key('events-filters-toggle'),
+                    onPressed: () =>
+                        setState(() => _filtersExpanded = !_filtersExpanded),
+                    icon: Icon(
+                      _filtersExpanded ? Icons.expand_less : Icons.tune,
+                    ),
+                    label: Text(context.tr('Filters and sort', '筛选与排序')),
+                  ),
+                  if (widget.onOpenPlans != null)
+                    TextButton.icon(
+                      onPressed: widget.onOpenPlans,
+                      icon: const Icon(Icons.event_note_outlined),
+                      label: Text(context.tr('My plans', '我的活动计划')),
                     ),
                 ],
               ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<int>(
-                isExpanded: true,
-                key: _sortKey,
-                initialValue: _timeSort,
-                decoration: InputDecoration(
-                  labelText: context.tr('Time order', '时间排序'),
-                  helperText: context.tr('Device local time', '设备本地时间'),
-                  helperMaxLines: 2,
-                ),
-                items: [
-                  DropdownMenuItem(
-                    value: 0,
-                    child: Text(context.tr('Source order', '来源顺序')),
-                  ),
-                  DropdownMenuItem(
-                    value: 1,
-                    child: Text(context.tr('Earliest first', '最早优先')),
-                  ),
-                  DropdownMenuItem(
-                    value: -1,
-                    child: Text(context.tr('Latest first', '最晚优先')),
-                  ),
-                ],
-                onChanged: (value) => setState(() => _timeSort = value ?? 0),
+              Text(
+                '${_timeLabel(context, _timeFilter)} · ${_category ?? context.tr('All categories', '全部分类')} · ${_sortLabel(context, _timeSort)}',
+                style: Theme.of(context).textTheme.bodySmall,
               ),
-              const SizedBox(height: 16),
-              if (state.busy || _searching)
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  child: LinearProgressIndicator(
-                    semanticsLabel: context.tr('Loading events', '正在加载活动'),
-                  ),
-                ),
-              if (_searching)
-                Row(
+              if (_filtersExpanded) ...[
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
                   children: [
-                    Expanded(
-                      child: Text(
-                        context.tr(
-                          'Searching… ${items.length} events loaded',
-                          '正在搜索，已加载 ${items.length} 个活动',
-                        ),
+                    for (final filter in EventTimeFilter.values)
+                      ChoiceChip(
+                        key: Key('events-time-${filter.name}'),
+                        label: Text(_timeLabel(context, filter)),
+                        selected: _timeFilter == filter,
+                        onSelected: (_) => setState(() => _timeFilter = filter),
                       ),
-                    ),
-                    TextButton(
-                      key: const Key('events-stop-search'),
-                      onPressed: _stopSearch,
-                      child: Text(context.tr('Stop', '停止')),
-                    ),
                   ],
                 ),
-              if (state.failure case final failure?)
-                StatusPanel(
-                  title: value == null
-                      ? context.tr('Events unavailable', '活动暂不可用')
-                      : context.tr(
-                          'More events couldn’t be loaded',
-                          '无法加载更多活动',
-                        ),
-                  body: value == null
-                      ? localizedFailure(context, failure)
-                      : context.tr(
-                          '${failure.message} Your current events are still shown.',
-                          '${localizedFailure(context, failure)} 仍显示当前活动。',
-                        ),
-                  icon: Icons.cloud_off_outlined,
-                  isError: true,
+                const SizedBox(height: 12),
+                DropdownButtonFormField<int>(
+                  isExpanded: true,
+                  key: _sortKey,
+                  initialValue: _timeSort,
+                  decoration: InputDecoration(
+                    labelText: context.tr('Time order', '时间排序'),
+                    helperText: context.tr('Device local time', '设备本地时间'),
+                    helperMaxLines: 2,
+                  ),
+                  items: [
+                    for (final sort in [0, 1, -1])
+                      DropdownMenuItem(
+                        value: sort,
+                        child: Text(_sortLabel(context, sort)),
+                      ),
+                  ],
+                  onChanged: (value) => setState(() => _timeSort = value ?? 0),
                 ),
-              if (value != null) ...[
                 if (categories.isNotEmpty || _category != null)
                   Wrap(
                     spacing: 8,
@@ -313,7 +262,7 @@ final class _ParticipationEventsPageState
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.tune, size: 20),
+                              const Icon(Icons.category_outlined, size: 20),
                               const SizedBox(width: 8),
                               Flexible(
                                 child: Text(
@@ -333,6 +282,44 @@ final class _ParticipationEventsPageState
                         ),
                     ],
                   ),
+              ],
+              const SizedBox(height: 12),
+              if ((state.busy || _searching) &&
+                  (!state.loadingMore || _searching))
+                _EventLoadingStatus(
+                  loadingMore: state.loadingMore,
+                  searching: _searching,
+                  loadedCount: items.length,
+                  onStop: _stopSearch,
+                ),
+              if (state.stopped && value != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Text(
+                    context.tr(
+                      'Stopped waiting. Your current events are still shown.',
+                      '已停止等待，仍显示当前活动。',
+                    ),
+                  ),
+                ),
+              if (state.failure case final failure?)
+                StatusPanel(
+                  title: value == null
+                      ? context.tr('Events unavailable', '活动暂不可用')
+                      : context.tr(
+                          'More events couldn’t be loaded',
+                          '无法加载更多活动',
+                        ),
+                  body: value == null
+                      ? localizedFailure(context, failure)
+                      : context.tr(
+                          '${failure.message} Your current events are still shown.',
+                          '${localizedFailure(context, failure)} 仍显示当前活动。',
+                        ),
+                  icon: Icons.cloud_off_outlined,
+                  isError: true,
+                ),
+              if (value != null) ...[
                 if ((_category != null ||
                         query.isNotEmpty ||
                         _timeFilter != EventTimeFilter.all) &&
@@ -355,15 +342,29 @@ final class _ParticipationEventsPageState
                       '当前可用范围内没有活动，请稍后查看。',
                     ),
                   ),
-                for (final source in value.sourceStatus.entries)
-                  Text(
-                    '${source.key == 'onepa' ? 'onePA' : 'Ticketmaster'}: ${source.value ? context.tr('available', '可用') : context.tr('unavailable; other source remains available', '暂不可用，仍可浏览其他来源')}',
+                if (value.sourceStatus.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Wrap(
+                      spacing: 12,
+                      children: [
+                        for (final source in value.sourceStatus.entries)
+                          Text(
+                            '${switch (source.key) {
+                              'onepa' => 'onePA',
+                              'ticketmaster' => 'Ticketmaster',
+                              _ => source.key,
+                            }}: ${source.value ? context.tr('available', '可用') : context.tr('unavailable', '暂不可用')}',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                      ],
+                    ),
                   ),
                 for (final item in matching) ...[
                   EventCard.summary(
                     key: ValueKey(item.eventId ?? item.browseId),
                     summary: item,
-                    onSelect: state.busy
+                    onSelect: state.busy && !state.loadingMore
                         ? null
                         : (id) {
                             if (controller.isCurrentSnapshot(state)) {
@@ -372,6 +373,13 @@ final class _ParticipationEventsPageState
                           },
                   ),
                 ],
+                if (state.loadingMore && !_searching)
+                  _EventLoadingStatus(
+                    loadingMore: true,
+                    searching: false,
+                    loadedCount: items.length,
+                    onStop: _stopSearch,
+                  ),
                 if (value.nextCursor != null)
                   TextButton(
                     onPressed: state.busy ? null : controller.next,
@@ -390,16 +398,23 @@ final class _ParticipationEventsPageState
                   ),
               ] else if (!state.busy && state.failure == null)
                 StatusPanel(
-                  title: context.tr('Refresh your events', '刷新活动列表'),
-                  body: context.tr(
-                    'This view has expired or was cleared. Reload to see current events.',
-                    '此页面的数据已过期或被清除，请重新加载当前活动。',
-                  ),
+                  title: state.stopped
+                      ? context.tr('Stopped waiting for events', '已停止等待活动')
+                      : context.tr('Refresh your events', '刷新活动列表'),
+                  body: state.stopped
+                      ? context.tr(
+                          'This page will ignore the pending response. Reload when you are ready.',
+                          '本页将忽略尚未返回的结果，可以稍后重新加载。',
+                        )
+                      : context.tr(
+                          'This view has expired or was cleared. Reload to see current events.',
+                          '此页面的数据已过期或被清除，请重新加载当前活动。',
+                        ),
                   icon: Icons.event_outlined,
                 ),
               if (value == null)
                 TextButton(
-                  onPressed: state.busy ? null : controller.load,
+                  onPressed: state.busy ? null : _reload,
                   child: Text(
                     value == null && state.failure != null
                         ? context.tr('Retry', '重试')
@@ -473,4 +488,99 @@ final class _ParticipationEventsPageState
       await _searchAvailable();
     }
   }
+}
+
+String _timeLabel(BuildContext context, EventTimeFilter filter) =>
+    switch (filter) {
+      EventTimeFilter.all => context.tr('Any time', '不限时间'),
+      EventTimeFilter.today => context.tr('Today', '今天'),
+      EventTimeFilter.weekend => context.tr('This weekend', '本周末'),
+      EventTimeFilter.sevenDays => context.tr('Next 7 days', '未来七天'),
+    };
+
+String _sortLabel(BuildContext context, int sort) => switch (sort) {
+  1 => context.tr('Earliest first', '最早优先'),
+  -1 => context.tr('Latest first', '最晚优先'),
+  _ => context.tr('Source order', '来源顺序'),
+};
+
+/// Elapsed waiting is feedback only; it does not imply provider progress or
+/// cancellation. The controller retires the response when the user stops.
+class _EventLoadingStatus extends StatefulWidget {
+  const _EventLoadingStatus({
+    required this.loadingMore,
+    required this.searching,
+    required this.loadedCount,
+    required this.onStop,
+  });
+  final bool loadingMore, searching;
+  final int loadedCount;
+  final VoidCallback onStop;
+
+  @override
+  State<_EventLoadingStatus> createState() => _EventLoadingStatusState();
+}
+
+class _EventLoadingStatusState extends State<_EventLoadingStatus> {
+  Timer? _timer;
+  bool _longWait = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer(const Duration(seconds: 10), () {
+      if (mounted) setState(() => _longWait = true);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        LinearProgressIndicator(
+          semanticsLabel: context.tr('Loading events', '正在加载活动'),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          _longWait
+              ? context.tr('Still waiting for event sources…', '仍在等待活动来源…')
+              : widget.searching
+              ? context.tr('Searching available events…', '正在搜索可用活动…')
+              : widget.loadingMore
+              ? context.tr('Reading more events…', '正在读取更多活动…')
+              : context.tr('Reading event sources…', '正在读取活动来源…'),
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        Text(
+          context.tr(
+            'Some sources can take a few minutes. You can leave this page. Stopping ignores the pending response here.',
+            '部分来源可能需要几分钟。你可以离开本页；停止等待后，本页将忽略尚未返回的结果。',
+          ),
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        if (widget.loadedCount > 0)
+          Text(
+            context.tr(
+              '${widget.loadedCount} events loaded',
+              '已加载 ${widget.loadedCount} 个活动',
+            ),
+          ),
+        TextButton(
+          key: Key(
+            widget.searching ? 'events-stop-search' : 'events-stop-waiting',
+          ),
+          onPressed: widget.onStop,
+          child: Text(context.tr('Stop waiting', '停止等待')),
+        ),
+      ],
+    ),
+  );
 }

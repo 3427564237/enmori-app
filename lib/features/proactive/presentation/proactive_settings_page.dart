@@ -9,6 +9,7 @@ import '../../account/account_preferences_providers.dart';
 import '../proactive_providers.dart';
 import 'proactive_status.dart';
 import 'proactive_processing_notice.dart';
+import 'proactive_time_label.dart';
 
 final class ProactiveSettingsPage extends ConsumerStatefulWidget {
   const ProactiveSettingsPage({
@@ -178,8 +179,8 @@ final class _ProactiveSettingsPageState
                                   '已暂停，直到你恢复',
                                 )
                               : context.tr(
-                                  'Paused until ${settings.pausedUntil!.toIso8601String()} · ${settings.timeZone}',
-                                  '已暂停至 ${settings.pausedUntil!.toIso8601String()} · ${settings.timeZone}',
+                                  'Paused until\n${deviceLocalFollowUpTimeLabel(context, settings.pausedUntil!)}',
+                                  '已暂停至\n${deviceLocalFollowUpTimeLabel(context, settings.pausedUntil!)}',
                                 ),
                       }, key: const Key('proactive-mode')),
                     ),
@@ -355,7 +356,19 @@ final class _ProactiveSettingsPageState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(followUpIntentCopy(context, intent)),
-                              Text('${intent.dueAt.toIso8601String()} · UTC'),
+                              Text(
+                                deviceLocalFollowUpTimeLabel(
+                                  context,
+                                  intent.dueAt,
+                                ),
+                                key: ValueKey(
+                                  'proactive-due-${intent.intentId}',
+                                ),
+                              ),
+                              Text(
+                                'UTC: ${intent.dueAt.toUtc().toIso8601String()}',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
                               TextButton(
                                 key: ValueKey(
                                   'proactive-cancel-${intent.intentId}',

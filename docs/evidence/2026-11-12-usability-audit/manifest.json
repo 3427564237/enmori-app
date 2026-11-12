@@ -1,0 +1,30 @@
+{
+  "review_date": "2026-11-12",
+  "timezone": "Asia/Singapore",
+  "source": "a3c6b5448046fa7f65fb25fd809f4f0c9823d87f",
+  "physical_device": "vivo V2405A",
+  "android_api": 37,
+  "font_scale": 1.0,
+  "large_text_tested": false,
+  "screen_reader_tested": false,
+  "private_evidence_root": "/home/miku/.local/state/enmori-usability-audit-20261112",
+  "screenshots": 47,
+  "ui_snapshots": 53,
+  "product_code_changed": false,
+  "installed_apk_sha256": "06bd0ead3c6ee74eb191512c2aff7136d44f7d922186359e817d6f84c53da090",
+  "test_passed": 268,
+  "independent_defect_probe_passed": 1,
+  "evidence_files": {
+    "frontend-review.md": "080a73eabcb8d2faf1582a096f04c21a6c1e31b8bf5ddaa386f991db2d4b60ec",
+    "acceptance-gaps.md": "cb268017d3d0e67a07dedcdf9252392c345bd12e09c8b49de1141ccac9fad285",
+    "pending_save_discard_probe_test.dart": "82456f167204ae9a7c541ce5d743c27d89a5b75c76fdcaf1d3b59104267d0de7",
+    "installed-package-verification.json": "9372dcc9f82f570ac5d1e64c0be928302c813fc3f35807ebf0b76f76ea83629f",
+    "flutter-test-command.json": "61be969948d305896b4cd7ec5766f3d724636b7d1390215ea8901c8f67ad91ed",
+    "pending-save-discard-probe.log": "d91cb8df23d17e56c1c7283bf2d88286a6beb143e26237b4c30c0dceb4b16989",
+    "flutter-regression-summary.json": "ce8156e1a6b33e8a9a3e2a8a882507030de73e3bf193bf79918d98320e919ab9",
+    "automated-artifact-hashes.json": "eca41d2cb424e26449be754b3cd23157bcbbdf7012ecadc680a253f0d3c4eb31",
+    "automated-review.md": "08ecc97345bbf8c2dc2a18f3c21f4b6b66ebadab99a7d19a0ff479e937ecae6f",
+    "timed-events-result.json": "df565e5500f6ae1da7585ede47c19dd5017a93d38b0e06f3fd3df4edc2c4aeae",
+    "README.md": "d8dd621166d73ead788419197864b71315d61cd5daf049691fd77c4370119e5a"
+  }
+}

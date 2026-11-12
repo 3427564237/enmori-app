@@ -1,0 +1,68 @@
+{
+  "local": [
+    {
+      "probe": "current onePA catalogue 20261112",
+      "stage": "http",
+      "elapsedMs": 1202,
+      "kind": "document",
+      "status": 403
+    },
+    {
+      "probe": "current onePA catalogue 20261112",
+      "stage": "provider-restriction",
+      "elapsedMs": 1202
+    },
+    {
+      "probe": "current onePA catalogue 20261112",
+      "stage": "result",
+      "elapsedMs": 1279,
+      "ok": false,
+      "errorName": "Error",
+      "safeReason": null,
+      "aborted": true
+    },
+    {
+      "probe": "owned watchdog",
+      "phase": "complete",
+      "code": 0,
+      "signal": null,
+      "deadlineHit": false,
+      "observedOwnedProcesses": 10,
+      "ownedRunningRemaining": 0,
+      "stderrBytes": 0
+    }
+  ],
+  "azure": [
+    {
+      "probe": "current onePA catalogue 20261112",
+      "stage": "http",
+      "elapsedMs": 21313,
+      "kind": "document",
+      "status": 403
+    },
+    {
+      "probe": "current onePA catalogue 20261112",
+      "stage": "provider-restriction",
+      "elapsedMs": 21313
+    },
+    {
+      "probe": "current onePA catalogue 20261112",
+      "stage": "result",
+      "elapsedMs": 22272,
+      "ok": false,
+      "errorName": "Error",
+      "safeReason": null,
+      "aborted": true
+    },
+    {
+      "probe": "owned watchdog",
+      "phase": "complete",
+      "code": 0,
+      "signal": null,
+      "deadlineHit": false,
+      "observedOwnedProcesses": 14,
+      "ownedRunningRemaining": 0,
+      "stderrBytes": 0
+    }
+  ]
+}

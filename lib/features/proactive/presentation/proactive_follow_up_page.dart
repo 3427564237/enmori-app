@@ -12,6 +12,7 @@ import '../domain/follow_up_quiet.dart';
 import '../proactive_providers.dart';
 import 'proactive_status.dart';
 import 'proactive_processing_notice.dart';
+import 'proactive_time_label.dart';
 
 final class ProactiveFollowUpPage extends ConsumerStatefulWidget {
   const ProactiveFollowUpPage({
@@ -141,6 +142,53 @@ final class _FollowUpPageState extends ConsumerState<ProactiveFollowUpPage> {
         ),
       );
     }
+  }
+
+  Future<void> _pickDate() async {
+    if (!_owns) return;
+    final entered = DateTime.tryParse(_date.text);
+    final initial = entered != null && entered.year >= 1 && entered.year <= 9999
+        ? entered
+        : ref.read(proactiveNowProvider)().toLocal();
+    final selected = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      // Picker assistance does not impose a new scheduling horizon. The
+      // resolver still checks the manually editable civil date and future time.
+      firstDate: DateTime(1),
+      lastDate: DateTime(9999, 12, 31),
+      helpText: context.tr(
+        'Choose date in the selected time zone',
+        '选择所选时区的日期',
+      ),
+    );
+    if (!_owns || selected == null) return;
+    _date.text =
+        '${selected.year.toString().padLeft(4, '0')}-'
+        '${selected.month.toString().padLeft(2, '0')}-'
+        '${selected.day.toString().padLeft(2, '0')}';
+  }
+
+  Future<void> _pickTime() async {
+    if (!_owns) return;
+    final match = RegExp(r'^(\d\d):(\d\d)$').firstMatch(_time.text);
+    final hour = match == null ? null : int.parse(match[1]!);
+    final minute = match == null ? null : int.parse(match[2]!);
+    final initial = hour != null && hour < 24 && minute! < 60
+        ? TimeOfDay(hour: hour, minute: minute)
+        : TimeOfDay.fromDateTime(ref.read(proactiveNowProvider)().toLocal());
+    final selected = await showTimePicker(
+      context: context,
+      initialTime: initial,
+      helpText: context.tr(
+        'Choose time in the selected time zone',
+        '选择所选时区的时间',
+      ),
+    );
+    if (!_owns || selected == null) return;
+    _time.text =
+        '${selected.hour.toString().padLeft(2, '0')}:'
+        '${selected.minute.toString().padLeft(2, '0')}';
   }
 
   FollowUpCivilTime? _civil() {
@@ -411,6 +459,12 @@ final class _FollowUpPageState extends ConsumerState<ProactiveFollowUpPage> {
                         'Date (YYYY-MM-DD)',
                         '日期（YYYY-MM-DD）',
                       ),
+                      suffixIcon: IconButton(
+                        key: const Key('proactive-pick-date'),
+                        tooltip: context.tr('Choose date', '选择日期'),
+                        onPressed: blocked ? null : _pickDate,
+                        icon: const Icon(Icons.calendar_month_outlined),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -424,6 +478,12 @@ final class _FollowUpPageState extends ConsumerState<ProactiveFollowUpPage> {
                         'Local time (HH:mm)',
                         '当地时间（HH:mm）',
                       ),
+                      suffixIcon: IconButton(
+                        key: const Key('proactive-pick-time'),
+                        tooltip: context.tr('Choose time', '选择时间'),
+                        onPressed: blocked ? null : _pickTime,
+                        icon: const Icon(Icons.schedule_outlined),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -433,6 +493,11 @@ final class _FollowUpPageState extends ConsumerState<ProactiveFollowUpPage> {
                     enabled: !blocked,
                     decoration: InputDecoration(
                       labelText: context.tr('IANA time zone', 'IANA 时区'),
+                      helperText: context.tr(
+                        'The date and time above use this zone. Verify before confirming.',
+                        '以上日期和时间以此时区为准，请核对后再确认。',
+                      ),
+                      helperMaxLines: 3,
                     ),
                   ),
                   if (_timeError != null)
@@ -635,7 +700,8 @@ final class _FollowUpPageState extends ConsumerState<ProactiveFollowUpPage> {
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       child: Text(
-                        '${followUpIntentCopy(context, _receipt!)}\n${_receipt!.dueAt.toIso8601String()}',
+                        '${followUpIntentCopy(context, _receipt!)}\n'
+                        '${_chosen?.dueAt == _receipt!.dueAt ? confirmedFollowUpTimeLabel(context, _chosen!) : deviceLocalFollowUpTimeLabel(context, _receipt!.dueAt)}',
                         key: const Key('proactive-receipt'),
                       ),
                     ),

@@ -24,6 +24,16 @@ class ProactivePushControls extends ConsumerWidget {
     final expiry = state.configured && state.authenticated && !state.unconfirmed
         ? state.registration?.expiresAt
         : null;
+    final renewal =
+        state.registration?.enabled == true &&
+        state.registration?.availability ==
+            ProactiveRegistrationAvailability.registered &&
+        !otherInstallation;
+    final enableAgain =
+        state.registration != null &&
+        (state.registration!.availability ==
+                ProactiveRegistrationAvailability.expired ||
+            (!state.registration!.enabled && state.registration!.revision > 0));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -89,8 +99,8 @@ class ProactivePushControls extends ConsumerWidget {
         if (expiry != null)
           Text(
             context.tr(
-              'Registration expiry: ${localTimeLabel(context, expiry)} (local time)',
-              '登记到期时间：${localTimeLabel(context, expiry)}（本地时间）',
+              'Registration expiry: ${localTimeLabel(context, expiry)} (device local time)',
+              '登记到期时间：${localTimeLabel(context, expiry)}（设备本地时间）',
             ),
           ),
         if (state.busy)
@@ -116,7 +126,13 @@ class ProactivePushControls extends ConsumerWidget {
               onPressed: active && !state.unconfirmed
                   ? controller.enablePush
                   : null,
-              child: Text(context.tr('Enable system notifications', '启用系统通知')),
+              child: Text(
+                renewal
+                    ? context.tr('Renew notification registration', '续期通知登记')
+                    : enableAgain
+                    ? context.tr('Enable notifications again', '重新启用系统通知')
+                    : context.tr('Enable system notifications', '启用系统通知'),
+              ),
             ),
             OutlinedButton(
               onPressed: active && !state.unconfirmed && !otherInstallation

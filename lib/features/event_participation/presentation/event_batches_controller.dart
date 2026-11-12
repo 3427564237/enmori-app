@@ -19,10 +19,12 @@ final class EventBatchesState {
     this.busy = false,
     this.loadingMore = false,
     this.failure,
+    this.stopped = false,
   });
   final ActivityBatch? batch;
   final bool busy;
   final bool loadingMore;
+  final bool stopped;
   final AppFailure? failure;
 }
 
@@ -67,9 +69,18 @@ final class EventBatchesController extends Notifier<EventBatchesState> {
   void stopSearch() {
     _search++;
     _generation++;
+    // A fresh source read may already have retired the previous server
+    // generation. Only pagination can safely retain the current snapshot.
+    final stoppedRefresh = state.busy && !state.loadingMore;
+    final retainedBatch = !stoppedRefresh && hasFreshBatch ? state.batch : null;
+    if (stoppedRefresh) {
+      _expiry?.cancel();
+      _expiry = null;
+    }
     state = EventBatchesState(
-      batch: hasFreshBatch ? state.batch : null,
+      batch: retainedBatch,
       failure: state.failure,
+      stopped: state.busy || state.stopped,
     );
   }
 

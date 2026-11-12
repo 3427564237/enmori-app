@@ -16,6 +16,102 @@ import 'proactive_test_support.dart';
 
 void main() {
   testWidgets(
+    'date and time pickers fill civil inputs but require fresh verification and confirmation',
+    (tester) async {
+      final r = await ProactiveRig.create(tester);
+      r.repo.settings = fixtureSettings(mode: ProactiveMode.on, revision: 1);
+      await _pump(
+        tester,
+        r,
+        ProactiveFollowUpPage(source: fixtureSource, onBack: () {}),
+      );
+      await _verify(tester);
+      await _tap(tester, 'proactive-confirm-time');
+      expect(_schedule(tester).onPressed, isNotNull);
+      await _tap(tester, 'proactive-pick-date');
+      await tester.tap(find.text('27').last);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('proactive-date')))
+            .controller!
+            .text,
+        '2026-10-27',
+      );
+      await _visible(tester, 'proactive-confirm-time');
+      expect(
+        tester
+            .widget<CheckboxListTile>(
+              find.byKey(const Key('proactive-confirm-time')),
+            )
+            .value,
+        isFalse,
+      );
+      expect(r.time.resolves, 1);
+
+      await _tap(tester, 'proactive-pick-time');
+      final timePicker = find.byType(TimePickerDialog);
+      expect(timePicker, findsOneWidget);
+      await tester.tap(find.byTooltip('Switch to text input mode'));
+      await tester.pumpAndSettle();
+      final timeFields = find.descendant(
+        of: timePicker,
+        matching: find.byType(TextField),
+      );
+      await tester.enterText(timeFields.at(0), '5');
+      await tester.enterText(timeFields.at(1), '45');
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      await _visible(tester, 'proactive-time');
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('proactive-time')))
+            .controller!
+            .text,
+        '17:45',
+      );
+      await _visible(tester, 'proactive-zone');
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('proactive-zone')))
+            .controller!
+            .text,
+        'Asia/Singapore',
+      );
+      await _visible(tester, 'proactive-schedule');
+      expect(_schedule(tester).onPressed, isNull);
+      expect(r.time.resolves, 1);
+      expect(r.repo.saved, isEmpty);
+      expect(r.repo.creates, isEmpty);
+      expect(tester.takeException(), isNull);
+      await _dispose(tester, r);
+    },
+  );
+  testWidgets(
+    'intent list labels device time without attributing the current settings zone to an old intent',
+    (tester) async {
+      final r = await ProactiveRig.create(tester);
+      r.repo.settings = fixtureSettings(
+        mode: ProactiveMode.on,
+        revision: 1,
+        timeZone: 'America/New_York',
+      );
+      r.repo.active = [fixtureReceipt()];
+      await _pump(tester, r, ProactiveSettingsPage(onBack: () {}));
+      await _visible(tester, 'proactive-due-$fixtureIntent', settings: true);
+      final label = tester
+          .widget<Text>(find.byKey(const Key('proactive-due-$fixtureIntent')))
+          .data!;
+      expect(label, startsWith('Device local time: '));
+      expect(label, contains('Oct 26'));
+      expect(label, isNot(contains('America/New_York')));
+      expect(find.text('UTC: 2026-10-26T08:30:00.000Z'), findsOneWidget);
+      expect(r.repo.creates, isEmpty);
+      await _dispose(tester, r);
+    },
+  );
+  testWidgets(
     'OpenAI confirmation preserves the reviewed Sydney instant and never enables push',
     (tester) async {
       final r = await ProactiveRig.create(
@@ -145,6 +241,18 @@ void main() {
           displayTime: '2026-10-25 02:30',
           offsetLabel: 'UTC+01:00',
         );
+        r.repo.nextCreate = Future.value(
+          Success(
+            FollowUpIntent(
+              intentId: fixtureIntent,
+              revision: 1,
+              state: FollowUpIntentState.queued,
+              dueAt: later.dueAt,
+              expiresAt: later.dueAt.add(const Duration(hours: 1)),
+              conversationId: fixtureTopic,
+            ),
+          ),
+        );
         r.time.resolution = Success([earlier, later]);
         await _pump(
           tester,
@@ -193,6 +301,13 @@ void main() {
           await _tap(tester, 'proactive-confirm-time');
           await _tap(tester, 'proactive-schedule');
           expect(r.repo.creates.single.time.dueAt, later.dueAt);
+          await _visible(tester, 'proactive-receipt');
+          final receipt = tester
+              .widget<Text>(find.byKey(const Key('proactive-receipt')))
+              .data!;
+          expect(receipt, contains('2:30 AM'));
+          expect(receipt, contains('Europe/Berlin · UTC+01:00'));
+          expect(receipt, isNot(contains('UTC+02:00')));
         }
         await _dispose(tester, r);
       },
@@ -283,6 +398,14 @@ void main() {
       await _tap(tester, 'proactive-schedule');
       expect(r.repo.creates, hasLength(1));
       expect(find.byKey(const Key('proactive-receipt')), findsOneWidget);
+      final receiptText = tester
+          .widget<Text>(find.byKey(const Key('proactive-receipt')))
+          .data!;
+      expect(receiptText, contains('Oct 26'));
+      expect(receiptText, contains('4:30 PM'));
+      expect(receiptText, contains('Asia/Singapore · UTC+08:00'));
+      expect(receiptText, isNot(contains('T08:30')));
+      await _visible(tester, 'proactive-schedule');
       expect(_schedule(tester).onPressed, isNull);
       await _tap(tester, 'proactive-done');
       expect(backs, 1);
