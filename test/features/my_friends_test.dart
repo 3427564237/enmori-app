@@ -194,7 +194,12 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Make room for familiar faces'), findsOneWidget);
+      expect(
+        find.text(
+          'No visible friends on this page. Continue to the next page.',
+        ),
+        findsOneWidget,
+      );
       expect(find.text('Next page'), findsOneWidget);
       repo.response = const Success(MyFriendsPage(friends: [rowB]));
       await tester.tap(find.byKey(const Key('my-friends-next')));

@@ -21,11 +21,13 @@ final class ParticipationEventsPage extends ConsumerStatefulWidget {
     required this.onSelect,
     this.onOpenPlans,
     this.onOpenRecent,
+    this.recommendationsBuilder,
     super.key,
   });
   final ValueChanged<String> onSelect;
   final VoidCallback? onOpenPlans;
   final VoidCallback? onOpenRecent;
+  final Widget Function(BuildContext, VoidCallback)? recommendationsBuilder;
   @override
   ConsumerState<ParticipationEventsPage> createState() =>
       _ParticipationEventsPageState();
@@ -44,6 +46,7 @@ final class _ParticipationEventsPageState
   bool _filtersExpanded = false;
   int _searchGeneration = 0;
   Completer<void>? _refreshWait;
+  bool _showRecommendations = false;
   @override
   void initState() {
     super.initState();
@@ -126,6 +129,18 @@ final class _ParticipationEventsPageState
     final page = Scaffold(
       appBar: AppBar(
         title: Text(context.tr('Events', '活动')),
+        bottom: widget.recommendationsBuilder == null
+            ? null
+            : TabBar(
+                onTap: (index) {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                  setState(() => _showRecommendations = index == 0);
+                },
+                tabs: [
+                  Tab(text: context.tr('For you', '为你推荐')),
+                  Tab(text: context.tr('Browse', '浏览活动')),
+                ],
+              ),
         actions: [
           if (widget.onOpenRecent != null)
             IconButton(
@@ -134,328 +149,367 @@ final class _ParticipationEventsPageState
               onPressed: widget.onOpenRecent,
               icon: const Icon(Icons.history),
             ),
-          IconButton(
-            tooltip: context.tr('Refresh events', '刷新活动'),
-            onPressed: state.busy ? null : () => unawaited(_reload()),
-            icon: const Icon(Icons.refresh),
-          ),
+          if (!_showRecommendations)
+            IconButton(
+              tooltip: context.tr('Refresh events', '刷新活动'),
+              onPressed: state.busy ? null : () => unawaited(_reload()),
+              icon: const Icon(Icons.refresh),
+            ),
         ],
       ),
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: _reload,
-          child: ListView(
-            key: const PageStorageKey("events-browse"),
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
-            children: [
-              TextField(
-                key: const Key('events-search'),
-                controller: _search,
-                maxLength: 100,
-                textInputAction: TextInputAction.search,
-                decoration: InputDecoration(
-                  labelText: context.tr('Search events', '搜索活动'),
-                  hintText: context.tr('Name, place or category', '活动名称、地点或分类'),
-                  counterText: '',
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: IconButton(
-                    tooltip: context.tr('Search available events', '搜索全部可用活动'),
-                    onPressed: state.busy || _searching
-                        ? null
-                        : () => unawaited(_searchAvailable()),
-                    icon: const Icon(Icons.arrow_forward),
-                  ),
-                ),
-                onChanged: (value) {
-                  if (_searching) _stopSearch();
-                  setState(() => _query = value);
-                },
-                onSubmitted: (_) => unawaited(_searchAvailable()),
-              ),
-              if (_query.isNotEmpty)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton(
-                    onPressed: () => setState(() {
-                      _search.clear();
-                      _query = '';
-                    }),
-                    child: Text(context.tr('Clear search', '清除搜索')),
-                  ),
-                ),
-              Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: Text(
-                  context.tr('Events across Singapore', '新加坡活动'),
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ),
-              Wrap(
-                spacing: 8,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  TextButton.icon(
-                    key: const Key('events-filters-toggle'),
-                    onPressed: () =>
-                        setState(() => _filtersExpanded = !_filtersExpanded),
-                    icon: Icon(
-                      _filtersExpanded ? Icons.expand_less : Icons.tune,
-                    ),
-                    label: Text(context.tr('Filters and sort', '筛选与排序')),
-                  ),
-                  if (widget.onOpenPlans != null)
-                    TextButton.icon(
-                      onPressed: widget.onOpenPlans,
-                      icon: const Icon(Icons.event_note_outlined),
-                      label: Text(context.tr('My plans', '我的活动计划')),
-                    ),
-                ],
-              ),
-              Text(
-                '${_timeLabel(context, _timeFilter)} · ${_category ?? context.tr('All categories', '全部分类')} · ${_sortLabel(context, _timeSort)}',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              if (_filtersExpanded) ...[
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
+      body: _showRecommendations && widget.recommendationsBuilder != null
+          ? Builder(
+              builder: (context) => widget.recommendationsBuilder!(context, () {
+                DefaultTabController.of(context).animateTo(1);
+                setState(() => _showRecommendations = false);
+              }),
+            )
+          : SafeArea(
+              child: RefreshIndicator(
+                onRefresh: _reload,
+                child: ListView(
+                  key: const PageStorageKey("events-browse"),
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(16),
                   children: [
-                    for (final filter in EventTimeFilter.values)
-                      ChoiceChip(
-                        key: Key('events-time-${filter.name}'),
-                        label: Text(_timeLabel(context, filter)),
-                        selected: _timeFilter == filter,
-                        onSelected: (_) => setState(() => _timeFilter = filter),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<int>(
-                  isExpanded: true,
-                  key: _sortKey,
-                  initialValue: _timeSort,
-                  decoration: InputDecoration(
-                    labelText: context.tr('Time order', '时间排序'),
-                    helperText: context.tr('Device local time', '设备本地时间'),
-                    helperMaxLines: 2,
-                  ),
-                  items: [
-                    for (final sort in [0, 1, -1])
-                      DropdownMenuItem(
-                        value: sort,
-                        child: Text(_sortLabel(context, sort)),
-                      ),
-                  ],
-                  onChanged: (value) => setState(() => _timeSort = value ?? 0),
-                ),
-                if (categories.isNotEmpty || _category != null)
-                  Wrap(
-                    spacing: 8,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      PopupMenuButton<String>(
-                        tooltip: context.tr('Filter event category', '筛选活动分类'),
-                        initialValue: _category,
-                        onSelected: (category) {
-                          setState(() => _category = category);
-                          unawaited(_searchAvailable());
-                        },
-                        itemBuilder: (_) => [
-                          for (final c in categories)
-                            PopupMenuItem(value: c, child: Text(c)),
-                        ],
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.category_outlined, size: 20),
-                              const SizedBox(width: 8),
-                              Flexible(
-                                child: Text(
-                                  _category ??
-                                      context.tr('All categories', '全部分类'),
-                                ),
-                              ),
-                              const Icon(Icons.expand_more),
-                            ],
+                    TextField(
+                      key: const Key('events-search'),
+                      controller: _search,
+                      maxLength: 100,
+                      textInputAction: TextInputAction.search,
+                      decoration: InputDecoration(
+                        labelText: context.tr('Search events', '搜索活动'),
+                        hintText: context.tr(
+                          'Name, place or category',
+                          '活动名称、地点或分类',
+                        ),
+                        counterText: '',
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: IconButton(
+                          tooltip: context.tr(
+                            'Search available events',
+                            '搜索全部可用活动',
                           ),
+                          onPressed: state.busy || _searching
+                              ? null
+                              : () => unawaited(_searchAvailable()),
+                          icon: const Icon(Icons.arrow_forward),
                         ),
                       ),
-                      if (_category != null)
-                        TextButton(
-                          onPressed: () => setState(() => _category = null),
-                          child: Text(context.tr('Clear filter', '清除筛选')),
-                        ),
-                    ],
-                  ),
-              ],
-              const SizedBox(height: 12),
-              if ((state.busy || _searching) &&
-                  (!state.loadingMore || _searching))
-                _EventLoadingStatus(
-                  loadingMore: state.loadingMore,
-                  searching: _searching,
-                  loadedCount: items.length,
-                  onStop: _stopSearch,
-                ),
-              if (state.stopped && value != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Text(
-                    context.tr(
-                      'Stopped waiting. Your current events are still shown.',
-                      '已停止等待，仍显示当前活动。',
+                      onChanged: (value) {
+                        if (_searching) _stopSearch();
+                        setState(() => _query = value);
+                      },
+                      onSubmitted: (_) => unawaited(_searchAvailable()),
                     ),
-                  ),
-                ),
-              if (state.failure case final failure?)
-                StatusPanel(
-                  title: value == null
-                      ? context.tr('Events unavailable', '活动暂不可用')
-                      : context.tr(
-                          'More events couldn’t be loaded',
-                          '无法加载更多活动',
+                    if (_query.isNotEmpty)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton(
+                          onPressed: () => setState(() {
+                            _search.clear();
+                            _query = '';
+                          }),
+                          child: Text(context.tr('Clear search', '清除搜索')),
                         ),
-                  body: value == null
-                      ? localizedFailure(context, failure)
-                      : context.tr(
-                          '${failure.message} Your current events are still shown.',
-                          '${localizedFailure(context, failure)} 仍显示当前活动。',
-                        ),
-                  icon: Icons.cloud_off_outlined,
-                  isError: true,
-                ),
-              if (value != null) ...[
-                if ((_category != null ||
-                        query.isNotEmpty ||
-                        _timeFilter != EventTimeFilter.all) &&
-                    matching.isEmpty &&
-                    !state.busy &&
-                    !_searching)
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    child: Text(
-                      context.tr(
-                        'No matching events in the loaded selection. Clear search/filter, or search the remaining available events.',
-                        '当前已加载范围内没有匹配活动，可清除搜索／筛选，或搜索剩余可用活动。',
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Text(
+                        context.tr('Events across Singapore', '新加坡活动'),
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ),
-                  ),
-                if (items.isEmpty)
-                  Text(
-                    context.tr(
-                      'No events in this available selection. Check again later.',
-                      '当前可用范围内没有活动，请稍后查看。',
-                    ),
-                  ),
-                if (value.sourceStatus.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Wrap(
-                      spacing: 12,
+                    Wrap(
+                      spacing: 8,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        for (final source in value.sourceStatus.entries)
-                          Text(
-                            '${switch (source.key) {
-                              'onepa' => 'onePA',
-                              'ticketmaster' => 'Ticketmaster',
-                              _ => source.key,
-                            }}: ${source.value ? context.tr('available', '可用') : context.tr('unavailable', '暂不可用')}',
-                            style: Theme.of(context).textTheme.bodySmall,
+                        TextButton.icon(
+                          key: const Key('events-filters-toggle'),
+                          onPressed: () => setState(
+                            () => _filtersExpanded = !_filtersExpanded,
+                          ),
+                          icon: Icon(
+                            _filtersExpanded ? Icons.expand_less : Icons.tune,
+                          ),
+                          label: Text(context.tr('Filters and sort', '筛选与排序')),
+                        ),
+                        if (widget.onOpenPlans != null)
+                          TextButton.icon(
+                            onPressed: widget.onOpenPlans,
+                            icon: const Icon(Icons.event_note_outlined),
+                            label: Text(context.tr('My plans', '我的活动计划')),
                           ),
                       ],
                     ),
-                  ),
-                for (final item in matching) ...[
-                  EventCard.summary(
-                    key: ValueKey(item.eventId ?? item.browseId),
-                    summary: item,
-                    onSelect: state.busy && !state.loadingMore
-                        ? null
-                        : (id) {
-                            if (controller.isCurrentSnapshot(state)) {
-                              widget.onSelect(id);
-                            }
-                          },
-                  ),
-                ],
-                if (state.loadingMore && !_searching)
-                  _EventLoadingStatus(
-                    loadingMore: true,
-                    searching: false,
-                    loadedCount: items.length,
-                    onStop: _stopSearch,
-                  ),
-                if (value.nextCursor != null)
-                  TextButton(
-                    onPressed: state.busy ? null : controller.next,
-                    child: Text(
-                      state.failure == null
-                          ? context.tr('Load more events', '加载更多活动')
-                          : context.tr('Try loading more again', '重试加载更多'),
+                    Text(
+                      '${_timeLabel(context, _timeFilter)} · ${_category ?? context.tr('All categories', '全部分类')} · ${_sortLabel(context, _timeSort)}',
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
-                  )
-                else
-                  Text(
-                    context.tr(
-                      'You’ve reached the end of the available events.',
-                      '已到达可用活动的末尾。',
-                    ),
-                  ),
-              ] else if (!state.busy && state.failure == null)
-                StatusPanel(
-                  title: state.stopped
-                      ? context.tr('Stopped waiting for events', '已停止等待活动')
-                      : context.tr('Refresh your events', '刷新活动列表'),
-                  body: state.stopped
-                      ? context.tr(
-                          'The request may still finish, but this page will ignore its response. Reload when you are ready.',
-                          '请求仍可能完成，但本页会忽略它的结果；可以稍后重新加载。',
-                        )
-                      : context.tr(
-                          'This view has expired or was cleared. Reload to see current events.',
-                          '此页面的数据已过期或被清除，请重新加载当前活动。',
-                        ),
-                  icon: Icons.event_outlined,
-                ),
-              if (value == null)
-                TextButton(
-                  onPressed: state.busy ? null : _reload,
-                  child: Text(
-                    value == null && state.failure != null
-                        ? context.tr('Retry', '重试')
-                        : context.tr('Reload', '重新加载'),
-                  ),
-                ),
-              ExpansionTile(
-                key: PageStorageKey('events-source-disclosure'),
-                title: Text(context.tr('About these events', '关于这些活动')),
-                children: [
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    child: Text(
-                      context.tr(
-                        'Ticketmaster and onePA supply this bounded selection; it is not their full catalogues. ENMORI sends the activity request and server connection information, not your sign-in token, profile or private content. Category labels are source labels, not new interest mappings. Views expire after five minutes. Opening the source website does not register or pay for an event.',
-                        '这里展示 Ticketmaster 和 onePA 提供的有限活动，并非完整目录。ENMORI 发送活动请求和服务器连接信息，不发送你的登录令牌、资料或私人内容。分类来自活动来源，不会创建新的兴趣映射。页面数据五分钟后过期。打开来源网站不代表报名或付款。',
+                    if (_filtersExpanded) ...[
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: [
+                          for (final filter in EventTimeFilter.values)
+                            ChoiceChip(
+                              key: Key('events-time-${filter.name}'),
+                              label: Text(_timeLabel(context, filter)),
+                              selected: _timeFilter == filter,
+                              onSelected: (_) =>
+                                  setState(() => _timeFilter = filter),
+                            ),
+                        ],
                       ),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<int>(
+                        isExpanded: true,
+                        key: _sortKey,
+                        initialValue: _timeSort,
+                        decoration: InputDecoration(
+                          labelText: context.tr('Time order', '时间排序'),
+                          helperText: context.tr('Device local time', '设备本地时间'),
+                          helperMaxLines: 2,
+                        ),
+                        items: [
+                          for (final sort in [0, 1, -1])
+                            DropdownMenuItem(
+                              value: sort,
+                              child: Text(_sortLabel(context, sort)),
+                            ),
+                        ],
+                        onChanged: (value) =>
+                            setState(() => _timeSort = value ?? 0),
+                      ),
+                      if (categories.isNotEmpty || _category != null)
+                        Wrap(
+                          spacing: 8,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            PopupMenuButton<String>(
+                              tooltip: context.tr(
+                                'Filter event category',
+                                '筛选活动分类',
+                              ),
+                              initialValue: _category,
+                              onSelected: (category) {
+                                setState(() => _category = category);
+                                unawaited(_searchAvailable());
+                              },
+                              itemBuilder: (_) => [
+                                for (final c in categories)
+                                  PopupMenuItem(value: c, child: Text(c)),
+                              ],
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.category_outlined,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Flexible(
+                                      child: Text(
+                                        _category ??
+                                            context.tr(
+                                              'All categories',
+                                              '全部分类',
+                                            ),
+                                      ),
+                                    ),
+                                    const Icon(Icons.expand_more),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            if (_category != null)
+                              TextButton(
+                                onPressed: () =>
+                                    setState(() => _category = null),
+                                child: Text(context.tr('Clear filter', '清除筛选')),
+                              ),
+                          ],
+                        ),
+                    ],
+                    const SizedBox(height: 12),
+                    if ((state.busy || _searching) &&
+                        (!state.loadingMore || _searching))
+                      _EventLoadingStatus(
+                        loadingMore: state.loadingMore,
+                        searching: _searching,
+                        loadedCount: items.length,
+                        onStop: _stopSearch,
+                      ),
+                    if (state.stopped && value != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Text(
+                          context.tr(
+                            'Stopped waiting. Your current events are still shown.',
+                            '已停止等待，仍显示当前活动。',
+                          ),
+                        ),
+                      ),
+                    if (state.failure case final failure?)
+                      StatusPanel(
+                        title: value == null
+                            ? context.tr('Events unavailable', '活动暂不可用')
+                            : context.tr(
+                                'More events couldn’t be loaded',
+                                '无法加载更多活动',
+                              ),
+                        body: value == null
+                            ? localizedFailure(context, failure)
+                            : context.tr(
+                                '${failure.message} Your current events are still shown.',
+                                '${localizedFailure(context, failure)} 仍显示当前活动。',
+                              ),
+                        icon: Icons.cloud_off_outlined,
+                        isError: true,
+                      ),
+                    if (value != null) ...[
+                      if ((_category != null ||
+                              query.isNotEmpty ||
+                              _timeFilter != EventTimeFilter.all) &&
+                          matching.isEmpty &&
+                          !state.busy &&
+                          !_searching)
+                        Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Text(
+                            context.tr(
+                              'No matching events in the loaded selection. Clear search/filter, or search the remaining available events.',
+                              '当前已加载范围内没有匹配活动，可清除搜索／筛选，或搜索剩余可用活动。',
+                            ),
+                          ),
+                        ),
+                      if (items.isEmpty)
+                        Text(
+                          context.tr(
+                            'No events in this available selection. Check again later.',
+                            '当前可用范围内没有活动，请稍后查看。',
+                          ),
+                        ),
+                      if (value.sourceStatus.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Wrap(
+                            spacing: 12,
+                            children: [
+                              for (final source in value.sourceStatus.entries)
+                                Text(
+                                  '${switch (source.key) {
+                                    'onepa' => 'onePA',
+                                    'ticketmaster' => 'Ticketmaster',
+                                    _ => source.key,
+                                  }}: ${source.value ? context.tr('available', '可用') : context.tr('unavailable', '暂不可用')}',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                            ],
+                          ),
+                        ),
+                      for (final item in matching) ...[
+                        EventCard.summary(
+                          key: ValueKey(item.eventId ?? item.browseId),
+                          summary: item,
+                          onSelect: state.busy && !state.loadingMore
+                              ? null
+                              : (id) {
+                                  if (controller.isCurrentSnapshot(state)) {
+                                    widget.onSelect(id);
+                                  }
+                                },
+                        ),
+                      ],
+                      if (state.loadingMore && !_searching)
+                        _EventLoadingStatus(
+                          loadingMore: true,
+                          searching: false,
+                          loadedCount: items.length,
+                          onStop: _stopSearch,
+                        ),
+                      if (value.nextCursor != null)
+                        TextButton(
+                          onPressed: state.busy ? null : controller.next,
+                          child: Text(
+                            state.failure == null
+                                ? context.tr('Load more events', '加载更多活动')
+                                : context.tr(
+                                    'Try loading more again',
+                                    '重试加载更多',
+                                  ),
+                          ),
+                        )
+                      else
+                        Text(
+                          context.tr(
+                            'You’ve reached the end of the available events.',
+                            '已到达可用活动的末尾。',
+                          ),
+                        ),
+                    ] else if (!state.busy && state.failure == null)
+                      StatusPanel(
+                        title: state.stopped
+                            ? context.tr(
+                                'Stopped waiting for events',
+                                '已停止等待活动',
+                              )
+                            : context.tr('Refresh your events', '刷新活动列表'),
+                        body: state.stopped
+                            ? context.tr(
+                                'The request may still finish, but this page will ignore its response. Reload when you are ready.',
+                                '请求仍可能完成，但本页会忽略它的结果；可以稍后重新加载。',
+                              )
+                            : context.tr(
+                                'This view has expired or was cleared. Reload to see current events.',
+                                '此页面的数据已过期或被清除，请重新加载当前活动。',
+                              ),
+                        icon: Icons.event_outlined,
+                      ),
+                    if (value == null)
+                      TextButton(
+                        onPressed: state.busy ? null : _reload,
+                        child: Text(
+                          value == null && state.failure != null
+                              ? context.tr('Retry', '重试')
+                              : context.tr('Reload', '重新加载'),
+                        ),
+                      ),
+                    ExpansionTile(
+                      key: PageStorageKey('events-source-disclosure'),
+                      title: Text(context.tr('About these events', '关于这些活动')),
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+                          child: Text(
+                            context.tr(
+                              'Ticketmaster and onePA supply this bounded selection; it is not their full catalogues. ENMORI sends the activity request and server connection information, not your sign-in token, profile or private content. Category labels are source labels, not new interest mappings. Views expire after five minutes. Opening the source website does not register or pay for an event.',
+                              '这里展示 Ticketmaster 和 onePA 提供的有限活动，并非完整目录。ENMORI 发送活动请求和服务器连接信息，不发送你的登录令牌、资料或私人内容。分类来自活动来源，不会创建新的兴趣映射。页面数据五分钟后过期。打开来源网站不代表报名或付款。',
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
     return RefreshOnReturn(
       onRefresh: () {
         final controller = ref.read(eventBatchesProvider.notifier);
-        if (!controller.hasFreshBatch) unawaited(_reload());
+        if (!_showRecommendations && !controller.hasFreshBatch) {
+          unawaited(_reload());
+        }
       },
-      child: page,
+      child: widget.recommendationsBuilder == null
+          ? page
+          : DefaultTabController(length: 2, initialIndex: 1, child: page),
     );
   }
 

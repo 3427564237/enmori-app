@@ -22,6 +22,7 @@ List<GoRoute> eventParticipationRoutes({
   String listPath = '/participation-events',
   String? plansPath,
   Widget Function(BuildContext, Widget)? wrapList,
+  Widget Function(BuildContext, VoidCallback)? recommendationsBuilder,
   required bool Function() current,
 }) => [
   GoRoute(
@@ -29,6 +30,7 @@ List<GoRoute> eventParticipationRoutes({
     name: 'root-events',
     builder: (context, state) {
       final page = ParticipationEventsPage(
+        recommendationsBuilder: recommendationsBuilder,
         onOpenRecent: () {
           if (!_atCurrentRoute(context, listPath, current)) return;
           Navigator.of(context).push<void>(

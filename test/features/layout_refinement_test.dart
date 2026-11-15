@@ -189,11 +189,11 @@ void main() {
             await tester.pumpAndSettle();
             expect(find.text('No friends activity to show.'), findsOneWidget);
             await tester.tap(
-              find.widgetWithText(ChoiceChip, 'People you may know'),
+              find.widgetWithText(Tab, 'Discover'),
             );
             await tester.pumpAndSettle();
             expect(find.byTooltip('Recommendation options'), findsOneWidget);
-            await tester.tap(find.text('My Friends'));
+            await tester.tap(find.widgetWithText(Tab, 'My friends'));
             await tester.pumpAndSettle();
             expect(find.text('Alex'), findsOneWidget);
             expect(tester.takeException(), isNull);

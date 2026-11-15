@@ -43,6 +43,7 @@ class Friends implements FriendRepository {
   Completer<Result<MyFriendsPage>>? pending;
   final cursors = <String?>[];
   final queries = <String?>[];
+  Result<MyFriendsPage>? continuedResponse;
   @override
   Future<Result<MyFriendsPage>> listFriends({
     String? cursor,
@@ -50,7 +51,8 @@ class Friends implements FriendRepository {
   }) async {
     cursors.add(cursor);
     queries.add(query);
-    return pending?.future ?? response;
+    return pending?.future ??
+        (cursor == null ? response : continuedResponse ?? response);
   }
 
   @override
@@ -127,7 +129,7 @@ void main() {
       client.close();
     }
   });
-  test('query edits/submission invalidate late responses and cursor; Next replaces; Reload and Clear restart', () async {
+  test('query edits discard late replies; submitted search traverses pages; reload and clear restart', () async {
     final repo = Friends();
     final container = ProviderContainer(
       overrides: [friendRepositoryProvider.overrideWithValue(repo)],
@@ -144,13 +146,12 @@ void main() {
     expect(container.read(myFriendsControllerProvider).nextCursor, isNull);
     repo.pending = null;
     repo.response = Success(MyFriendsPage(friends: [rowB], nextCursor: cursor));
+    repo.continuedResponse = const Success(MyFriendsPage(friends: []));
     await controller.search();
     pending.complete(const Success(MyFriendsPage(friends: [rowA])));
     await old;
     expect(container.read(myFriendsControllerProvider).friends, [rowB]);
     repo.response = const Success(MyFriendsPage(friends: []));
-    await controller.load(next: true);
-    expect(container.read(myFriendsControllerProvider).friends, isEmpty);
     await controller.load();
     await controller.clearSearch();
     expect(repo.queries, ['Alice', 'Bob', 'Bob', 'Bob', null]);
@@ -242,10 +243,11 @@ void main() {
       expect(repo.queries, [null]);
       await tester.enterText(field, 'Alice');
       repo.response = Success(MyFriendsPage(friends: [], nextCursor: cursor));
+      repo.continuedResponse = const Success(MyFriendsPage(friends: []));
       await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pumpAndSettle();
       expect(tester.widget<TextField>(field).focusNode!.hasFocus, isFalse);
-      expect(find.text('No matching friends on this page.'), findsOneWidget);
+      expect(find.text('No matching friends'), findsOneWidget);
       expect(find.text('Member A'), findsNothing);
       final semantics = tester.ensureSemantics();
 
@@ -253,7 +255,6 @@ void main() {
         'my-friends-search',
         'my-friends-clear-search',
         'my-friends-reload',
-        'my-friends-next',
       ]) {
         final finder = find.byKey(Key(key));
         await tester.ensureVisible(finder);
@@ -271,12 +272,10 @@ void main() {
       }
       semantics.dispose();
       repo.response = const Success(MyFriendsPage(friends: [rowB]));
-      await tester.tap(find.byKey(const Key('my-friends-next')));
-      await tester.pumpAndSettle();
-      expect(find.text('Member B'), findsOneWidget);
       await tester.ensureVisible(find.byKey(const Key('my-friends-reload')));
       await tester.tap(find.byKey(const Key('my-friends-reload')));
       await tester.pumpAndSettle();
+      expect(find.text('Member B'), findsOneWidget);
       await tester.tap(find.byKey(const Key('my-friends-clear-search')));
       await tester.pumpAndSettle();
       expect(tester.widget<TextField>(field).controller!.text, '');

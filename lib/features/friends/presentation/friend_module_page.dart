@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../check_in/check_in_providers.dart';
 import '../../check_in/domain/check_in_repository.dart';
 import '../../auth/auth_providers.dart';
-import '../../../core/presentation/enmori_motion.dart';
 import 'friend_page.dart';
 import 'my_friends_page.dart';
 import 'my_friends_controller.dart';
@@ -176,69 +175,61 @@ final class _FriendModulePageState extends ConsumerState<FriendModulePage> {
         children: [discovery(false)],
       ),
     ];
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(context.tr('Friends', '好友')),
-        actions: [
-          IconButton(
-            tooltip: context.tr('Find people and requests', '查找用户与好友请求'),
-            onPressed: requests,
-            icon: Badge(
-              isLabelVisible: pending != null && pending > 0,
-              label: Text('$pending'),
-              child: const Icon(Icons.person_add_alt),
-            ),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 4,
-                children: [
-                  for (final (index, title) in [
-                    context.tr('My Friends', '我的好友'),
-                    context.tr('Activity', '动态'),
-                    context.tr('People you may know', '可能认识的人'),
-                  ].indexed)
-                    ChoiceChip(
-                      chipAnimationStyle: EnmoriMotion.chips(context),
-                      label: Text(title),
-                      selected: _view == index,
-                      onSelected: (_) {
-                        FocusManager.instance.primaryFocus?.unfocus();
-                        setState(() {
-                          _view = index;
-                          _visited.add(index);
-                        });
-                      },
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: IndexedStack(
-                index: _view,
-                children: [
-                  for (var i = 0; i < views.length; i++)
-                    TickerMode(
-                      enabled: _view == i,
-                      child: ExcludeFocus(
-                        excluding: _view != i,
-                        child: _visited.contains(i)
-                            ? views[i]()
-                            : const SizedBox.shrink(),
-                      ),
-                    ),
-                ],
+    return DefaultTabController(
+      length: 3,
+      initialIndex: _view,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(context.tr('Friends', '好友')),
+          actions: [
+            IconButton(
+              tooltip: context.tr('Find people and requests', '查找用户与好友请求'),
+              onPressed: requests,
+              icon: Badge(
+                isLabelVisible: pending != null && pending > 0,
+                label: Text('$pending'),
+                child: const Icon(Icons.person_add_alt),
               ),
             ),
           ],
+        ),
+        body: SafeArea(
+          child: Column(
+            children: [
+              TabBar(
+                onTap: (index) {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                  setState(() {
+                    _view = index;
+                    _visited.add(index);
+                  });
+                },
+                tabs: [
+                  Tab(text: context.tr('My friends', '我的好友')),
+                  Tab(text: context.tr('Activity', '动态')),
+                  Tab(text: context.tr('Discover', '发现')),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: IndexedStack(
+                  index: _view,
+                  children: [
+                    for (var i = 0; i < views.length; i++)
+                      TickerMode(
+                        enabled: _view == i,
+                        child: ExcludeFocus(
+                          excluding: _view != i,
+                          child: _visited.contains(i)
+                              ? views[i]()
+                              : const SizedBox.shrink(),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

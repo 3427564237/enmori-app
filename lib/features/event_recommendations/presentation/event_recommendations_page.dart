@@ -150,12 +150,16 @@ final class EventRecommendationsPage extends ConsumerStatefulWidget {
     this.recommendationCardBuilder,
     this.syntheticPreview = false,
     this.initialEventIndex = 0,
+    this.embedded = false,
+    this.onBrowseAll,
     super.key,
   }) : assert(initialEventIndex >= 0);
   final void Function(String)? onOpenEvent;
   final RecommendationCardBuilder? recommendationCardBuilder;
   final bool syntheticPreview;
   final int initialEventIndex;
+  final bool embedded;
+  final VoidCallback? onBrowseAll;
 
   @override
   ConsumerState<EventRecommendationsPage> createState() =>
@@ -304,17 +308,20 @@ final class _EventRecommendationsPageState
         response != null &&
         (currentIndex < 0 ? 0 : currentIndex) + 2 < response.items.length;
     final page = Scaffold(
-      appBar: AppBar(title: Text(context.tr('Event recommendations', '活动推荐'))),
+      appBar: widget.embedded
+          ? null
+          : AppBar(title: Text(context.tr('Event recommendations', '活动推荐'))),
       body: SafeArea(
         child: ListView(
           key: const Key('route-event-recommendations'),
           padding: const EdgeInsets.all(24),
           children: [
-            Text(
-              context.tr('Event recommendations', '活动推荐'),
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const SizedBox(height: 16),
+            if (!widget.embedded)
+              Text(
+                context.tr('Event recommendations', '活动推荐'),
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+            if (!widget.embedded) const SizedBox(height: 16),
             _RecommendationContent(
               state: state,
               onRetry: _load,
@@ -322,6 +329,7 @@ final class _EventRecommendationsPageState
               recommendationCardBuilder: widget.recommendationCardBuilder,
               syntheticPreview: widget.syntheticPreview,
               eventKeys: _eventKeys,
+              onBrowseAll: widget.onBrowseAll,
             ),
           ],
         ),
@@ -495,12 +503,21 @@ final class _RecommendationContent extends StatelessWidget {
                 title: context.tr(eventEmptyTitle, '暂时没有活动推荐'),
                 body: context.tr(eventEmptyBody, '可以更新兴趣或稍后再查看。'),
                 icon: Icons.event_busy_outlined,
-                action: onSeeAll == null
+                action: onBrowseAll != null
+                    ? OutlinedButton.icon(
+                        key: const Key('event-recommendations-browse-empty'),
+                        onPressed: onBrowseAll,
+                        icon: const Icon(Icons.explore_outlined),
+                        label: Text(context.tr('Browse activities', '浏览活动')),
+                      )
+                    : onSeeAll == null
                     ? null
                     : OutlinedButton(
                         key: const Key('event-recommendations-see-all-empty'),
                         onPressed: onSeeAll,
-                        child: Text(context.tr('All recommendations', '查看全部推荐')),
+                        child: Text(
+                          context.tr('All recommendations', '查看全部推荐'),
+                        ),
                       ),
               )
             : _RecommendationList(

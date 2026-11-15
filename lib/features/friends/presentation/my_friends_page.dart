@@ -30,7 +30,6 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
     with WidgetsBindingObserver {
   final _query = TextEditingController();
   final _queryFocus = FocusNode();
-  bool _specialCareOnly = false;
   @override
   void initState() {
     super.initState();
@@ -73,11 +72,13 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
       padding: const EdgeInsets.all(16),
       children: [
         TextField(
+          enabled: state.updatingUsername == null,
           key: const Key('my-friends-search-query'),
           controller: _query,
           focusNode: _queryFocus,
           decoration: InputDecoration(
-            labelText: context.tr('Display name', '显示名称'),
+            labelText: context.tr('Search friends', '搜索好友'),
+            hintText: context.tr('Display name', '显示名称'),
             prefixIcon: const Icon(Icons.search),
             errorText: state.queryError == null
                 ? null
@@ -106,12 +107,20 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
           spacing: 8,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            if (state.friends.isNotEmpty || _specialCareOnly)
-              FilterChip(
-                label: Text(context.tr('Special Care', '特别关心')),
-                selected: _specialCareOnly,
-                onSelected: (value) => setState(() => _specialCareOnly = value),
-              ),
+            FilterChip(
+              label: Text(context.tr('All', '全部')),
+              selected: !state.specialCareOnly,
+              onSelected: state.updatingUsername != null
+                  ? null
+                  : (_) => controller.filterStarred(false),
+            ),
+            FilterChip(
+              label: Text(context.tr('Starred', '星标')),
+              selected: state.specialCareOnly,
+              onSelected: state.updatingUsername != null
+                  ? null
+                  : (_) => controller.filterStarred(true),
+            ),
             if (state.searching || state.query.isNotEmpty)
               TextButton(
                 key: const Key('my-friends-clear-search'),
@@ -135,6 +144,30 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
           LinearProgressIndicator(
             semanticsLabel: context.tr('Loading friends', '正在加载好友'),
           ),
+        if (state.busy && state.filtered && state.updatingUsername == null)
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  context.tr(
+                    'Searching all friends… Results are still loading.',
+                    '正在查找全部好友…结果尚未加载完成。',
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: controller.pauseScan,
+                child: Text(context.tr('Stop', '停止')),
+              ),
+            ],
+          ),
+        if (state.scanPaused)
+          Text(
+            context.tr(
+              'Search paused. Continue to see all matches.',
+              '查找已暂停，继续查找以查看全部匹配结果。',
+            ),
+          ),
         if (state.failure case final failure?)
           StatusPanel(
             title: context.tr('Friends couldn’t be loaded', '无法加载好友'),
@@ -146,12 +179,17 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
               child: Text(context.tr('Try again', '重试')),
             ),
           ),
-        if (state.loaded && state.friends.isEmpty)
+        if (state.loaded && state.friends.isEmpty && state.nextCursor == null)
           StatusPanel(
-            title: state.searching
-                ? context.tr('No matching friends on this page.', '本页没有匹配的好友。')
+            title: state.filtered
+                ? context.tr('No matching friends', '没有匹配的好友')
                 : context.tr('Make room for familiar faces', '从认识的人开始'),
-            body: state.searching
+            body: state.specialCareOnly
+                ? context.tr(
+                    'Star friends using the star beside their name. Only you can see this choice.',
+                    '点击好友姓名旁的星标即可添加，只有你能看到这个选择。',
+                  )
+                : state.searching
                 ? context.tr(
                     'Try another display name, or clear your search.',
                     '尝试其他显示名称，或清除搜索。',
@@ -161,12 +199,19 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
                     '查找你认识的人，建立好友联系。',
                   ),
             icon: Icons.people_outline,
-            action: !state.searching && widget.onFindPeople != null
+            action: !state.filtered && widget.onFindPeople != null
                 ? TextButton(
                     onPressed: widget.onFindPeople,
                     child: Text(context.tr('Find people', '查找用户')),
                   )
                 : null,
+          ),
+        if (state.loaded && state.friends.isEmpty && state.nextCursor != null)
+          Text(
+            context.tr(
+              'No visible friends on this page. Continue to the next page.',
+              '本页没有可显示的好友，请继续查看下一页。',
+            ),
           ),
         if (state.searching &&
             !state.loaded &&
@@ -179,40 +224,90 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
               '点击搜索，查找这个显示名称。',
             ),
           ),
-        if (state.loaded &&
-            state.friends.isNotEmpty &&
-            _specialCareOnly &&
-            !state.friends.any((friend) => friend.specialCare))
-          Text(
-            context.tr('No Special Care friends on this page.', '本页没有特别关心的好友。'),
-          ),
-        for (final friend in state.friends.where(
-          (friend) => !_specialCareOnly || friend.specialCare,
-        ))
+        for (final friend in state.friends)
           widget.onOpenFriend != null
               ? ListTile(
                   key: Key('my-friend-profile-${friend.username}'),
                   title: Text(friend.displayName),
-                  leading: Semantics(
-                    label: friend.specialCare
-                        ? context.tr('Special Care', '特别关心')
-                        : null,
-                    child: IdentityAvatar(username: friend.username),
-                  ),
+                  leading: IdentityAvatar(username: friend.username),
                   subtitle: Text('@${friend.username}'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () async {
-                    final session = ref.read(authSessionProvider).asData?.value;
-                    controller.clear(preserveQuery: true);
-                    await widget.onOpenFriend?.call(friend.username);
-                    if (mounted &&
-                        identical(
-                          session,
-                          ref.read(authSessionProvider).asData?.value,
-                        )) {
-                      await controller.load();
-                    }
-                  },
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        key: Key('friend-star-${friend.username}'),
+                        tooltip: friend.specialCare
+                            ? context.tr('Unstar friend', '取消星标')
+                            : context.tr(
+                                'Star friend · only visible to you',
+                                '星标好友 · 仅自己可见',
+                              ),
+                        onPressed: state.busy
+                            ? null
+                            : () async {
+                                final session = ref
+                                    .read(authSessionProvider)
+                                    .asData
+                                    ?.value;
+                                final failure = await controller.setStarred(
+                                  friend.username,
+                                  !friend.specialCare,
+                                );
+                                if (!context.mounted ||
+                                    failure == null ||
+                                    !identical(
+                                      session,
+                                      ref
+                                          .read(authSessionProvider)
+                                          .asData
+                                          ?.value,
+                                    )) {
+                                  return;
+                                }
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      localizedFailure(context, failure),
+                                    ),
+                                  ),
+                                );
+                              },
+                        icon: state.updatingUsername == friend.username
+                            ? const SizedBox.square(
+                                dimension: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Icon(
+                                friend.specialCare
+                                    ? Icons.star_rounded
+                                    : Icons.star_outline_rounded,
+                                color: friend.specialCare
+                                    ? Theme.of(context).colorScheme.primary
+                                    : null,
+                              ),
+                      ),
+                      const Icon(Icons.chevron_right),
+                    ],
+                  ),
+                  onTap: state.busy
+                      ? null
+                      : () async {
+                          final session = ref
+                              .read(authSessionProvider)
+                              .asData
+                              ?.value;
+                          controller.clear(preserveQuery: true);
+                          await widget.onOpenFriend?.call(friend.username);
+                          if (mounted &&
+                              identical(
+                                session,
+                                ref.read(authSessionProvider).asData?.value,
+                              )) {
+                            await controller.load();
+                          }
+                        },
                 )
               : Padding(
                   padding: const EdgeInsets.all(16),
@@ -224,12 +319,18 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
                     ],
                   ),
                 ),
-        if (state.nextCursor != null)
+        if (state.nextCursor != null || state.scanPaused)
           OutlinedButton(
             key: const Key('my-friends-next'),
             style: OutlinedButton.styleFrom(minimumSize: const Size(64, 48)),
-            onPressed: state.busy ? null : () => controller.load(next: true),
-            child: Text(context.tr('Next page', '下一页')),
+            onPressed: state.busy
+                ? null
+                : () => controller.load(next: state.nextCursor != null),
+            child: Text(
+              state.filtered
+                  ? context.tr('Continue search', '继续查找')
+                  : context.tr('Next page', '下一页'),
+            ),
           ),
       ],
     );

@@ -292,6 +292,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           current: canNavigateActivity,
           listPath: AppRoutes.activities,
           plansPath: AppRoutes.eventPlans,
+          recommendationsBuilder: (context, browse) => EventRecommendationsPage(
+            embedded: true,
+            onBrowseAll: browse,
+            recommendationCardBuilder: (context, event, onOpen) =>
+                ConnectedRecommendationCard(event: event, onOpen: onOpen),
+            onOpenEvent: (id) {
+              if (context.mounted && canNavigateActivity()) {
+                context.push<void>(eventPath(id));
+              }
+            },
+          ),
           wrapList: (context, child) =>
               rootTab(context, AppRoutes.activities, 2, child),
           onProfile: (context, username) =>
@@ -872,6 +883,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.eventRecommendations,
         builder: (context, state) => EventRecommendationsPage(
+          onBrowseAll: () => context.push<void>(AppRoutes.activities),
           initialEventIndex: state.uri.queryParameters['from'] == '2' ? 2 : 0,
           recommendationCardBuilder: participationEnabled
               ? (context, event, onOpen) =>

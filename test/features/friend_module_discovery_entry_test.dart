@@ -31,13 +31,14 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      final chip = find.widgetWithText(ChoiceChip, 'People you may know');
-      expect(tester.widget<ChoiceChip>(chip).selected, initialDiscovery);
+      final tab = find.widgetWithText(Tab, 'Discover');
+      final controller = DefaultTabController.of(tester.element(tab));
+      expect(controller.index, initialDiscovery ? 2 : 0);
       if (!initialDiscovery) {
-        await tester.tap(chip);
+        await tester.tap(tab);
         await tester.pumpAndSettle();
       }
-      expect(tester.widget<ChoiceChip>(chip).selected, isTrue);
+      expect(controller.index, 2);
       expect(find.byType(FriendDiscoveryPanel), findsOneWidget);
       expect(find.text('No matches right now'), findsOneWidget);
       expect(tester.takeException(), isNull);

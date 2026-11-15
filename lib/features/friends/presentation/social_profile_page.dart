@@ -388,7 +388,7 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
     if (profile.relationship == SocialRelationship.friend) ...[
       SwitchListTile(
         contentPadding: EdgeInsets.zero,
-        title: Text(context.tr('Special Care', '特别关心')),
+        title: Text(context.tr('Starred friend', '星标好友')),
         subtitle: Text(
           context.tr('Only you can see this choice.', '只有你能看到这个选择。'),
         ),
