@@ -449,23 +449,44 @@ final class _AccountPreferencesPageState
                       ),
                       if (widget.recommendationSection != null)
                         widget.recommendationSection!,
-                      TextField(
-                        key: const Key('profile-region'),
-                        readOnly: widget.recommendationSection != null,
-                        controller: _region,
-                        onChanged: (_) => setState(() {}),
-                        enabled: ready,
-                        maxLength: 120,
-                        decoration: InputDecoration(
-                          labelText: context.tr('Previous region', '原地区'),
+                      if (widget.recommendationSection == null)
+                        TextField(
+                          key: const Key('profile-region'),
+                          controller: _region,
+                          onChanged: (_) => setState(() {}),
+                          enabled: ready,
+                          maxLength: 120,
+                          decoration: InputDecoration(
+                            labelText: context.tr('Previous region', '原地区'),
+                          ),
                         ),
-                      ),
-                      Text(
-                        context.tr(
-                          'Kept for reference. Choose your home area in Recommendation profile.',
-                          '保留供参考。请在推荐资料中选择常用地区。',
+                      if (widget.recommendationSection != null &&
+                          _region.text.trim().isNotEmpty)
+                        Padding(
+                          key: const Key('profile-previous-region'),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                context.tr(
+                                  'Previous region (read-only)',
+                                  '原地区（仅供参考）',
+                                ),
+                                style: Theme.of(context).textTheme.labelLarge,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(_region.text),
+                              const SizedBox(height: 4),
+                              Text(
+                                context.tr(
+                                  'Choose your home area in Recommendation profile above.',
+                                  '请在上方的推荐资料中选择常用地区。',
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
                       const SizedBox(height: 24),
                       Text(
                         context.tr('Profile visibility', "资料可见范围"),

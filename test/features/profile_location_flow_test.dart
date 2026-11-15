@@ -135,10 +135,11 @@ void main() {
       container.read(appRouterProvider).go(AppRoutes.profileEdit);
       await _frames(tester);
 
-      final region = find.byKey(const Key('profile-region'));
+      final region = find.byKey(const Key('profile-previous-region'));
       await tester.ensureVisible(region);
-      expect(tester.widget<TextField>(region).readOnly, isTrue);
-      expect(tester.widget<TextField>(region).controller!.text, legacyRegion);
+      expect(find.byKey(const Key('profile-region')), findsNothing);
+      expect(find.text('Previous region (read-only)'), findsOneWidget);
+      expect(find.text(legacyRegion), findsOneWidget);
       expect(find.byKey(const Key('profile-sync-location')), findsNothing);
       final name = find.byKey(const Key('profile-display-name'));
       await tester.ensureVisible(name);
@@ -173,7 +174,7 @@ void main() {
 
       expect(find.byType(RecommendationProfilePage), findsNothing);
       expect(find.byKey(const Key('route-profile-edit')), findsOneWidget);
-      expect(tester.widget<TextField>(region).controller!.text, legacyRegion);
+      expect(find.text(legacyRegion), findsOneWidget);
       expect(
         tester.widget<TextField>(name).controller!.text,
         'Name waiting for Save',

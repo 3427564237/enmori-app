@@ -9,10 +9,16 @@ import '../domain/interest_repository.dart';
 import 'interest_editor_controller.dart';
 
 final class InterestEditorPage extends ConsumerStatefulWidget {
-  const InterestEditorPage({this.onSaved, this.onSkip, super.key});
+  const InterestEditorPage({
+    this.onSaved,
+    this.onSkip,
+    this.setupStepCount,
+    super.key,
+  });
 
   final ValueChanged<InterestSelection>? onSaved;
   final VoidCallback? onSkip;
+  final int? setupStepCount;
 
   @override
   ConsumerState<InterestEditorPage> createState() => _InterestEditorPageState();
@@ -121,6 +127,21 @@ final class _InterestEditorPageState extends ConsumerState<InterestEditorPage> {
       key: const Key('route-interests'),
       padding: const EdgeInsets.all(16),
       children: [
+        if (widget.setupStepCount case final step?) ...[
+          Text(
+            context.tr(
+              'Step $step of $step · Interests',
+              '第 $step/$step 步 · 兴趣',
+            ),
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+          const SizedBox(height: 8),
+          LinearProgressIndicator(
+            value: 1,
+            semanticsLabel: context.tr('Profile setup progress', '资料完善进度'),
+          ),
+          const SizedBox(height: 24),
+        ],
         if (widget.onSkip != null) ...[
           Text(
             context.tr('A little space for your everyday', "留一处空间给日常"),

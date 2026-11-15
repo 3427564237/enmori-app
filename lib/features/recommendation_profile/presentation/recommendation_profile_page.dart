@@ -92,7 +92,8 @@ class _AreaPickerState extends State<_AreaPicker> {
 }
 
 class RecommendationProfilePage extends ConsumerStatefulWidget {
-  const RecommendationProfilePage({super.key});
+  const RecommendationProfilePage({this.onboarding = false, super.key});
+  final bool onboarding;
   @override
   ConsumerState<RecommendationProfilePage> createState() => _ProfileState();
 }
@@ -186,13 +187,14 @@ class _ProfileState extends ConsumerState<RecommendationProfilePage> {
       setState(() {
         _load(value);
         _dirty = false;
-        _busy = false;
         _uncertain = false;
       });
       ref.invalidate(recommendationProfileProvider);
       ref.read(contentAccessProvider.notifier).mutationSettled(session);
       await ref.read(activityAreaProvider.notifier).refresh();
-      if (mounted) {
+      if (mounted &&
+          identical(session, ref.read(authSessionProvider).asData?.value)) {
+        setState(() => _busy = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -210,6 +212,20 @@ class _ProfileState extends ConsumerState<RecommendationProfilePage> {
           '保存未确认，草稿已保留。请先读取已保存版本再重试。',
         );
       });
+    }
+  }
+
+  Future<void> _saveAndContinue() async {
+    await _save();
+    if (mounted &&
+        widget.onboarding &&
+        _current &&
+        ModalRoute.of(context)?.isCurrent == true &&
+        !_busy &&
+        !_dirty &&
+        !_uncertain &&
+        _base?.onboardingPromptSeen == true) {
+      Navigator.pop(context);
     }
   }
 
@@ -414,12 +430,23 @@ class _ProfileState extends ConsumerState<RecommendationProfilePage> {
           title: Text(context.tr('Recommendation profile', '推荐资料')),
         ),
         body: Center(
-          child: _opening
-              ? const CircularProgressIndicator()
-              : TextButton(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (_opening)
+                const CircularProgressIndicator()
+              else
+                TextButton(
                   onPressed: _readFresh,
                   child: Text(context.tr('Unable to load. Retry', '读取失败，重试')),
                 ),
+              if (widget.onboarding)
+                TextButton(
+                  onPressed: () => Navigator.maybePop(context),
+                  child: Text(context.tr('Skip for now', '暂时跳过')),
+                ),
+            ],
+          ),
         ),
       );
     }
@@ -517,6 +544,18 @@ class _ProfileState extends ConsumerState<RecommendationProfilePage> {
         body: ListView(
           padding: const EdgeInsets.all(20),
           children: [
+            if (widget.onboarding) ...[
+              Text(
+                context.tr('Step 2 of 3 · Recommendations', '第 2/3 步 · 推荐偏好'),
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+              const SizedBox(height: 8),
+              LinearProgressIndicator(
+                value: 2 / 3,
+                semanticsLabel: context.tr('Profile setup progress', '资料完善进度'),
+              ),
+              const SizedBox(height: 24),
+            ],
             Text(
               context.tr(
                 'Optional information helps find relevant activities and people. Birthday and device coordinates are never shown on your discovery card.',
@@ -691,6 +730,14 @@ class _ProfileState extends ConsumerState<RecommendationProfilePage> {
                       },
                 child: Text(context.tr('Skip for now', '暂时跳过')),
               ),
+            if (widget.onboarding &&
+                (_dirty || _base!.onboardingPromptSeen || _uncertain))
+              TextButton(
+                onPressed: _busy ? null : () => Navigator.maybePop(context),
+                child: Text(
+                  context.tr('Continue without saving changes', '不保存更改并继续'),
+                ),
+              ),
             if (_error != null)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
@@ -705,12 +752,14 @@ class _ProfileState extends ConsumerState<RecommendationProfilePage> {
                 child: Text(context.tr('Read saved version', '读取已保存版本')),
               ),
             FilledButton(
-              onPressed: _busy || _uncertain ? null : _save,
+              onPressed: _busy || _uncertain ? null : _saveAndContinue,
               child: Text(
                 _busy
                     ? (_uncertain
                           ? context.tr('Reading…', '读取中…')
                           : context.tr('Saving…', '保存中…'))
+                    : widget.onboarding
+                    ? context.tr('Save and continue', '保存并继续')
                     : context.tr('Save', '保存'),
               ),
             ),

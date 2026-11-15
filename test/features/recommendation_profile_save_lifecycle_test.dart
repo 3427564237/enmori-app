@@ -61,11 +61,14 @@ Future<void> _open(
   WidgetTester tester,
   _Profiles profiles, {
   Stream<AuthSession>? sessions,
+  bool onboarding = false,
+  ActivityAreaController Function()? activity,
 }) async {
   await tester.pumpWidget(
     ProviderScope(
       retry: (_, _) => null,
       overrides: [
+        if (activity != null) activityAreaProvider.overrideWith(activity),
         recommendationProfileRepositoryProvider.overrideWithValue(profiles),
         regionRepositoryProvider.overrideWithValue(_Regions()),
         currentAuthSubjectProvider.overrideWithValue('synthetic-owner'),
@@ -79,7 +82,8 @@ Future<void> _open(
             body: TextButton(
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (_) => const RecommendationProfilePage(),
+                  builder: (_) =>
+                      RecommendationProfilePage(onboarding: onboarding),
                 ),
               ),
               child: const Text('Open profile'),
@@ -108,7 +112,44 @@ Future<void> _editAndSave(WidgetTester tester, {bool edit = true}) async {
   await tester.pump();
 }
 
+class _PendingActivityArea extends ActivityAreaController {
+  final refreshed = Completer<void>();
+  @override
+  ActivityArea build() => const ActivityArea();
+  @override
+  Future<void> refresh() => refreshed.future;
+}
+
 void main() {
+  testWidgets('setup waits for the post-save refresh before advancing once', (
+    tester,
+  ) async {
+    final profiles = _Profiles();
+    final activity = _PendingActivityArea();
+    await _open(tester, profiles, onboarding: true, activity: () => activity);
+    final save = find.widgetWithText(FilledButton, 'Save and continue');
+    await tester.scrollUntilVisible(
+      save,
+      350,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(save);
+    await tester.pump();
+    profiles.result.complete(Success(profiles.attempted!));
+    await tester.pump();
+    expect(
+      tester.widget<FilledButton>(find.byType(FilledButton).last).onPressed,
+      isNull,
+    );
+    await tester.pageBack();
+    await tester.pump();
+    expect(find.byType(RecommendationProfilePage), findsOneWidget);
+    activity.refreshed.complete();
+    await tester.pumpAndSettle();
+    expect(find.byType(RecommendationProfilePage), findsNothing);
+    expect(find.text('Open profile'), findsOneWidget);
+  });
+
   testWidgets(
     'saved comparison hides private values when the login session changes',
     (tester) async {

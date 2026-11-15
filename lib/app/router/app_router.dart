@@ -22,6 +22,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/account/account_providers.dart';
 import '../../features/account/presentation/onboarding_page.dart';
+import '../../features/account/presentation/registration_profile_page.dart';
 import '../../features/account/presentation/own_profile_page.dart';
 import '../../features/account/presentation/account_preferences_page.dart';
 import '../../features/account/presentation/account_preferences_controller.dart';
@@ -61,6 +62,7 @@ abstract final class AppRoutes {
   static const signIn = '/sign-in';
   static const onboarding = '/onboarding';
   static const setupInterests = '/setup-interests';
+  static const setupProfile = '/setup-profile';
   static const home = '/home';
   static const profile = '/profile';
   static const personas = '/personas';
@@ -569,21 +571,37 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.onboarding,
         builder: (context, state) => OnboardingPage(
-          onCompleted: () async {
+          onCompleted: () => context.go(AppRoutes.setupProfile),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.setupProfile,
+        builder: (context, state) => RegistrationProfilePage(
+          hasRecommendationStep: remoteGroup,
+          onContinue: () async {
+            final session = ref.read(authSessionProvider).asData?.value;
             if (remoteGroup) {
               await Navigator.of(context).push<void>(
                 MaterialPageRoute(
-                  builder: (_) => const RecommendationProfilePage(),
+                  builder: (_) =>
+                      const RecommendationProfilePage(onboarding: true),
                 ),
               );
             }
-            if (context.mounted) context.go(AppRoutes.setupInterests);
+            if (context.mounted &&
+                identical(
+                  session,
+                  ref.read(authSessionProvider).asData?.value,
+                )) {
+              context.go(AppRoutes.setupInterests);
+            }
           },
         ),
       ),
       GoRoute(
         path: AppRoutes.setupInterests,
         builder: (context, state) => InterestEditorPage(
+          setupStepCount: remoteGroup ? 3 : 2,
           onSaved: (_) => context.go(AppRoutes.home),
           onSkip: () => context.go(AppRoutes.home),
         ),
@@ -1061,7 +1079,7 @@ String? redirectFor({
       AppRoutes.configurationUnavailable ||
       AppRoutes.forbidden ||
       AppRoutes.unavailable => AppRoutes.home,
-      AppRoutes.onboarding => AppRoutes.setupInterests,
+      AppRoutes.onboarding => AppRoutes.setupProfile,
       _ => null,
     },
   };

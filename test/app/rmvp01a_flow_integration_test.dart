@@ -49,6 +49,17 @@ void main() {
           .read(onboardingControllerProvider.notifier)
           .complete(username: 'miku_01', initialChoice: InitialChoice.accept);
       await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('registration-profile-step')),
+        findsOneWidget,
+      );
+      await tester.scrollUntilVisible(
+        find.text('Skip for now'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text('Skip for now'));
+      await tester.pumpAndSettle();
       expect(find.text('Skip for now'), findsOneWidget);
       await tester.tap(find.text('Skip for now'));
       await tester.pumpAndSettle();
