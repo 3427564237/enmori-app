@@ -41,3 +41,9 @@ The signed **v68** candidate (`1.0.0-friends20261115`, `com.enmori.app.group`) w
 The first `--no-pub` release attempt failed because a generated registrant still referenced the integration-test plugin after tests. Rebuilding with normal release tooling regenerated registration correctly and succeeded, with no source or dependency-lock changes.
 
 At the initial v68 delivery, `adb devices -l` reported no connected devices. No installation, real-account interest/relationship change, cloud deployment, notification send or AI call was performed in that first increment. APK creation is not physical-device acceptance. The subsequently approved Backend-only interest-first update was deployed and independently verified; see [its follow-up evidence](interest-first-ordering.md).
+
+## v69 regression follow-up
+
+The subsequently connected phone was still on v67. Screenshot diagnosis separated its Music-first source-order Browse list from its Gaming-only personalized recommendations, and reproduced the missing browser-return confirmation. The [repair record](event-regression-repair.md) retains the root causes and verification. The v69 client changes the initial Events destination to For you, restores shared official-link return coordination, and preserves an in-flight return across detail expiry and URL refresh. The backend also accepts both observed official-cover metadata spellings.
+
+The signed v69 build and existing-service update are recorded in [the APK receipt](android-v69-candidate.json) and [backend receipt](backend-v69-delivery.json). [Phone acceptance and screenshots](phone-regression-acceptance.md) distinguish the retained-data installation and real flows from isolated tests. [Provider diagnostics](provider-content-diagnostic.json) record the separate cloud 403 problem; successful desktop acquisition and deployed parser verification do not establish restored cloud content.

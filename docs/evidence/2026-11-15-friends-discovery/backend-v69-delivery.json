@@ -1,0 +1,65 @@
+{
+  "sourceCommit": "0f419cf4f9d838a4c35ebaa5f314f0589265834d",
+  "basePackage": "2026111507205768.zip",
+  "activePackage": "2026111508521169.zip",
+  "packageSha256": "b2ef10b5abe302f6c80d7aea254f2f57317a21f06464a8e311755ad9f747b025",
+  "bytes": 68067299,
+  "everyEntryVerified": true,
+  "entryCount": 8561,
+  "startSubmittedAtUtc": "2026-11-15T08:56:24.014612+00:00",
+  "listeningAtUtc": "2026-11-15T09:01:51.1932825Z",
+  "mountedVerification": {
+    "readAtUtc": "2026-11-15T09:02:40.940Z",
+    "bytes": 432,
+    "sha256": "9ae15ed7c57666a4dbafcd44ce3b3a5d7e6afb72e26b6ce545f1430de15f78e0",
+    "sourceCommit": "0f419cf4f9d838a4c35ebaa5f314f0589265834d",
+    "demoVersion": 69,
+    "renewableServiceOwner": true,
+    "paidCreditSuccessorCode": true,
+    "rankModuleSha256": "71c9142cb87a4d0c2a76f886711da459462a62ee1630656a6df94c9c54514d40",
+    "readerModuleSha256": "b37f77c96f040d086695a50838e70ebfff7f36573b73ecded6cbfa3eec16f200",
+    "namedCoverMetadataVerified": true,
+    "syntheticRank": [
+      {
+        "eventId": "gaming",
+        "score": 4
+      },
+      {
+        "eventId": "music",
+        "score": 13
+      }
+    ]
+  },
+  "existingOperatorAccountFieldsUnchanged": true,
+  "readOnlyProfileStatuses": [
+    200,
+    200,
+    200
+  ],
+  "settingsChanged": false,
+  "databaseBusinessRecordWrites": 0,
+  "paidModelCallsIssued": 0,
+  "scope": "official-cover metadata variants; no ranking change",
+  "providerContentRestoredClaimed": false,
+  "phoneEvidence": "phone-regression-acceptance.md",
+  "ownerVerification": {
+    "generationBefore": 87,
+    "generationAfter": 88,
+    "observedLeaseVersions": [
+      3570,
+      3573
+    ],
+    "acquisitionVerified": true,
+    "renewalVerified": true,
+    "attemptCountUnchanged": true,
+    "attemptRecordsUnchanged": true,
+    "monetaryAndQuotaInvariantsVerified": true
+  },
+  "postUpdateProviderCheck": {
+    "checkedAt": "2026-11-15T09:07:46.234Z",
+    "homeStatus": 403,
+    "detailStatus": 403,
+    "homeTitle": "Your Browsing Activity Has Been Paused",
+    "contentAvailable": false
+  }
+}

@@ -30,6 +30,8 @@ That desktop read exposed an additional parser defect: the provider's actual PGL
 
 The physical PGL card/detail retained its API-supplied cover, but Detail reported that official details could not be read. A Music sample had neither cover nor acquired description. Provider-acquired content is therefore **not restored by the client repair or parser fix alone while Azure receives 403**. No copied catalogue, new proxy/host, stored browser profile, fingerprint override, CAPTCHA handling or fabricated substitute content was introduced. The earlier approved omission of description excerpts on overview cards also remains in effect; full descriptions belong in Detail.
 
+After deploying the repair, the final cloud diagnostic at **09:07:46 UTC** again received 403 from the homepage and PGL detail. The homepage title was `Your Browsing Activity Has Been Paused`; no event content was returned. Only font requests were locally filtered. Further cloud acquisition probes were stopped. The underlying provider condition for that pause is unknown. API-supplied descriptions and covers already remain available when supplied; the affected PGL description is absent from that fallback. Restoring provider-permitted cloud access remains outstanding.
+
 ## Verification and delivery
 
 - Twenty focused return-flow, retarget and Events-entry tests passed after reproducing the original failures.

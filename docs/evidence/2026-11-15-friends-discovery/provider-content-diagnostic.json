@@ -1,0 +1,57 @@
+{
+  "scope": "Public source acquisition only; no account content or credentials",
+  "cloudBeforeUpdate": [
+    {
+      "checkedAt": "2026-11-15T08:43:07.226Z",
+      "diagnosticLaunchTimeoutMs": 20000,
+      "homeStatus": 403,
+      "homeLinksReady": false,
+      "detailStatus": 403,
+      "detailReady": false
+    },
+    {
+      "checkedAt": "2026-11-15T08:39:18.430Z",
+      "homeStatus": 403,
+      "homeLinksReady": false
+    }
+  ],
+  "desktopBeforeCoverFix": {
+    "checkedAt": "2026-11-15T08:45:24.139Z",
+    "source": "existing compiled PublicEventBrowser",
+    "url": "https://ticketmaster.sg/activity/detail/26sg_pglcs2major",
+    "title": "Tickets: PGL CS 2 Major Singapore 2026 @ Singapore Indoor Stadium | 10 Dec 2026 (Thu.) ~ 13 Dec 2026 (Sun.) | Ticketmaster SG",
+    "descriptionCharacters": 590,
+    "coverHost": null,
+    "occurrenceRows": 4,
+    "exactBookingLinked": true,
+    "failures": []
+  },
+  "desktopAfterCoverFix": {
+    "checkedAt": "2026-11-15T08:50:05.371Z",
+    "source": "existing compiled PublicEventBrowser",
+    "url": "https://ticketmaster.sg/activity/detail/26sg_pglcs2major",
+    "title": "Tickets: PGL CS 2 Major Singapore 2026 @ Singapore Indoor Stadium | 10 Dec 2026 (Thu.) ~ 13 Dec 2026 (Sun.) | Ticketmaster SG",
+    "descriptionCharacters": 590,
+    "coverHost": "static.ticketmaster.sg",
+    "occurrenceRows": 4,
+    "exactBookingLinked": true,
+    "failures": []
+  },
+  "limits": [
+    "Desktop success does not establish Azure access",
+    "No content substitution, proxy, profile reuse or challenge bypass",
+    "Live post-update phone acceptance is recorded separately"
+  ],
+  "cloudAfterUpdate": {
+    "checkedAt": "2026-11-15T09:07:46.234Z",
+    "diagnosticLaunchTimeoutMs": 20000,
+    "homeStatus": 403,
+    "homeLinksReady": false,
+    "detailStatus": 403,
+    "detailReady": false,
+    "homeTitle": "Your Browsing Activity Has Been Paused",
+    "homeBodyCharacters": 0,
+    "detailBodyCharacters": 0,
+    "onlyLocallyBlockedResourcesWereFonts": true
+  }
+}

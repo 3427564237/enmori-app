@@ -1,0 +1,18 @@
+{
+  "createdAtUtc": "2026-11-15T08:54:50.521465+00:00",
+  "sourceCommit": "0f419cf4f9d838a4c35ebaa5f314f0589265834d",
+  "package": "com.enmori.app.group",
+  "versionCode": 69,
+  "versionName": "1.0.0-events20261115",
+  "apkPath": "/home/miku/Downloads/ENMORI-events-v69-release.apk",
+  "bytes": 70576056,
+  "sha256": "8c2185a37e7da505ea57fc8a345da7ff3679fedca1446a6724b9baa1bcfaa087",
+  "signerCertificateSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+  "signatureVerified": true,
+  "debuggable": false,
+  "existingReleaseConfigurationReused": true,
+  "flutterTestsPassed": 1774,
+  "backendTestsPassed": 1945,
+  "installedAtBuildTime": false,
+  "phoneAcceptance": "see phone-regression-acceptance.md"
+}
