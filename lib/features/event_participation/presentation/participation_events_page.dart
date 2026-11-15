@@ -50,10 +50,22 @@ final class _ParticipationEventsPageState
   @override
   void initState() {
     super.initState();
+    _showRecommendations = widget.recommendationsBuilder != null;
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) ref.read(eventBatchesProvider.notifier).load();
+      if (mounted && !_showRecommendations) {
+        unawaited(ref.read(eventBatchesProvider.notifier).load());
+      }
     });
+  }
+
+  void _selectDestination(bool recommendations) {
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(() => _showRecommendations = recommendations);
+    final controller = ref.read(eventBatchesProvider.notifier);
+    if (!recommendations && !controller.hasFreshBatch) {
+      unawaited(controller.load());
+    }
   }
 
   @override
@@ -132,10 +144,7 @@ final class _ParticipationEventsPageState
         bottom: widget.recommendationsBuilder == null
             ? null
             : TabBar(
-                onTap: (index) {
-                  FocusManager.instance.primaryFocus?.unfocus();
-                  setState(() => _showRecommendations = index == 0);
-                },
+                onTap: (index) => _selectDestination(index == 0),
                 tabs: [
                   Tab(text: context.tr('For you', '为你推荐')),
                   Tab(text: context.tr('Browse', '浏览活动')),
@@ -161,7 +170,7 @@ final class _ParticipationEventsPageState
           ? Builder(
               builder: (context) => widget.recommendationsBuilder!(context, () {
                 DefaultTabController.of(context).animateTo(1);
-                setState(() => _showRecommendations = false);
+                _selectDestination(false);
               }),
             )
           : SafeArea(
@@ -509,7 +518,7 @@ final class _ParticipationEventsPageState
       },
       child: widget.recommendationsBuilder == null
           ? page
-          : DefaultTabController(length: 2, initialIndex: 1, child: page),
+          : DefaultTabController(length: 2, child: page),
     );
   }
 

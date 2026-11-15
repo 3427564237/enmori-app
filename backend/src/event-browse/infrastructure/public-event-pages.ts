@@ -146,6 +146,23 @@ export interface PublicPage {
   occurrenceRows?: string[][];
   sections: { heading: string; text: string }[];
 }
+interface PublicMetadata {
+  name: string | null;
+  property: string | null;
+  content: string | null;
+}
+/** Providers use either HTML metadata spelling for the same official cover. */
+export function publicPageCover(
+  metadata: readonly PublicMetadata[],
+): string | undefined {
+  for (const attribute of ["property", "name"] as const) {
+    const cover = metadata.find(
+      (m) => m[attribute] === "og:image" && m.content?.trim(),
+    )?.content?.trim();
+    if (cover) return cover;
+  }
+  return undefined;
+}
 /** No login, storageState, CAPTCHA handling, persistent profile or private API. */
 export class PublicEventBrowser {
   private browser: Promise<Browser> | undefined;
@@ -265,15 +282,17 @@ export class PublicEventBrowser {
         .locator("#activityContent")
         .waitFor({ state: "visible", timeout: 8000 });
       const value = (await page.evaluate(
-        `(() => {const body=document.querySelector('#activityContent');const sections=[];for(const heading of document.querySelectorAll('h2,h3')){if(!/pricing|admission|accessib|faq|entry|condition|refund|ways to buy|^other$/i.test(heading.textContent||''))continue;let text='';let n=heading.nextElementSibling;while(n&&!/^H[123]$/.test(n.tagName)&&text.length<12000){text+='\\n'+(n.innerText||'');n=n.nextElementSibling;}if(text.trim())sections.push({heading:heading.textContent.trim(),text:text.trim().slice(0,12000)});}return {url:location.href,title:document.title,text:document.body.innerText.slice(0,60000),description:body?.innerText,links:[...document.querySelectorAll('a[href]')].map(a=>a.href),cover:document.querySelector('meta[property="og:image"]')?.content,occurrenceRows:[...document.querySelectorAll('table tbody tr')].map(r=>[...r.querySelectorAll('td')].map(c=>c.innerText.trim())).filter(r=>r.length===4),sections:sections.slice(0,12)};})()`,
-      )) as PublicPage;
+        `(() => {const body=document.querySelector('#activityContent');const sections=[];for(const heading of document.querySelectorAll('h2,h3')){if(!/pricing|admission|accessib|faq|entry|condition|refund|ways to buy|^other$/i.test(heading.textContent||''))continue;let text='';let n=heading.nextElementSibling;while(n&&!/^H[123]$/.test(n.tagName)&&text.length<12000){text+='\\n'+(n.innerText||'');n=n.nextElementSibling;}if(text.trim())sections.push({heading:heading.textContent.trim(),text:text.trim().slice(0,12000)});}return {url:location.href,title:document.title,text:document.body.innerText.slice(0,60000),description:body?.innerText,links:[...document.querySelectorAll('a[href]')].map(a=>a.href),metadata:[...document.querySelectorAll('meta[property="og:image"],meta[name="og:image"]')].map(m=>({name:m.getAttribute('name'),property:m.getAttribute('property'),content:m.getAttribute('content')})),occurrenceRows:[...document.querySelectorAll('table tbody tr')].map(r=>[...r.querySelectorAll('td')].map(c=>c.innerText.trim())).filter(r=>r.length===4),sections:sections.slice(0,12)};})()`,
+      )) as Omit<PublicPage, "cover"> & { metadata: PublicMetadata[] };
       if (
         !permittedPublicPage(value.url) ||
         /just a moment|access denied|one moment please/i.test(value.title) ||
         signal.aborted
       )
         throw Error("Source unavailable");
-      return value;
+      const { metadata, ...pageValue } = value;
+      const cover = publicPageCover(metadata);
+      return { ...pageValue, ...(cover ? { cover } : {}) };
     } catch (error) {
       this.reportFailure(
         `EVENT_READER_${stage}_${error instanceof Error && error.name === "TimeoutError" ? "TIMEOUT" : "UNAVAILABLE"}`,

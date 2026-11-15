@@ -14,10 +14,32 @@ import { EnrichedTicketmasterSource } from "../../src/event-browse/infrastructur
 import type { PublicEventBrowser } from "../../src/event-browse/infrastructure/public-event-pages.js";
 import {
   permittedBrowserResource,
+  publicPageCover,
   renderedText,
 } from "../../src/event-browse/infrastructure/public-event-pages.js";
 const url = "https://www.onepa.gov.sg/events/synthetic-12345678",
   asOf = "2026-10-28T00:00:00.000Z";
+test("official cover metadata supports the provider's name and property variants", () => {
+  const named = {
+    name: "og:image",
+    property: null,
+    content: "https://static.ticketmaster.sg/official.jpg",
+  };
+  assert.equal(publicPageCover([named]), named.content);
+  const property = {
+    name: null,
+    property: "og:image",
+    content: "https://static.ticketmaster.sg/legacy.jpg",
+  };
+  assert.equal(publicPageCover([named, property]), property.content);
+  assert.equal(
+    publicPageCover([
+      { name: "description", property: null, content: "Not a cover" },
+    ]),
+    undefined,
+  );
+  assert.equal(publicPageCover([{ ...named, content: "  " }]), undefined);
+});
 test("rendered source arrows and comparisons cannot erase a complete description", () => {
   assert.equal(
     renderedText("First paragraph.\n\nMore details>>\nAge < 12; adults > 18."),

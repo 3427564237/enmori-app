@@ -494,6 +494,8 @@ void main() {
       );
       router.go(AppRoutes.activities);
       await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(Tab, 'Browse'));
+      await tester.pumpAndSettle();
       expect(find.text('Synthetic integration concert'), findsOneWidget);
       final coveredEventsCallback = tester
           .widget<ParticipationEventsPage>(find.byType(ParticipationEventsPage))

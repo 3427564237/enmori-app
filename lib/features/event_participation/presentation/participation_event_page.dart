@@ -49,6 +49,7 @@ final class _ParticipationEventPageState
     with WidgetsBindingObserver {
   EventDetail? _detail;
   Uri? _returnUrl;
+  bool _registrationAtDetailsLink = false;
   AppFailure? _failure;
   AuthSessionAuthenticated? _session;
   bool _loading = false;
@@ -79,8 +80,19 @@ final class _ParticipationEventPageState
     _expiry?.cancel();
     _detail = null;
     _returnUrl = null;
+    _registrationAtDetailsLink = false;
     _loading = false;
     _failure = null;
+  }
+
+  void _expireDetails() {
+    _generation++;
+    _expiry?.cancel();
+    _detail = null;
+    _loading = false;
+    _failure = null;
+    // Keep the page/session-owned return coordinator. Its old URL cannot be
+    // opened again while sourceAvailable is false; Going still rechecks source.
   }
 
   @override
@@ -134,9 +146,13 @@ final class _ParticipationEventPageState
               value.content?.detailUrl ??
               value.externalSourceUrl,
         );
+        _registrationAtDetailsLink =
+            value.content != null &&
+            (value.content!.bookingUrl == null ||
+                value.content!.bookingUrl == value.content!.detailUrl);
         _expiry?.cancel();
         _expiry = Timer(const Duration(minutes: 5), () {
-          if (mounted) setState(_reset);
+          if (mounted) setState(_expireDetails);
         });
       } else {
         _failure = result is Failure<EventDetail>
@@ -158,6 +174,20 @@ final class _ParticipationEventPageState
     }
     final controller = ref.read(participationControllerProvider.notifier);
     final details = _detail;
+    final registration = _returnUrl == null
+        ? null
+        : ExternalRegistrationAction(
+            key: ValueKey('registration-${widget.eventId}'),
+            eventId: widget.eventId,
+            sourceUrl: _returnUrl!,
+            opener: widget.opener,
+            confirmGoing: controller.confirmGoing,
+            readGoing: controller.readGoing,
+            sourceAvailable: details != null,
+            buttonLabel: _registrationAtDetailsLink
+                ? context.tr('Official event details', '官网活动详情')
+                : null,
+          );
     final page = Scaffold(
       appBar: AppBar(
         title: Text(context.tr('Event details', '活动详情')),
@@ -177,7 +207,11 @@ final class _ParticipationEventPageState
               Text(context.tr('Loading Event information…', '正在加载活动信息…')),
             if (_failure case final failure?)
               Text(localizedFailure(context, failure)),
-            if (details != null && details.content != null)
+            if (_registrationAtDetailsLink && registration != null)
+              registration,
+            if (details != null &&
+                details.content != null &&
+                !_registrationAtDetailsLink)
               OutlinedButton.icon(
                 onPressed: () async {
                   final session = _session;
@@ -248,20 +282,8 @@ final class _ParticipationEventPageState
               eventId: widget.eventId,
             ),
             const Divider(height: 32),
-            if (_returnUrl case final url?
-                when details?.content == null ||
-                    details!.content!.bookingUrl != null &&
-                        details.content!.bookingUrl !=
-                            details.content!.detailUrl)
-              ExternalRegistrationAction(
-                key: ValueKey('registration-${widget.eventId}'),
-                eventId: widget.eventId,
-                sourceUrl: url,
-                opener: widget.opener,
-                confirmGoing: controller.confirmGoing,
-                readGoing: controller.readGoing,
-                sourceAvailable: details != null,
-              ),
+            if (!_registrationAtDetailsLink && registration != null)
+              registration,
             const SizedBox(height: 16),
             if (details != null)
               ParticipantPreview(

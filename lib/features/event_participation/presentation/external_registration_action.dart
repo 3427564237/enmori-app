@@ -20,6 +20,7 @@ final class ExternalRegistrationAction extends ConsumerStatefulWidget {
     required this.confirmGoing,
     required this.readGoing,
     this.sourceAvailable = true,
+    this.buttonLabel,
     super.key,
   });
   final String eventId;
@@ -28,6 +29,7 @@ final class ExternalRegistrationAction extends ConsumerStatefulWidget {
   final Future<Result<void>> Function(String eventId) confirmGoing;
   final Future<Result<bool>> Function(String eventId) readGoing;
   final bool sourceAvailable;
+  final String? buttonLabel;
 
   @override
   ConsumerState<ExternalRegistrationAction> createState() =>
@@ -36,11 +38,16 @@ final class ExternalRegistrationAction extends ConsumerStatefulWidget {
 
 final class _ExternalRegistrationActionState
     extends ConsumerState<ExternalRegistrationAction>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
   ExternalRegistrationFlow? _flow;
   AuthSessionAuthenticated? _session;
   bool _dialog = false;
   AppLifecycleState? _lifecycle;
+
+  // A provider refresh can move this action below the visible detail content.
+  // Scrolling must not dispose the page-local browser return coordinator.
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -56,8 +63,7 @@ final class _ExternalRegistrationActionState
   @override
   void didUpdateWidget(ExternalRegistrationAction oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.eventId != widget.eventId ||
-        oldWidget.sourceUrl != widget.sourceUrl) {
+    if (oldWidget.eventId != widget.eventId) {
       _flow?.dispose();
       _flow = null;
     }
@@ -108,12 +114,14 @@ final class _ExternalRegistrationActionState
       ),
     );
     _dialog = false;
-    if (allowed != true ||
-        !widget.sourceAvailable ||
-        !_current(session) ||
-        !identical(flow, _flow)) {
+    if (!_current(session) || !identical(flow, _flow)) {
       return;
     }
+    if (flow.sourceUrl != widget.sourceUrl) {
+      setState(() {});
+      return;
+    }
+    if (allowed != true || !widget.sourceAvailable) return;
     final opening = flow.open();
     setState(() {});
     await opening;
@@ -175,6 +183,7 @@ final class _ExternalRegistrationActionState
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final observed = participationSession(ref.watch(authSessionProvider));
     if (!identical(observed, _session)) {
       _flow?.dispose();
@@ -186,6 +195,16 @@ final class _ExternalRegistrationActionState
       return Text(
         context.tr('Sign in to record participation.', '登录后可保存参与状态。'),
       );
+    }
+    final existing = _flow;
+    if (!_dialog &&
+        existing != null &&
+        existing.sourceUrl != widget.sourceUrl &&
+        (existing.phase == RegistrationPhase.idle ||
+            existing.phase == RegistrationPhase.failed ||
+            existing.phase == RegistrationPhase.saved)) {
+      existing.dispose();
+      _flow = null;
     }
     _flow ??= ExternalRegistrationFlow(
       eventId: widget.eventId,
@@ -247,7 +266,11 @@ final class _ExternalRegistrationActionState
               : null,
           icon: const Icon(Icons.open_in_new),
           label: Text(
-            context.tr('Tickets / booking on the official provider', '官网报名／购票'),
+            widget.buttonLabel ??
+                context.tr(
+                  'Tickets / booking on the official provider',
+                  '官网报名／购票',
+                ),
           ),
         ),
       ],

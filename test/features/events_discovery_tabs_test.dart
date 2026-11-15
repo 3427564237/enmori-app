@@ -15,7 +15,7 @@ import 'event_batches_test.dart' as browse;
 
 void main() {
   testWidgets(
-    'For you and Browse use different sources; empty recommendation returns to preserved search',
+    'Events starts with For you; Browse loads on entry and preserves search',
     (tester) async {
       tester.view.physicalSize = const Size(320, 850);
       tester.view.devicePixelRatio = 1;
@@ -54,12 +54,20 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      expect(recommendations.views, [EventRecommendationView.all]);
+      expect(find.text(eventEmptyTitle), findsOneWidget);
+      expect(find.byKey(const Key('events-search')), findsNothing);
+      expect(catalogue.first, 0);
+      await tester.tap(find.widgetWithText(Tab, 'Browse'));
+      await tester.pumpAndSettle();
       expect(find.byKey(const Key('events-search')), findsOneWidget);
-      expect(recommendations.views, isEmpty);
       await tester.enterText(find.byKey(const Key('events-search')), 'gaming');
       await tester.tap(find.widgetWithText(Tab, 'For you'));
       await tester.pumpAndSettle();
-      expect(recommendations.views, [EventRecommendationView.all]);
+      expect(recommendations.views, [
+        EventRecommendationView.all,
+        EventRecommendationView.all,
+      ]);
       expect(find.text(eventEmptyTitle), findsOneWidget);
       expect(find.byKey(const Key('events-search')), findsNothing);
       await tester.tap(
