@@ -34,4 +34,8 @@ This reproduces LI's symptom without a stale interest save and establishes a con
 
 `previews/friends.png` is an actual Flutter raster of the changed page, rendered with the app theme/fonts and synthetic data. It was visually inspected. Existing 320px/2x-text layout and action checks pass. It is not a phone screenshot.
 
-`adb devices -l` reported no connected devices. No installation, real-account interest/relationship change, cloud deployment, notification send or AI call was performed. APK preparation, if successful, is recorded separately in `android-candidate.json`; it is not physical-device acceptance.
+The signed **v68** candidate (`1.0.0-friends20261115`, `com.enmori.app.group`) was built from source commit `248b2b853a851841ae73a8989f15b3c9812073fd` and copied to `/home/miku/Downloads/ENMORI-friends-v68-release.apk`. Its package/version, non-debuggable flag and existing release certificate were verified. Hash and build receipt: [android-candidate.json](android-candidate.json). Test summary: [verification.json](verification.json).
+
+The first `--no-pub` release attempt failed because a generated registrant still referenced the integration-test plugin after tests. Rebuilding with normal release tooling regenerated registration correctly and succeeded, with no source or dependency-lock changes.
+
+`adb devices -l` reported no connected devices. No installation, real-account interest/relationship change, cloud deployment, notification send or AI call was performed. APK creation is not physical-device acceptance.

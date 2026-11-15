@@ -1,0 +1,16 @@
+{
+  "flutter": {
+    "passed": 1769,
+    "failed": 0,
+    "version": "3.47.2"
+  },
+  "backendRecommendation": {
+    "passed": 39,
+    "failed": 0,
+    "node": "24.19.0"
+  },
+  "analysis": "No issues found",
+  "phoneConnected": false,
+  "liveRankingVerified": false,
+  "productionBackendChanged": false
+}

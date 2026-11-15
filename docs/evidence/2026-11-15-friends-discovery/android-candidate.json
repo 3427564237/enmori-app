@@ -1,0 +1,27 @@
+{
+  "createdAt": "2026-11-15T06:55:27.844885+00:00",
+  "sourceCommit": "248b2b853a851841ae73a8989f15b3c9812073fd",
+  "package": "com.enmori.app.group",
+  "versionCode": 68,
+  "versionName": "1.0.0-friends20261115",
+  "apkPath": "/home/miku/Downloads/ENMORI-friends-v68-release.apk",
+  "bytes": 70576064,
+  "sha256": "3dca8b14b31fa5be8ad44f2e36cf2facff9129d038966659288cf3af1b10ee78",
+  "signerCertificateSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+  "signatureVerified": true,
+  "debuggable": false,
+  "existingReleaseConfigurationReused": true,
+  "installed": false,
+  "phoneConnected": false,
+  "productionBackendChanged": false,
+  "buildAttempts": [
+    {
+      "result": "failed",
+      "reason": "--no-pub reused a generated integration_test registrant after tests"
+    },
+    {
+      "result": "passed",
+      "recovery": "default release tooling regenerated plugin registration; no source or dependency lock changes"
+    }
+  ]
+}
