@@ -1,0 +1,245 @@
+{
+  "observedAtUtc": "2026-11-15T09:59:43.364Z",
+  "deployment": {
+    "name": "2026111509412170.zip",
+    "sourceCommit": "bb89730efe1c7a40a072cdddc5491e8d98ef3d64",
+    "sha256": "4f71db853d599820796d6ed7b51e34dfeaada7617876932ca81743d078b0443b",
+    "bytes": 68067606,
+    "entryCount": 8561,
+    "everyEntryVerified": true
+  },
+  "plan": {
+    "from": "B1",
+    "to": "B2",
+    "capacity": 1,
+    "region": "Japan East",
+    "selection": "retain after measured improvement"
+  },
+  "funding": {
+    "observedAtUtc": "2026-11-15T10:01:32.415536+00:00",
+    "estimatedAvailableUsd": 92.23,
+    "sixtyTwoDayComputeUsd": 55.056,
+    "reserveUsd": 37.174,
+    "spendingLimit": "On",
+    "creditExpiry": [
+      "2027-10-28T07:20:08.0000000Z"
+    ]
+  },
+  "benchmark": {
+    "b1ApiReads": [
+      {
+        "path": "/v1/me/profile",
+        "status": 200,
+        "elapsedMs": 1201
+      },
+      {
+        "path": "/v1/me/interests",
+        "status": 200,
+        "elapsedMs": 1318
+      },
+      {
+        "path": "/v1/me/recommendation-profile",
+        "status": 200,
+        "elapsedMs": 988
+      },
+      {
+        "path": "/v1/recommendations/events?view=all",
+        "status": 200,
+        "elapsedMs": 190069
+      },
+      {
+        "path": "/v1/recommendations/events?view=home",
+        "status": 200,
+        "elapsedMs": 1199
+      },
+      {
+        "path": "/v1/admin/operations-status",
+        "status": 200,
+        "elapsedMs": 639
+      }
+    ],
+    "b2ApiReads": [
+      {
+        "path": "/v1/me/profile",
+        "status": 200,
+        "elapsedMs": 740
+      },
+      {
+        "path": "/v1/me/interests",
+        "status": 200,
+        "elapsedMs": 797
+      },
+      {
+        "path": "/v1/me/recommendation-profile",
+        "status": 200,
+        "elapsedMs": 691
+      },
+      {
+        "path": "/v1/recommendations/events?view=all",
+        "status": 200,
+        "elapsedMs": 35143
+      },
+      {
+        "path": "/v1/recommendations/events?view=home",
+        "status": 200,
+        "elapsedMs": 1032
+      },
+      {
+        "path": "/v1/admin/operations-status",
+        "status": 200,
+        "elapsedMs": 614
+      }
+    ],
+    "b1SourceStates": [
+      {
+        "service": "ticketmaster",
+        "state": "ready"
+      },
+      {
+        "service": "onepa",
+        "state": "unavailable"
+      }
+    ],
+    "b2SourceStates": [
+      {
+        "service": "ticketmaster",
+        "state": "ready"
+      },
+      {
+        "service": "onepa",
+        "state": "ready"
+      }
+    ],
+    "existingAccountFieldsUnchanged": true,
+    "baselineAccountRecommendationCount": 0,
+    "limits": [
+      "B1 first read overlapped part of package preparation; provider source success differed. Not an isolated hardware A/B or a percentile.",
+      "Benchmark account has no recommendations; live human Gaming acceptance is separate."
+    ]
+  },
+  "tests": {
+    "backend": {
+      "passed": 1950,
+      "failed": 0
+    },
+    "readerAndEnrichmentFocused": {
+      "passed": 19,
+      "failed": 0
+    },
+    "independentFocused": {
+      "passed": 9,
+      "failed": 0
+    },
+    "overlappingCounts": true
+  },
+  "browserLaunchB1": {
+    "atUtc": "2026-11-15T09:46:22.850Z",
+    "vantage": "Azure Japan East B1",
+    "samples": [
+      {
+        "ok": true,
+        "elapsedMs": 7830
+      },
+      {
+        "ok": true,
+        "elapsedMs": 2014
+      },
+      {
+        "ok": true,
+        "elapsedMs": 1545
+      }
+    ]
+  },
+  "browserLaunchB2": {
+    "atUtc": "2026-11-15T09:58:12.886Z",
+    "vantage": "Azure Japan East B2",
+    "samples": [
+      {
+        "ok": true,
+        "elapsedMs": 4246
+      },
+      {
+        "ok": true,
+        "elapsedMs": 1026
+      },
+      {
+        "ok": true,
+        "elapsedMs": 810
+      }
+    ]
+  },
+  "cloudPublicReaderB2": {
+    "atUtc": "2026-11-15T10:00:19.132Z",
+    "vantage": "Azure Japan East B2",
+    "failures": [
+      "EVENT_READER_HOME_ACCESS_DENIED_UNAVAILABLE"
+    ],
+    "navigation": [
+      {
+        "status": 403,
+        "path": "/"
+      }
+    ],
+    "success": false,
+    "errorType": "Error",
+    "elapsedMs": 4471
+  },
+  "operatorPublicReaderAfterPatch": {
+    "checkedAt": "2026-11-15T09:37:50.934Z",
+    "source": "existing compiled PublicEventBrowser",
+    "url": "https://ticketmaster.sg/activity/detail/26sg_pglcs2major",
+    "title": "Tickets: PGL CS 2 Major Singapore 2026 @ Singapore Indoor Stadium | 10 Dec 2026 (Thu.) ~ 13 Dec 2026 (Sun.) | Ticketmaster SG",
+    "descriptionCharacters": 590,
+    "coverHost": "static.ticketmaster.sg",
+    "occurrenceRows": 4,
+    "exactBookingLinked": true,
+    "failures": []
+  },
+  "productWritesByProbes": 0,
+  "paidModelCallsByProbes": 0,
+  "notificationSendsByProbes": 0,
+  "startupSeconds": {
+    "b1V69": 327.179,
+    "b2V70": 267.835
+  },
+  "officialImagesEndpointProbe": {
+    "atUtc": "2026-11-15T10:10:43.238Z",
+    "provider": "authorized Ticketmaster Discovery API",
+    "requests": [
+      {
+        "kind": "event-list",
+        "status": 200,
+        "elapsedMs": 1413
+      },
+      {
+        "kind": "event-images",
+        "status": 200,
+        "elapsedMs": 1120
+      }
+    ],
+    "sameEvent": true,
+    "title": "Singapore vs Brazil-Japan vs Paraguay",
+    "listImageCount": 10,
+    "imagesEndpointCount": 10,
+    "imagesEndpointGenuineCount": 0,
+    "listHasDescription": false
+  },
+  "physicalPhone": {
+    "apkVersionCode": 69,
+    "forYouFirstGamingMatch": true,
+    "gamingOnlySelectionRetained": true,
+    "sampledUpperBoundsMs": {
+      "forYou": 25986,
+      "pglDetail": 8729,
+      "browse": 34044,
+      "onepaDetail": 5390
+    },
+    "cacheHitVerified": false,
+    "pglApiCoverPresent": true,
+    "pglWebsiteDescriptionAvailable": false,
+    "onepaDescriptionCharacters": 1685,
+    "onepaSampleCover": "not_provided_by_source",
+    "participationWrites": 0,
+    "interestChanges": 0
+  }
+}

@@ -1,6 +1,6 @@
 # Event content access and B2 performance proposal
 
-Prepared 15 November 2026. **Proposal; no hosting change has been executed.**
+Prepared 15 November 2026. **At preparation this was a proposal and no hosting change had been executed.** LI subsequently approved it, and [the B2 rollout](../evidence/2026-11-15-friends-discovery/b2-rollout.md) records execution, measured improvement and retention. The original cost/rollback proposal below is preserved.
 
 ## Concrete selection
 

@@ -25,3 +25,7 @@ The existing reader ignored explicit homepage, booking-fallback and detail HTTP 
 Five offline reader regressions cover homepage 403/429, ordinary 401 bootstrap with named official cover, refused linked detail and refused booking fallback. Four denial tests failed against the pre-fix reader. Strict TypeScript compilation passes; focused reader/enrichment tests **19/19**, full backend **1,950/1,950**. The local connected reader success above separately confirms that bootstrap and actual public PGL content still work from the accessible operator environment.
 
 At this record's preparation, the patch is a source candidate; the live deployment remains v69. Missing website-only covers/descriptions on a refused cloud host are **not restored**. [Provider inquiry draft](provider-access-support-draft.md) is prepared and has not been sent. No product/account writes, paid model calls, notification sends or purchase operations were used in this investigation.
+
+## Subsequent approved delivery
+
+The approved B2 trial and backend v70 deployment completed. B2 is retained based on the measured improvement; current cloud Ticketmaster 403 remains. See [B2 rollout and limits](b2-rollout.md) for exact package/runtime identity, funding, measurements and unchanged account/financial-state evidence. This supersedes only the earlier candidate-only deployment status, not the stated provider-access limitation.

@@ -14,3 +14,7 @@ The public-page reader uses a fresh Chromium context without login, retained use
 Could you confirm whether this intended public supplementary-content access is permitted and supported, and how to resolve the denial through an approved integration? Alternatively, can Singapore event-specific covers and full descriptions be provided through our existing Discovery API access or another licensed interface?
 
 We can supply a request identifier or the current outbound IP privately if needed. API keys, user data and authentication material are not included in this inquiry.
+
+Current follow-up: after the same application's approved performance upgrade to Japan East B2, a bounded public reader attempt at 2026-11-15 10:00:19 UTC still received homepage HTTP 403 and stopped immediately. The API remained available. The provider access issue was not resolved by faster compute.
+
+Intended channel: [Ticketmaster Developer Support](https://developer.ticketmaster.com/support/contact-us/), whose official instructions include API integration, missing event data and error/request evidence. This document is a draft only; no form or message has been submitted.
