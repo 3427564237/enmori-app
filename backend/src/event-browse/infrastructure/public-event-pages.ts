@@ -169,6 +169,12 @@ export class PublicEventBrowser {
   private active = 0;
   constructor(
     private readonly reportFailure: (category: string) => void = () => {},
+    private readonly launch: () => Promise<Browser> = () => chromium.launch({
+      // Ordinary ephemeral Chromium; no fingerprint overrides or user profile.
+      headless: false,
+      args: ["--start-minimized"],
+      timeout: 10000,
+    }),
   ) {}
   async read(url: string, signal: AbortSignal): Promise<PublicPage> {
     if (!permittedPublicPage(url) || signal.aborted)
@@ -180,13 +186,7 @@ export class PublicEventBrowser {
     this.active++;
     let context;
     try {
-      const browser = await (this.browser ??= chromium.launch({
-        // The provider renders its public page in ordinary desktop Chromium.
-        // No fingerprint overrides or user profile are used.
-        headless: false,
-        args: ["--start-minimized"],
-        timeout: 10000,
-      }));
+      const browser = await (this.browser ??= this.launch());
       context = await browser.newContext({
         serviceWorkers: "block",
         acceptDownloads: false,
@@ -218,15 +218,25 @@ export class PublicEventBrowser {
         return route.continue();
       });
       const page = await context.newPage();
+      const navigate = async (target: string, label: string) => {
+        stage = `${label}_NAVIGATION`;
+        const response = await page.goto(target, {
+          waitUntil: "domcontentloaded",
+          timeout: 8000,
+        });
+        // A provider refusal cannot supply event links/content. Preserve the
+        // ordinary 401 bootstrap used by this site, but do not wait eight more
+        // seconds for selectors after an explicit access/rate-limit denial.
+        if (response?.status() === 403 || response?.status() === 429) {
+          stage = `${label}_ACCESS_DENIED`;
+          throw Error("Source unavailable");
+        }
+      };
       let target = url;
       if (new URL(url).hostname.endsWith("ticketmaster.sg")) {
         // Use the provider's linked information page, never a guessed rewrite
         // of a booking URL. The homepage also completes normal page bootstrap.
-        stage = "HOME_NAVIGATION";
-        await page.goto("https://ticketmaster.sg/", {
-          waitUntil: "domcontentloaded",
-          timeout: 8000,
-        });
+        await navigate("https://ticketmaster.sg/", "HOME");
         stage = "HOME_LINKS";
         await page
           .locator('a[href*="/activity/detail/"]')
@@ -248,11 +258,7 @@ export class PublicEventBrowser {
           );
           if (discovered) target = discovered;
           else {
-            stage = "BOOKING_NAVIGATION";
-            await page.goto(url, {
-              waitUntil: "domcontentloaded",
-              timeout: 8000,
-            });
+            await navigate(url, "BOOKING");
             stage = "BOOKING_LINKS";
             await page
               .locator('a[href*="/activity/detail/"]')
@@ -273,8 +279,7 @@ export class PublicEventBrowser {
           }
         }
       }
-      stage = "DETAIL_NAVIGATION";
-      await page.goto(target, { waitUntil: "domcontentloaded", timeout: 8000 });
+      await navigate(target, "DETAIL");
       // Public pages may render after an initial non-200 bootstrap response.
       // Only real content on an allowed final URL establishes successful read.
       stage = "DETAIL_CONTENT";
