@@ -19,4 +19,8 @@ The list and search now project the canonical Username only when the parsed Prof
 
 ## Delivery boundary
 
-Backend package preparation, deployed identity, runtime restart and fresh connected results are recorded separately after execution. The source/Emulator results above do not by themselves claim a live fix or phone acceptance. No reported-account mutation, paid AI call or notification probe is part of this task.
+Backend **v71** was deployed on the existing Azure app and B2 plan using the unchanged operator protocol. The package contains source `a447689781b8b389c972009380a25c63f39fd5d7`, selector `2026111511215971.zip`, SHA-256 `11a06e77848a74ddc8c1faa3221302fe2f93c5c9631264239f827dae2a187604`. Stop was positively confirmed before switching the package. The mounted manifest and compiled Friend repository hash match the reviewed payload; runtime import succeeded.
+
+After restart, the service owner recovered from generation 89 to 90, retained the monetary state, and renewed its lease. The operator issued no paid requests. Fresh diagnostic-account HTTP reads of Friends, search, Profile, interests and recommendation preferences returned 200; its existing fields matched the pre-deployment hashes. See [sanitized deployment receipt](deployment.json).
+
+Read-only reinspection of the reported pair confirmed both list directions and current-name search, and identical before/after account/relationship fingerprints. The sender had independently added a DisplayName during this work, before the deployment snapshot. Consequently this live pair no longer exercises the unset-name fallback; that case is evidenced by the isolated and Emulator tests. Pair verification used the compiled repository against allowlisted real Firestore records, not an impersonated HTTP session or phone screen. No reported-account mutation, paid AI call or notification probe was used. Phone acceptance of this fix remains unverified.

@@ -1,0 +1,85 @@
+{
+  "package": {
+    "name": "2026111511215971.zip",
+    "baseName": "2026111509412170.zip",
+    "sha256": "11a06e77848a74ddc8c1faa3221302fe2f93c5c9631264239f827dae2a187604",
+    "bytes": 68067163,
+    "sourceCommit": "a447689781b8b389c972009380a25c63f39fd5d7",
+    "everyEntryVerified": true,
+    "entryCount": 8561,
+    "selector": "2026111509412170.zip"
+  },
+  "mounted": {
+    "readAtUtc": "2026-11-15T11:34:42.834Z",
+    "sha256": "adc7a7852aa0ad43cd567587e10ab3121bf60ec250efbcf851149580dc88b2ca",
+    "sourceCommit": "a447689781b8b389c972009380a25c63f39fd5d7",
+    "demoVersion": 71,
+    "renewableServiceOwner": true,
+    "paidCreditSuccessorCode": true,
+    "friendListNameFallback": true,
+    "friendModuleSha256": "47c672a8d9e8b50471d195883774c6805332370e481010e09053b8e5044fc6f7",
+    "moduleImportSucceeded": true
+  },
+  "reportedPair": {
+    "mode": "after",
+    "atUtc": "2026-11-15T11:34:33.908Z",
+    "reportedPairMatched": true,
+    "accountAndRelationshipHash": "6b07029e44c3beb703ef1b060e14bb53521769c4c110a76d4b6ea00af5f0f886",
+    "bothDirectionsVisible": true,
+    "currentDisplayLabelMatches": true,
+    "currentDisplaySearchMatches": true,
+    "storedNamePresent": true,
+    "liveUnnamedFallbackCase": false,
+    "productWrites": 0,
+    "evidenceType": "compiled candidate repository against exact live pair through enforced read-only Firestore transactions; not an HTTP/phone read",
+    "accountAndRelationshipUnchanged": true
+  },
+  "diagnosticAccountHttp": {
+    "mode": "profile-after",
+    "atUtc": "2026-11-15T11:33:27.001Z",
+    "productWrites": 0,
+    "modelCalls": 0,
+    "reads": [
+      {
+        "path": "/v1/me/friends",
+        "status": 200,
+        "elapsedMs": 1093
+      },
+      {
+        "path": "/v1/me/friends/search?q=member",
+        "status": 200,
+        "elapsedMs": 868
+      },
+      {
+        "path": "/v1/me/profile",
+        "status": 200,
+        "elapsedMs": 576
+      },
+      {
+        "path": "/v1/me/interests",
+        "status": 200,
+        "elapsedMs": 662
+      },
+      {
+        "path": "/v1/me/recommendation-profile",
+        "status": 200,
+        "elapsedMs": 657
+      }
+    ],
+    "friendListCount": 0,
+    "profileHash": "c8f26daff2c45d32014cc726b4dcec5009dc79c609bcba40bd5620934517d99a",
+    "interestsHash": "b0d7edf9b723102cac6d13aa6d8f48c54858ea028c0285fe76bdbd571564147a",
+    "preferencesHash": "c93bdc59d8b95d4d4f6a192e27244f8857aae48d62dcfb3c2a5307edf623be08",
+    "existingAccountFieldsUnchanged": true,
+    "passed": true,
+    "completedAtUtc": "2026-11-15T11:33:31.213Z"
+  },
+  "runtimeOwner": {
+    "generationBefore": 89,
+    "generationAfter": 90,
+    "leaseRenewalVerified": true,
+    "moneyHashUnchanged": true,
+    "operatorPaidRequests": 0
+  },
+  "phoneAcceptance": false
+}
