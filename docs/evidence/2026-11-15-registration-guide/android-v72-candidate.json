@@ -1,0 +1,20 @@
+{
+  "atUtc": "2026-11-15T11:45:35.114091+00:00",
+  "sourceCommit": "57a170a654ce359c15be3781602445c1c111511e",
+  "apkPath": "/home/miku/Downloads/ENMORI-setup-v72-release.apk",
+  "sha256": "8bdf9af0d919c458d7feda0f56d4e0753927242001b5ca3de68072d2a70eaadb",
+  "bytes": 70608828,
+  "versionCode": 72,
+  "versionName": "1.0.0-setup20261115",
+  "package": "com.enmori.app.group",
+  "debuggable": false,
+  "signerCertificateSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+  "signatureVerified": true,
+  "companionEnabled": true,
+  "existingReleaseConfigurationReused": true,
+  "flutterTestsPassed": 1792,
+  "staticAnalysis": "no issues",
+  "installed": false,
+  "phoneAcceptance": false,
+  "deviceAvailability": "no connected adb device at packaging check"
+}
