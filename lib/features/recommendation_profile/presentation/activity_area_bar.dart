@@ -81,8 +81,13 @@ class _AreaBarState extends ConsumerState<ActivityAreaBar>
     final a = ref.watch(activityAreaProvider);
     final p = ref.watch(recommendationProfileProvider).asData?.value;
     return Column(
+      key: const Key('home-recommendation-area'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(
+          context.tr('Activity recommendation area', '活动推荐地区'),
+          style: Theme.of(context).textTheme.labelMedium,
+        ),
         if (p case Success<RecommendationProfile>(:final value)
             when !value.onboardingPromptSeen)
           ListTile(
@@ -104,9 +109,12 @@ class _AreaBarState extends ConsumerState<ActivityAreaBar>
             ),
           ),
         Wrap(
+          spacing: 8,
+          runSpacing: 4,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             TextButton.icon(
+              key: const Key('home-choose-recommendation-area'),
               icon: const Icon(Icons.place_outlined),
               label: Text(a.name ?? context.tr('All Singapore', '全新加坡')),
               onPressed: _choosingArea ? null : _chooseArea,
@@ -119,6 +127,7 @@ class _AreaBarState extends ConsumerState<ActivityAreaBar>
                 'Profile unavailable' => '资料读取失败',
                 _ => '全新加坡',
               }),
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             if (a.source == 'Selected area')
               TextButton(

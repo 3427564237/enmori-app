@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../features/event_recommendations/presentation/event_recommendations_page.dart';
 import 'social_demo_presentation.dart';
+import 'home_introduction.dart';
 
 final class HomeShellPage extends StatelessWidget {
   const HomeShellPage({
@@ -12,6 +13,8 @@ final class HomeShellPage extends StatelessWidget {
     this.weatherSection,
     this.daySection,
     this.profileHeader,
+    this.greeting,
+    this.recommendationControls,
     this.onContinueDiscovery,
     this.onSelectTab,
     this.onOpenSettings,
@@ -34,6 +37,8 @@ final class HomeShellPage extends StatelessWidget {
   final Widget? weatherSection;
   final Widget? daySection;
   final Widget? profileHeader;
+  final Widget? greeting;
+  final Widget? recommendationControls;
   final VoidCallback? onContinueDiscovery;
   final ValueChanged<int>? onSelectTab;
   final VoidCallback? onOpenSettings;
@@ -196,44 +201,21 @@ final class HomeShellPage extends StatelessWidget {
             key: const Key('route-home'),
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             children: [
-              Semantics(
-                header: true,
-                child: Text(
-                  context.tr('Today', "今天"),
-                  style: Theme.of(context).textTheme.headlineLarge,
+              _HomeSection(
+                child: HomeIntroduction(
+                  greeting: greeting,
+                  weather: weatherSection,
+                  onStartCheckIn: onStartCheckIn,
                 ),
-              ),
-              Text(
-                MaterialLocalizations.of(context)
-                    .formatFullDate(DateTime.now()),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                context.tr(
-                  'Record this moment, and how you feel.',
-                  "记下这一刻，也记下你的感受。",
-                ),
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 12),
-              FilledButton.icon(
-                key: const Key('r6-new-check-in-button'),
-                onPressed: onStartCheckIn,
-                icon: const Icon(Icons.edit_note),
-                label: Text(context.tr('New Check-in', "新建签到")),
               ),
               if (daySection != null) _HomeSection(child: daySection!),
               if (profileHeader != null) _HomeSection(child: profileHeader!),
-              if (weatherSection != null) ...[
-                const SizedBox(height: 16),
-                _HomeSection(child: weatherSection!),
-              ],
               const SizedBox(height: 24),
               if (onOpenEvent != null)
                 _HomeSection(
                   child: EventRecommendationsSection(
                     heading: context.tr('Events for you', "为你推荐的活动"),
+                    contextControls: recommendationControls,
                     onBrowseAll: onBrowseActivities,
                     onSeeAll: onSeeAllEvents,
                     onContinueDiscovery: onContinueDiscovery,

@@ -610,20 +610,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.home,
         name: 'root-home',
         builder: (context, state) => HomeShellPage(
-          profileHeader: remoteGroup
-              ? Column(
-                  children: [
-                    const ActivityAreaBar(),
-                    ConnectedOwnHeader(
-                      onEdit: () async {
-                        if (canNavigateShared(context, AppRoutes.home)) {
-                          await context.push<void>(AppRoutes.profileEdit);
-                        }
-                      },
-                    ),
-                  ],
-                )
-              : null,
+          greeting: remoteGroup ? const ConnectedHomeGreeting() : null,
+          recommendationControls: remoteGroup ? const ActivityAreaBar() : null,
           onContinueDiscovery: () async {
             if (!canNavigateShared(context, AppRoutes.home)) return;
             await context.push<void>(

@@ -10,12 +10,16 @@ final class WeatherCard extends StatefulWidget {
     required this.snapshot,
     required this.openAttribution,
     this.showUpdated = false,
+    this.compact = false,
+    this.contextLabel,
     this.actions,
     super.key,
   });
   final WeatherSnapshot snapshot;
   final Future<bool> Function(Uri) openAttribution;
   final bool showUpdated;
+  final bool compact;
+  final String? contextLabel;
   final Widget? actions;
   @override
   State<WeatherCard> createState() => _WeatherCardState();
@@ -44,7 +48,7 @@ final class _WeatherCardState extends State<WeatherCard> {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 8),
+    padding: EdgeInsets.symmetric(vertical: widget.compact ? 0 : 8),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -67,11 +71,15 @@ final class _WeatherCardState extends State<WeatherCard> {
                         ),
                         Text(
                           '${widget.snapshot.temperatureCelsius.toStringAsFixed(1)}°C',
-                          style: Theme.of(context).textTheme.titleLarge,
+                          style: widget.compact
+                              ? Theme.of(context).textTheme.titleMedium
+                              : Theme.of(context).textTheme.titleLarge,
                         ),
                         Text(
                           _conditionLabel(context, widget.snapshot.condition),
-                          style: Theme.of(context).textTheme.bodyLarge,
+                          style: widget.compact
+                              ? Theme.of(context).textTheme.bodyMedium
+                              : Theme.of(context).textTheme.bodyLarge,
                         ),
                       ],
                     ),
@@ -101,10 +109,13 @@ final class _WeatherCardState extends State<WeatherCard> {
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Text(
-              context.tr(
-                'Updated ${localTimeLabel(context, widget.snapshot.observedAt)}',
-                '更新于 ${localTimeLabel(context, widget.snapshot.observedAt)}',
-              ),
+              [
+                if (widget.contextLabel != null) widget.contextLabel!,
+                context.tr(
+                  'Updated ${localTimeLabel(context, widget.snapshot.observedAt)}',
+                  '更新于 ${localTimeLabel(context, widget.snapshot.observedAt)}',
+                ),
+              ].join(' · '),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),

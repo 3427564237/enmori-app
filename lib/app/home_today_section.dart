@@ -101,57 +101,74 @@ final class _HomeTodaySectionState extends ConsumerState<HomeTodaySection> {
         key: const Key('home-today-summary'),
         margin: EdgeInsets.zero,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 8,
                 children: [
-                  Expanded(
+                  Tooltip(
+                    message:
+                        '${MaterialLocalizations.of(context).formatFullDate(snapshot.date!)} · ${snapshot.timeZone}',
                     child: Semantics(
                       header: true,
                       child: Text(
                         context.tr('Your day so far', '今天的记录'),
-                        style: Theme.of(context).textTheme.titleLarge,
+                        style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ),
                   ),
-                  IconButton(
-                    key: const Key('home-today-refresh'),
-                    tooltip: context.tr('Refresh today’s Check-ins', '刷新今天的签到'),
-                    onPressed: _opening
-                        ? null
-                        : () => ref.invalidate(homeTodayProvider),
-                    icon: const Icon(Icons.refresh),
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      TextButton(
+                        key: const Key('home-today-history'),
+                        onPressed: _opening
+                            ? null
+                            : () => _open(snapshot, widget.onOpenHistory),
+                        child: Text(context.tr('History', '历史记录')),
+                      ),
+                      IconButton(
+                        key: const Key('home-today-refresh'),
+                        tooltip: context.tr(
+                          'Refresh today’s Check-ins',
+                          '刷新今天的签到',
+                        ),
+                        onPressed: _opening
+                            ? null
+                            : () => ref.invalidate(homeTodayProvider),
+                        icon: const Icon(Icons.refresh),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              Text(
-                '${MaterialLocalizations.of(context).formatMediumDate(snapshot.date!)} · ${snapshot.timeZone}',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const SizedBox(height: 8),
               if (snapshot.entries.isEmpty)
                 Text(
                   snapshot.hasMore
                       ? context.tr(
-                          'No entries on this page. Open history to continue reading.',
-                          '当前页没有记录，可打开签到记录继续查看。',
+                          'No entries on this page. Open history for more.',
+                          '当前页没有记录，可在历史记录中继续查看。',
                         )
                       : context.tr(
-                          'No saved Check-ins for this day yet. Use New Check-in above to record a moment.',
-                          '这一天还没有已保存的签到。点击上方“新建签到”，记下此刻。',
+                          'No saved Check-ins today. Record a moment above.',
+                          '今天还没有签到，在上方记下此刻吧。',
                         ),
                 ),
               for (final entry in snapshot.entries)
                 ListTile(
                   key: ValueKey('home-today-${entry.checkIn.checkInId}'),
                   contentPadding: EdgeInsets.zero,
+                  minVerticalPadding: 4,
+                  visualDensity: VisualDensity.compact,
                   title: Text(
                     entry.checkIn.note.isNotEmpty
                         ? entry.checkIn.note
                         : context.tr('Mood Check-in', '心情签到'),
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   subtitle: Text(
@@ -160,6 +177,8 @@ final class _HomeTodaySectionState extends ConsumerState<HomeTodaySection> {
                       if (entry.checkIn.mood?.isNotEmpty == true)
                         entry.checkIn.mood!,
                     ].join(' · '),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: _opening
@@ -169,26 +188,16 @@ final class _HomeTodaySectionState extends ConsumerState<HomeTodaySection> {
                           () => widget.onOpenCheckIn(entry.checkIn.checkInId),
                         ),
                 ),
-              if (snapshot.hasMore) ...[
+              if (snapshot.hasMore && snapshot.entries.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(
                   context.tr(
-                    'Showing up to 3 from this day. Open history for more.',
-                    '这里只展示当天最多 3 条记录，可在签到记录中查看其余内容。',
+                    'Showing up to 3. Open history for more.',
+                    '这里最多显示 3 条，其余可在历史记录中查看。',
                   ),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
-              Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: TextButton(
-                  key: const Key('home-today-history'),
-                  onPressed: _opening
-                      ? null
-                      : () => _open(snapshot, widget.onOpenHistory),
-                  child: Text(context.tr('Open Check-in history', '打开签到记录')),
-                ),
-              ),
             ],
           ),
         ),

@@ -27,6 +27,7 @@ final class EventRecommendationsSection extends ConsumerStatefulWidget {
   const EventRecommendationsSection({
     required this.onSeeAll,
     this.heading,
+    this.contextControls,
     this.onBrowseAll,
     this.onContinueDiscovery,
     this.onOpenEvent,
@@ -37,6 +38,7 @@ final class EventRecommendationsSection extends ConsumerStatefulWidget {
 
   final VoidCallback? onSeeAll;
   final String? heading;
+  final Widget? contextControls;
   final VoidCallback? onBrowseAll;
   final VoidCallback? onContinueDiscovery;
   final void Function(String)? onOpenEvent;
@@ -134,6 +136,7 @@ final class _EventRecommendationsSectionState
         onSeeAll: widget.onSeeAll,
         home: true,
         heading: widget.heading,
+        contextControls: widget.contextControls,
         onBrowseAll: widget.onBrowseAll,
         onContinueDiscovery: widget.onContinueDiscovery,
         onOpenEvent: widget.onOpenEvent,
@@ -369,6 +372,7 @@ final class _RecommendationContent extends StatelessWidget {
     this.onSeeAll,
     this.home = false,
     this.heading,
+    this.contextControls,
     this.onBrowseAll,
     this.onContinueDiscovery,
     this.onOpenEvent,
@@ -382,6 +386,7 @@ final class _RecommendationContent extends StatelessWidget {
   final VoidCallback? onSeeAll;
   final bool home;
   final String? heading;
+  final Widget? contextControls;
   final VoidCallback? onBrowseAll;
   final VoidCallback? onContinueDiscovery;
   final Map<String, GlobalKey> eventKeys;
@@ -563,6 +568,11 @@ final class _RecommendationContent extends StatelessWidget {
                   icon: const Icon(Icons.refresh),
                 ),
             ],
+          ),
+        if (contextControls != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: contextControls!,
           ),
         if (syntheticPreview) ...[
           Card(

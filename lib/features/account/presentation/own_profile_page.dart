@@ -57,6 +57,14 @@ final class OwnProfilePage extends ConsumerWidget {
     }
 
     final canEdit = state.username != null;
+    Future<void> editInterests() async {
+      final controller = ref.read(ownProfileControllerProvider.notifier);
+      await onEditInterests();
+      if (context.mounted && ref.read(currentAuthSubjectProvider) == subject) {
+        await controller.load();
+      }
+    }
+
     final commonActions = <ProfileAction>[
       if (onOpenHistory != null)
         ProfileAction(
@@ -74,23 +82,6 @@ final class OwnProfilePage extends ConsumerWidget {
           onPressed: canEdit ? () => onOpenRecords!(state.username!) : null,
           emphasized: true,
         ),
-      ProfileAction(
-        key: const Key('profile-edit-interests'),
-        icon: Icons.interests_outlined,
-        label: context.tr('Edit interests', '编辑兴趣'),
-        onPressed: !canEdit
-            ? null
-            : () async {
-                final controller = ref.read(
-                  ownProfileControllerProvider.notifier,
-                );
-                await onEditInterests();
-                if (context.mounted &&
-                    ref.read(currentAuthSubjectProvider) == subject) {
-                  await controller.load();
-                }
-              },
-      ),
       if (onOpenFootprint != null)
         ProfileAction(
           key: const Key('profile-footprint'),
@@ -226,19 +217,38 @@ final class OwnProfilePage extends ConsumerWidget {
                     ),
                     _ => const LinearProgressIndicator(),
                   },
-                  const SizedBox(height: 24),
-                  Text(
-                    context.tr('Quick access', '常用功能'),
-                    style: Theme.of(context).textTheme.titleLarge,
+                  if (commonActions.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    Text(
+                      context.tr('Quick access', '常用功能'),
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 4),
+                    ProfileActionGroup(actions: commonActions),
+                  ],
+                  const SizedBox(height: 20),
+                  Wrap(
+                    key: const Key('profile-interests-heading'),
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 12,
+                    children: [
+                      Semantics(
+                        header: true,
+                        child: Text(
+                          context.tr('Interests', '兴趣'),
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ),
+                      TextButton.icon(
+                        key: const Key('profile-edit-interests'),
+                        onPressed: canEdit ? editInterests : null,
+                        icon: const Icon(Icons.edit_outlined, size: 18),
+                        label: Text(context.tr('Edit interests', '编辑兴趣')),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 4),
-                  ProfileActionGroup(actions: commonActions),
-                  const SizedBox(height: 20),
-                  Text(
-                    context.tr('Interests', '兴趣'),
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
                   if (state.phase == OwnProfilePhase.loading)
                     const LinearProgressIndicator(key: Key('profile-loading'))
                   else if (state.phase == OwnProfilePhase.failed)

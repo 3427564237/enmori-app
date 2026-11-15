@@ -1,0 +1,128 @@
+{
+  "atUtc": "2026-11-15T12:48:20.833551+00:00",
+  "baselineCommit": "2c7cf70e289da2d2906b580a028a66375fa73c83",
+  "branch": "souma/home-layout-20261115",
+  "checks": [
+    {
+      "kind": "full-flutter-tests",
+      "command": "fvm flutter test --no-pub test",
+      "result": "passed",
+      "testsPassed": 1803,
+      "logPath": "/home/miku/.local/state/enmori-home-layout-20261115/enmori-home-layout-final-full.log",
+      "logSha256": "156adaa2e8cd73d202154869ff1e27aed5ce92e9dfb926e640b1e489ce1f9fa1"
+    },
+    {
+      "kind": "captured-font-viewports",
+      "command": "ENMORI_CAPTURE_* and ENMORI_HOME_LAYOUT_PREVIEW set; fvm flutter test --no-pub test/features/home_layout_refinement_test.dart",
+      "result": "passed",
+      "testsPassed": 11,
+      "logPath": "/home/miku/.local/state/enmori-home-layout-20261115/enmori-home-layout-delivery-previews.log",
+      "logSha256": "ebebeb51f8aa9682ba267a070df3c49419cfc12fac8bc9ad3c16916794ee823a"
+    },
+    {
+      "kind": "static-analysis",
+      "command": "fvm flutter analyze --no-pub",
+      "result": "no issues",
+      "testsPassed": null,
+      "logPath": "/home/miku/.local/state/enmori-home-layout-20261115/enmori-home-layout-delivery-analyze.log",
+      "logSha256": "cae5b46cfb082fe5dd1ecbf0bf65327004f2b0165eae17fc52a572db33787db4"
+    }
+  ],
+  "fullSuiteExitCode": 0,
+  "overlappingTestCountsDoNotAdd": true,
+  "dependencyManifestAndLockUnchanged": true,
+  "diffWhitespaceCheck": "passed",
+  "sourceFileSha256": {
+    "lib/app/home_introduction.dart": "488c374fb183ed3f0c035c429f0a013d9cf87a7e0bc07bb60ef97263ede0ae5c",
+    "lib/app/home_shell_page.dart": "701b23d9b6c1eeb11517b00924d4d76f35e667ed5693301b10d222e9967f59ed",
+    "lib/app/home_today_section.dart": "f2fbeb0d85c5fcc8d56c2c09514a552ded5a71137930947b61c075282a3ff10e",
+    "lib/app/remote_social_composition.dart": "c84325441fa9a480b0698a60353555e51530807e1f7a28a2e54e3a64060a0c62",
+    "lib/app/router/app_router.dart": "d7c27bbeb676cedadd1919038d4be4c43a27ccd84d16ba7901d7fc42c26a7a44",
+    "lib/features/account/presentation/own_profile_page.dart": "c92595ebb269191bcf4b445d9683a8b3f53957fdcdd8632ae84fe417a765dbba",
+    "lib/features/account/presentation/profile_action_group.dart": "61b1671830c4c2c80bf926072682dbff5d8a6cf1309f9c364b0bf471b4be8b85",
+    "lib/features/event_recommendations/presentation/event_recommendations_page.dart": "f86f3764c645b20ec821699a4be9c23455b85e93f8d7bcfa4f14f6e1c27d89b5",
+    "lib/features/recommendation_profile/presentation/activity_area_bar.dart": "64c41dd422b1654fe685c05b1151e2f02ea330ce943468e02da29b13be7809a9",
+    "lib/features/weather/presentation/home_weather_card.dart": "038c983ba0ac5261e2c29843e038500259a6fb05f95542dcb26fe5e5dff3efff",
+    "lib/features/weather/presentation/weather_card.dart": "f51d0b26c12f0ee68b124436a0ba92900a2959405044ffc0e18701d55623b4fa",
+    "test/app/home_today_test.dart": "78e8e3433de391623eefea13fa118778661144abca3a736acbcba27f79f3bbfe",
+    "test/features/home_layout_refinement_test.dart": "3d0d38a9a0b59dfe6d33bf2ce2763dbfdef2d2b89bf7d591f0bdb16cd147f83c",
+    "test/features/own_profile_shortcuts_test.dart": "b338d94754b20adc6b3acd6293d188deb2af73cd22cdd8b0a835118d78bc04e1"
+  },
+  "rasterEvidence": {
+    "kind": "production Flutter widgets with synthetic repositories",
+    "physicalDevice": false,
+    "accountData": "synthetic",
+    "testOnlyCjkFallback": true,
+    "sha256": {
+      "previews/home-en-landscape.png": "f698c3f69bee725d7d1bc23216091d0266cce54f31f53bcf5b3bb557cec69a9a",
+      "previews/home-en-large-text.png": "da5f8eb941c4629213e61446ca7cbb106aca75fce75f8f097b1c3c1324ce782f",
+      "previews/home-en-narrow.png": "e0606a467cd7024cee8a2a169488ecfe3e47a258845c25b0e509a3404cd9031c",
+      "previews/home-en-phone.png": "0d61fbb6b2591882a005568397ca398faf61c91cdcf020edf8efa8e753a38f9f",
+      "previews/home-events-en-landscape.png": "75652c0e68d199ac925dbdfe2ab7b14e6d05b64532aef223ba7150cc477bf93c",
+      "previews/home-events-en-large-text.png": "d0a7e42a551960714dab6134101c1380da2bb6320f36b11fede195c5795ae5ea",
+      "previews/home-events-en-narrow.png": "ba80d2dda9b1d9a23c5ebef7ee9e8724c139d9df52c3a976a15572618dd957cb",
+      "previews/home-events-en-phone.png": "95983efc190ae24680ffd7ef7cbfa11983e7b93ef14caae342e382c9f13faf1d",
+      "previews/home-events-zh-landscape.png": "075e6cab7e73f635aa71b4d8a72318db674a55df472aa842b1a75eb0eb47b5e9",
+      "previews/home-events-zh-large-text.png": "345ac59cf324f35b8efb7436b15e9f303f5ab0d9f8bf079db8e39e2cb00ee1f3",
+      "previews/home-events-zh-narrow.png": "91e8aa250b4bf67dfcca520547a2059f34022351f1b4f9b6b8dd6bfd8fa52fde",
+      "previews/home-events-zh-phone.png": "32f8a2792fee31f38af7f1e6162bbda234974c1e7045b9d90a6c87ae47909814",
+      "previews/home-loading.png": "dbd442ad46c6d16263139f0cc88b75bb66507a1e4cd642d250defb9d189402e2",
+      "previews/home-weather-failed.png": "073f39cd6cb8b9a852a2f559a305edde8471a9aa9fc42aad56708778abeeba87",
+      "previews/home-weather-off-empty-day.png": "3c4b5e249954443c54177904aaad541f49c1afa7337c2d83af2f6beb5538efdf",
+      "previews/home-zh-landscape.png": "228ce1698105d91195a6cc96b0bd9cad2c03226aa261085ba2d46cb2adfaa888",
+      "previews/home-zh-large-text.png": "e534c64be3e6e567ca5c4e2102f13618d5dd08a9f940dd7c81ad466ddf75bdca",
+      "previews/home-zh-narrow.png": "c64537a026adfbbe741c798310c24e1057e90f5d8cbdca2156a5a33ffc689ded",
+      "previews/home-zh-phone.png": "598e128b729ecce7fbb80023ce8ad6ce1334423ad831d7cf842f92e01b0a482a",
+      "previews/profile-en-landscape.png": "8b4395e6a02d55ef1dda7c35f44ce442560b951eb7f69705b220bf4bfea928a8",
+      "previews/profile-en-large-text.png": "a0e31e355630993a408d81db6558b371fadb923d31b8e38de0aaec9e96910cae",
+      "previews/profile-en-narrow.png": "22f3d65ae2aed87bb04ef322aaddddd07c97534b2f6d1de7a9a940b520445ada",
+      "previews/profile-en-phone.png": "125ee757c0db9d09d7ad0049fd952a8b018390a589bf53d2f1952707951a859e",
+      "previews/profile-interests-en-landscape.png": "0dd5156726cd951d7d79b83b7775a83520a3d3976b1549a4178476224d7f44f0",
+      "previews/profile-interests-en-large-text.png": "33c9814a781ab5b01c4f6e45a9a1990c5882cac5c0317d4f6d3b180b5660ed89",
+      "previews/profile-interests-en-narrow.png": "e040cd71b844f76ff87c32a3fa54991e3e412c9d4d62c8e605a765aa64cdf873",
+      "previews/profile-interests-en-phone.png": "5db8fa1b879be6d68d3ad6939a71f51f34e9e4e95d8e523557185d5696d1adf2",
+      "previews/profile-interests-zh-landscape.png": "b8860b171864a1211f523641fa5db743470a48889e5cd07756b9bb10bcf3e5d1",
+      "previews/profile-interests-zh-large-text.png": "d231291d2a53aa87d8a9f19470679e56fd6c5f7ea3404b16ac7d4f7653e7709c",
+      "previews/profile-interests-zh-narrow.png": "a0f7f34d24aaf4836a86e79c3435e7b08bc4fb01565f3663774159429308bd3c",
+      "previews/profile-interests-zh-phone.png": "a0551d5589e79d55e4fa8cef0fa3e24e0f2f3466950bd4860f786f33e824a932",
+      "previews/profile-zh-landscape.png": "6346736f628f838592584fc972c518f892acdfd6f0047b0cd716b68842bc85e5",
+      "previews/profile-zh-large-text.png": "fb8bcd86985c237481ca6a2c1ad65323a95484a8f239b6a36dfcf0e3de1399b0",
+      "previews/profile-zh-narrow.png": "445c0299c6678dec0e011c7d4f043b6f4055d02c4b96e54b7c3eaac061889cac",
+      "previews/profile-zh-phone.png": "c87ab5f3d3c7fb48436bebf096212cd6bf34256e28327143b962f2031a953566"
+    }
+  },
+  "matrix": {
+    "locales": [
+      "en",
+      "zh"
+    ],
+    "logicalViewports": [
+      [
+        375,
+        812,
+        1
+      ],
+      [
+        320,
+        640,
+        1
+      ],
+      [
+        320,
+        640,
+        2
+      ],
+      [
+        812,
+        375,
+        2
+      ]
+    ],
+    "reducedMotion": true
+  },
+  "realAccountOrServiceWrites": false,
+  "backendChanged": false,
+  "phoneAcceptance": false,
+  "screenReaderAudit": false,
+  "iosAcceptance": false
+}

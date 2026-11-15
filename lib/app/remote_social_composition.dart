@@ -20,7 +20,6 @@ import '../features/friends/presentation/friend_activity_panel.dart';
 import '../features/friends/presentation/friend_discovery_panel.dart';
 import '../features/account/account_preferences_providers.dart';
 import '../features/account/domain/account_preferences_repository.dart';
-import '../features/account/presentation/own_profile_header.dart';
 import 'providers.dart';
 import 'router/app_router.dart';
 
@@ -253,34 +252,34 @@ final class GroupHomeSocial extends ConsumerWidget {
   }
 }
 
-final class ConnectedOwnHeader extends ConsumerWidget {
-  const ConnectedOwnHeader({required this.onEdit, super.key});
-  final Future<void> Function() onEdit;
+final class ConnectedHomeGreeting extends ConsumerWidget {
+  const ConnectedHomeGreeting({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final subject = ref.watch(currentAuthSubjectProvider);
     final profile = subject == null
         ? null
         : ref.watch(ownProfileDetailsProvider(subject));
+    final String greeting;
     if (profile case AsyncData<Result<OwnProfile>>(
       value: Success<OwnProfile>(:final value),
     )) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 16, bottom: 4),
-        child: OwnProfileHeader(
-          profile: value,
-          compact: true,
-          onEdit: () async {
-            await onEdit();
-            if (context.mounted &&
-                subject == ref.read(currentAuthSubjectProvider)) {
-              ref.invalidate(ownProfileDetailsProvider(subject!));
-            }
-          },
-        ),
-      );
+      final name = value.displayName ?? value.username;
+      greeting = context.tr('Hello, $name', '你好，$name');
+    } else {
+      greeting = context.tr('Welcome back', '欢迎回来');
     }
-    return const SizedBox.shrink();
+    // The fallback and resolved identity share one line and identical metrics.
+    return Tooltip(
+      message: greeting,
+      child: Text(
+        greeting,
+        key: const Key('home-greeting'),
+        style: Theme.of(context).textTheme.bodyMedium,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
   }
 }
 

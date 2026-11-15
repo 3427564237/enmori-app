@@ -60,7 +60,22 @@ void main() {
 
         expect(
           tester.getTopLeft(find.byKey(const Key('profile-history'))).dy,
-          tester.getTopLeft(find.byKey(const Key('profile-edit-interests'))).dy,
+          lessThan(
+            tester
+                .getTopLeft(find.byKey(const Key('profile-edit-interests')))
+                .dy,
+          ),
+        );
+        expect(
+          find.descendant(
+            of: find.byKey(const Key('profile-interests-heading')),
+            matching: find.byKey(const Key('profile-edit-interests')),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          tester.getTopLeft(find.byKey(const Key('profile-history'))).dy,
+          tester.getTopLeft(find.byKey(const Key('profile-footprint'))).dy,
         );
 
         for (final (key, label, destination) in [
@@ -116,6 +131,7 @@ void main() {
       expect(find.byKey(Key(key)), findsNothing);
     }
     expect(find.text('Profile & privacy'), findsNothing);
+    expect(find.text('Quick access'), findsNothing);
   });
 
   testWidgets('profile controls precede long My plans content', (tester) async {
@@ -288,7 +304,7 @@ void main() {
           .dy;
       if (size.width == 360) {
         expect(interestsY, greaterThan(historyY));
-        expect(footprintY, greaterThan(interestsY));
+        expect(interestsY, greaterThan(footprintY));
       }
       await _show(tester, find.byKey(const Key('profile-settings')));
       expect(

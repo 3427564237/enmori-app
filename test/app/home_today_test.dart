@@ -364,7 +364,7 @@ void main() {
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull);
           expect(
-            find.text(locale == 'zh' ? '打开签到记录' : 'Open Check-in history'),
+            find.text(locale == 'zh' ? '历史记录' : 'History'),
             findsOneWidget,
           );
         },

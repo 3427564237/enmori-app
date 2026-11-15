@@ -30,10 +30,13 @@ final class ProfileActionGroup extends StatelessWidget {
         1.0,
         1.75,
       );
-      final columns =
+      final availableColumns =
           ((constraints.maxWidth + spacing) / (92 * textScale + spacing))
               .floor()
               .clamp(1, 4);
+      final columns = actions.isNotEmpty && actions.length < availableColumns
+          ? actions.length
+          : availableColumns;
       final width = (constraints.maxWidth - spacing * (columns - 1)) / columns;
       return Wrap(
         spacing: spacing,

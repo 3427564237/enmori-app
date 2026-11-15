@@ -168,22 +168,31 @@ final class _HomeWeatherCardState extends ConsumerState<HomeWeatherCard>
                   ),
                   onPressed: state.busy ? null : _requestWeather,
                   icon: const Icon(Icons.cloud_outlined),
-                  label: Text(context.tr('Add today’s weather', "添加今日天气")),
+                  label: Text(
+                    state.busy
+                        ? context.tr('Getting current weather…', '正在获取天气…')
+                        : context.tr('Add today’s weather', "添加今日天气"),
+                  ),
                 ),
               ),
               actions,
             ],
           ),
-        Text(
-          state.automatic
-              ? context.tr('Approximate location · auto on', "大致位置 · 自动获取已开启")
-              : context.tr('Optional · approximate location', "可选 · 大致位置"),
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
+        if (state.weather == null)
+          Text(
+            state.automatic
+                ? context.tr('Approximate location · auto on', "大致位置 · 自动获取已开启")
+                : context.tr('Optional · approximate location', "可选 · 大致位置"),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         if (state.weather case final weather?)
           WeatherCard(
             snapshot: weather,
             showUpdated: true,
+            compact: true,
+            contextLabel: state.automatic
+                ? context.tr('Approximate location · auto on', '大致位置 · 自动获取已开启')
+                : context.tr('Approximate location', '大致位置'),
             actions: actions,
             openAttribution: widget.openAttribution,
           ),
