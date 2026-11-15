@@ -1,0 +1,79 @@
+{
+  "verifiedAtUtc": "2026-11-15T13:19:49.975849+00:00",
+  "sourceCommit": "c34d90d0de348651458df929cf5973bc8711555d",
+  "candidateReceipt": "android-v73-candidate.json",
+  "installation": {
+    "atUtc": "2026-11-15T13:04:21.253958+00:00",
+    "oldVersionCode": 69,
+    "versionCode": 73,
+    "versionName": "1.0.0-ui20261115",
+    "firstInstallTimeRetained": true,
+    "dataDirectoryRetained": true,
+    "installedApkSha256": "be3d607ff8a985e0976f02c045a5ea522f3d016824023b203a293322e735b91b",
+    "matchesCandidate": true,
+    "installMode": "adb install -r --no-incremental",
+    "uninstalled": false,
+    "dataCleared": false
+  },
+  "device": {
+    "model": "V2405A",
+    "reportedAndroidVersion": "17",
+    "physicalSize": "Physical size: 1260x2800",
+    "density": "Physical density: 560",
+    "existingSystemFontPreserved": true
+  },
+  "preservation": {
+    "profileDetailsEqualBeforeAfter": true,
+    "sampledSavedCheckInEqualBeforeAfter": true,
+    "savedInterestVisibleBeforeAndAfter": true,
+    "originalInterestSelectionStillChecked": true,
+    "primaryActionBoundsStable": true,
+    "primaryActionBoundsByState": {
+      "v73-home-initial": "[112,763][1148,931]",
+      "v73-weather-retry": "[112,763][1148,931]",
+      "v73-check-in-return": "[112,763][1148,931]",
+      "v73-home-restored": "[112,763][1148,931]"
+    }
+  },
+  "layoutAndInteraction": {
+    "locale": "en",
+    "fontScales": [
+      1.0,
+      2.0
+    ],
+    "orientations": [
+      "portrait",
+      "landscape"
+    ],
+    "newReproducibleLayoutOrNavigationRegressionsObserved": false,
+    "newCheckInOpenedWithoutSaving": true,
+    "existingHistoryAndDetailOpened": true,
+    "interestEditorOpenedScrolledAndCancelled": true,
+    "areaPickerSearchedAndCancelled": true,
+    "eventCardOpenedAndReturned": true,
+    "diagnosticMarkerCounts": {
+      "FATAL EXCEPTION": 0,
+      "RenderFlex overflowed": 0,
+      "RenderBox was not laid out": 0,
+      "Vertical viewport was given unbounded height": 0,
+      "EXCEPTION CAUGHT BY": 0
+    }
+  },
+  "restoredSystemSettings": {
+    "fontScale": "1.0",
+    "accelerometerRotation": "0",
+    "userRotation": "0"
+  },
+  "finalScreen": "Last tested return: Home; later observed system recent-apps screen during evidence collection",
+  "limitations": [
+    "Single original phone and existing account; not complete UAT",
+    "Location services off; no live-weather success-state check",
+    "No real interest save or participation change performed",
+    "Activity recommendations showed loading before completing; no timing benchmark",
+    "Event detail reported official details could not be read; cause not established",
+    "No Chinese physical-phone, screen-reader or iOS acceptance"
+  ],
+  "privateEvidenceDirectory": "/home/miku/.local/state/enmori-v73-phone-20261115",
+  "rawScreenshotsUiTreesAndLogsCommitted": false,
+  "evidenceCollectionNote": "The final UI dump reported could not get idle state; its stale XML and unrelated recent-apps capture were discarded. Verified app screenshots from earlier successful dumps remain the evidence."
+}

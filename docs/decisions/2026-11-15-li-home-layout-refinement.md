@@ -21,3 +21,7 @@ The Home introduction uses a lightweight greeting instead of the full Profile ed
 ## Evidence boundary
 
 Produce actual Flutter raster previews with explicitly synthetic data and relevant widget/regression evidence. Distinguish these from connected services, installed APK and physical-phone observations; a device is not connected at start. Do not alter account settings or records to manufacture evidence.
+
+## Same-day physical-device follow-up
+
+After reviewing the v73 candidate, LI explicitly requested: “把 v73 安装到手机上，保留现有数据，再检查一下真机上的布局和交互有没有问题。” LI then confirmed that the original phone was connected and USB debugging allowed. This authorizes a retained-data update of that phone to the already delivered v73 artifact and bounded physical layout/interaction checks. The resulting observations are recorded in the [v73 physical-device verification](../evidence/2026-11-15-home-layout/phone-v73-verification.md); they do not replace the earlier source/widget evidence or establish full UAT.

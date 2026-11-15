@@ -48,4 +48,6 @@ An interrupted build produced no APK. A subsequent `--no-pub` build exposed the 
 
 ## Acceptance boundary
 
-No account settings, interests, records or real service data were changed for verification. There is no new backend or deployment work. Widget evidence does not establish network readiness, physical-phone behavior, a screen-reader audit, iOS acceptance or full UAT. No device was connected at either the initial or final packaging check. The signed candidate has not been installed or accepted on a physical phone.
+At the packaging stage, no account settings, interests, records or real service data were changed for verification, and no device was connected at the initial or final packaging check. There is no new backend or deployment work. Widget evidence does not establish network readiness, physical-phone behavior, a screen-reader audit, iOS acceptance or full UAT.
+
+After LI's explicit follow-up, the exact signed v73 candidate was installed over v69 on the original phone with data retained. See the [physical-device verification](phone-v73-verification.md) and [installation receipt](phone-v73-verification.json) for the later bounded evidence, settings restoration and remaining content-reading limitations. The earlier candidate JSON retains its packaging-time `installed: false` state as history.
