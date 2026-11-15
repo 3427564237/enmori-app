@@ -38,6 +38,14 @@ Additional inspected states: [loading](previews/home-loading.png), [weather refr
 
 The machine-readable [verification receipt](verification.json) records final command outcomes and raster hashes. Test runs overlap; their counts must not be added.
 
+Final results: all **1,803 Flutter tests passed** with exit code 0; the separate captured-font viewport run passed 11 tests; static analysis reported no issues. Dependency manifest and lockfile are unchanged.
+
+## Signed Android candidate
+
+[v73 packaging receipt](android-v73-candidate.json): source commit `c34d90d0de348651458df929cf5973bc8711555d`, package `com.enmori.app.group`, version `1.0.0-ui20261115` / 73, release signature verified against the existing group certificate, non-debuggable. The APK is `/home/miku/Downloads/ENMORI-ui-v73-release.apk` (70,608,824 bytes). It reuses the existing release configuration and companion selection.
+
+An interrupted build produced no APK. A subsequent `--no-pub` build exposed the test-generated Android plugin registrant retaining `integration_test`. Flutter's standard release build regenerated that ignored file in release mode, excluding development plugins, and completed successfully. An offline `pub get --enforce-lockfile` check passed; neither the dependency manifest nor lockfile changed. No handwritten plugin-registrant or application-source workaround was used.
+
 ## Acceptance boundary
 
-No account settings, interests, records or real service data were changed for verification. There is no new backend or deployment work. Widget evidence does not establish network readiness, physical-phone behavior, a screen-reader audit, iOS acceptance or full UAT. No device was connected at the beginning of this work; any signed Android candidate and final device check are recorded separately.
+No account settings, interests, records or real service data were changed for verification. There is no new backend or deployment work. Widget evidence does not establish network readiness, physical-phone behavior, a screen-reader audit, iOS acceptance or full UAT. No device was connected at either the initial or final packaging check. The signed candidate has not been installed or accepted on a physical phone.

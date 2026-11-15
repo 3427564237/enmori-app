@@ -1,0 +1,23 @@
+{
+  "atUtc": "2026-11-15T12:53:16.680479+00:00",
+  "sourceCommit": "c34d90d0de348651458df929cf5973bc8711555d",
+  "apkPath": "/home/miku/Downloads/ENMORI-ui-v73-release.apk",
+  "sha256": "be3d607ff8a985e0976f02c045a5ea522f3d016824023b203a293322e735b91b",
+  "bytes": 70608824,
+  "versionCode": 73,
+  "versionName": "1.0.0-ui20261115",
+  "package": "com.enmori.app.group",
+  "debuggable": false,
+  "signerCertificateSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+  "signatureVerified": true,
+  "companionEnabled": true,
+  "existingReleaseConfigurationReused": true,
+  "flutterTestsPassed": 1803,
+  "staticAnalysis": "no issues",
+  "buildExitCode": 0,
+  "buildLog": "/home/miku/.local/state/enmori-home-layout-20261115/enmori-home-layout-release.log",
+  "buildLogSha256": "c28745f4bd8c916f55a90945990108b093aa1395dcfbb1523c85d833546b1d95",
+  "installed": false,
+  "phoneAcceptance": false,
+  "deviceAvailability": "no connected adb device at final packaging check"
+}
