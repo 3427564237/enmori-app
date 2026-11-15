@@ -40,4 +40,4 @@ The signed **v68** candidate (`1.0.0-friends20261115`, `com.enmori.app.group`) w
 
 The first `--no-pub` release attempt failed because a generated registrant still referenced the integration-test plugin after tests. Rebuilding with normal release tooling regenerated registration correctly and succeeded, with no source or dependency-lock changes.
 
-`adb devices -l` reported no connected devices. No installation, real-account interest/relationship change, cloud deployment, notification send or AI call was performed. APK creation is not physical-device acceptance.
+At the initial v68 delivery, `adb devices -l` reported no connected devices. No installation, real-account interest/relationship change, cloud deployment, notification send or AI call was performed in that first increment. APK creation is not physical-device acceptance. The subsequently approved Backend-only interest-first update was deployed and independently verified; see [its follow-up evidence](interest-first-ordering.md).

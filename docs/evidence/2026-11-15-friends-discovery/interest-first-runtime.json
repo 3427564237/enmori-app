@@ -1,0 +1,237 @@
+{
+  "sourceCommit": "fac7723338ecd0045c214d068d9f41567cc8aac7",
+  "activePackage": "2026111507205768.zip",
+  "packageSha256": "5fd18c15320299ba3f4b2131aeb1b3fed36e41d288a61f8a7d0d863dab0629c3",
+  "packageBytes": 68066847,
+  "everyEntryVerified": true,
+  "entryCount": 8561,
+  "previousPackage": "2026111212213766.zip",
+  "settingsUnchanged": true,
+  "existingFinancialRecordsPreserved": true,
+  "operatorModelCalls": 0,
+  "operatorProductWrites": 0,
+  "startRequestedAtUtc": "2026-11-15T07:28:24.244843+00:00",
+  "listeningAtUtc": "2026-11-15T07:33:34.8849792Z",
+  "startToListeningSeconds": 310.64,
+  "ownerGeneration": 87,
+  "renewalObserved": true,
+  "baselineOwnerAlreadyExpired": true,
+  "mountedApplication": {
+    "readAtUtc": "2026-11-15T07:40:59.328Z",
+    "bytes": 396,
+    "sha256": "8937a8e3cc90df09cb79154eb642d723f341b45156c6865ac5593714e7f9d222",
+    "sourceCommit": "fac7723338ecd0045c214d068d9f41567cc8aac7",
+    "demoVersion": 68,
+    "renewableServiceOwner": true,
+    "paidCreditSuccessorCode": true,
+    "rankModuleSha256": "71c9142cb87a4d0c2a76f886711da459462a62ee1630656a6df94c9c54514d40",
+    "syntheticRank": [
+      {
+        "eventId": "gaming",
+        "score": 4
+      },
+      {
+        "eventId": "music",
+        "score": 13
+      }
+    ]
+  },
+  "adminReadback": {
+    "atUtc": "2026-11-15T07:39:37.357Z",
+    "reads": [
+      {
+        "path": "/v1/me/profile",
+        "status": 200,
+        "elapsedMs": 757
+      },
+      {
+        "path": "/v1/me/interests",
+        "status": 200,
+        "elapsedMs": 807
+      },
+      {
+        "path": "/v1/me/recommendation-profile",
+        "status": 200,
+        "elapsedMs": 666
+      },
+      {
+        "path": "/v1/recommendations/events?view=all",
+        "status": 200,
+        "elapsedMs": 3899
+      },
+      {
+        "path": "/v1/recommendations/events?view=home",
+        "status": 200,
+        "elapsedMs": 851
+      },
+      {
+        "path": "/v1/admin/operations-status",
+        "status": 200,
+        "elapsedMs": 603
+      }
+    ],
+    "productWrites": 0,
+    "modelCalls": 0,
+    "passed": true,
+    "existingAccountFieldsUnchanged": true,
+    "ranking": {
+      "itemCount": 0,
+      "interestMatches": 0,
+      "otherRelevant": 0,
+      "interestFirst": true,
+      "nonempty": false,
+      "homeMatchesAll": true
+    },
+    "services": [
+      {
+        "service": "backend",
+        "configured": true,
+        "state": "ready",
+        "lastObservedAt": "2026-11-15T07:39:45.236Z"
+      },
+      {
+        "service": "firebase",
+        "configured": true,
+        "state": "ready",
+        "lastObservedAt": "2026-11-15T07:39:45.236Z",
+        "lastSucceededAt": "2026-11-15T07:39:45.236Z"
+      },
+      {
+        "service": "ai",
+        "configured": true,
+        "state": "ready",
+        "lastObservedAt": "2026-11-15T07:39:45.236Z"
+      },
+      {
+        "service": "ticketmaster",
+        "configured": true,
+        "state": "ready",
+        "lastObservedAt": "2026-11-15T07:39:43.445Z",
+        "lastSucceededAt": "2026-11-15T07:39:43.445Z"
+      },
+      {
+        "service": "onepa",
+        "configured": true,
+        "state": "ready",
+        "lastObservedAt": "2026-11-15T07:38:20.418Z",
+        "lastSucceededAt": "2026-11-15T07:38:20.418Z"
+      }
+    ]
+  },
+  "ordinaryReadback": {
+    "atUtc": "2026-11-15T07:40:51.042Z",
+    "reads": [
+      {
+        "path": "/v1/me/profile",
+        "status": 200,
+        "elapsedMs": 877
+      },
+      {
+        "path": "/v1/me/interests",
+        "status": 200,
+        "elapsedMs": 1291
+      },
+      {
+        "path": "/v1/me/recommendation-profile",
+        "status": 200,
+        "elapsedMs": 703
+      },
+      {
+        "path": "/v1/recommendations/events?view=all",
+        "status": 200,
+        "elapsedMs": 5914
+      },
+      {
+        "path": "/v1/recommendations/events?view=home",
+        "status": 200,
+        "elapsedMs": 5492
+      }
+    ],
+    "productWrites": 0,
+    "modelCalls": 0,
+    "passed": true,
+    "ranking": {
+      "itemCount": 63,
+      "interestMatches": 63,
+      "otherRelevant": 0,
+      "interestFirst": true,
+      "nonempty": true,
+      "homeMatchesAll": true
+    }
+  },
+  "initialColdRead": {
+    "atUtc": "2026-11-15T07:34:04.769Z",
+    "reads": [
+      {
+        "path": "/v1/me/profile",
+        "status": 200,
+        "elapsedMs": 3555
+      },
+      {
+        "path": "/v1/me/interests",
+        "status": 200,
+        "elapsedMs": 4310
+      },
+      {
+        "path": "/v1/me/recommendation-profile",
+        "status": 200,
+        "elapsedMs": 3987
+      },
+      {
+        "path": "/v1/recommendations/events?view=all",
+        "status": 503,
+        "elapsedMs": 6556
+      }
+    ],
+    "productWrites": 0,
+    "modelCalls": 0,
+    "passed": false,
+    "existingAccountFieldsUnchanged": true
+  },
+  "explicitSourceRefresh": {
+    "atUtc": "2026-11-15T07:36:01.364Z",
+    "reads": [
+      {
+        "path": "/v1/me/profile",
+        "status": 200,
+        "elapsedMs": 979
+      },
+      {
+        "path": "/v1/me/interests",
+        "status": 200,
+        "elapsedMs": 897
+      },
+      {
+        "path": "/v1/me/recommendation-profile",
+        "status": 200,
+        "elapsedMs": 720
+      },
+      {
+        "path": "/v1/event-browse",
+        "status": 503,
+        "elapsedMs": 136950
+      }
+    ],
+    "productWrites": 0,
+    "modelCalls": 0,
+    "passed": false
+  },
+  "verification": {
+    "backendTestsPassed": 1944,
+    "clientRecommendationTestsPassed": 26,
+    "analysis": "No issues found",
+    "phoneConnected": false,
+    "liAccountVerified": false,
+    "physicalAcceptance": false
+  },
+  "limitations": [
+    "Initial cold recommendation and source refresh returned 503; later warm reads succeeded.",
+    "The live ordinary account had only interest-matched candidates; cross-group precedence was verified with synthetic inputs in the mounted production module and isolated HTTP tests.",
+    "No actual LI interest change or physical-phone validation was performed."
+  ],
+  "reconciliations": [
+    "Expired pre-existing owner refused the former live-baseline check before any stop; same-service expired baseline was permitted with future/identity/financial/drain checks retained and nine isolated checks passed.",
+    "Activation returned 502; readback proved its process ended without switching. The already verified package was then selected with exact hash checks.",
+    "Azure exec application shell was unavailable. The existing Azure SSH path verified the mounted module after adapting CRLF marker parsing."
+  ]
+}

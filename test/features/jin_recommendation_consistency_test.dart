@@ -181,6 +181,70 @@ void main() {
       },
     );
   }
+  for (final version in [
+    'event_recommendation_v2',
+    'event_recommendation_v3',
+  ]) {
+    test(
+      '$version keeps interest-first Backend order even when the later score is higher',
+      () async {
+        final client = BackendApiClient(
+          Uri.parse('https://example.invalid'),
+          () async => const Success('synthetic-token'),
+          httpClient: MockClient(
+            (_) async => http.Response(
+              jsonEncode({
+                'asOf': '2026-11-15T00:00:00Z',
+                'formulaVersion': version,
+                'items': [
+                  {
+                    'eventId': 'gaming',
+                    'title': 'Gaming',
+                    'startAt': '2026-11-21T00:00:00Z',
+                    'matchedInterests': [
+                      {'interestTagId': 'gaming', 'displayName': 'Gaming'},
+                    ],
+                    'reasonCode': 'relevance_match',
+                    'reasons': [
+                      {'code': 'shared_interests', 'count': 1, 'points': 4},
+                    ],
+                  },
+                  {
+                    'eventId': 'music',
+                    'title': 'Music',
+                    'startAt': '2026-11-20T00:00:00Z',
+                    'matchedInterests': [],
+                    'reasonCode': 'relevance_match',
+                    'reasons': [
+                      {
+                        'code': 'friends_participating',
+                        'count': 5,
+                        'points': 10,
+                      },
+                      if (version == 'event_recommendation_v3') ...[
+                        {'code': 'same_area', 'count': 1, 'points': 2},
+                        {'code': 'target_age', 'count': 1, 'points': 1},
+                      ] else
+                        {'code': 'same_region', 'count': 1, 'points': 1},
+                    ],
+                  },
+                ],
+              }),
+              200,
+            ),
+          ),
+        );
+        addTearDown(client.close);
+        final result = await BackendEventRecommendationRepository(client)
+            .read(view: EventRecommendationView.all);
+        expect(result, isA<Success<EventRecommendationResponse>>());
+        final items =
+            (result as Success<EventRecommendationResponse>).value.items;
+        expect(items.map((item) => item.eventId), ['gaming', 'music']);
+        expect(items.last.matchedInterests, isEmpty);
+      },
+    );
+  }
   test('v2 HTTP client accepts real non-interest reasons and rejects mismatched evidence', () async {
     for (final points in [4, 99]) {
       final client = BackendApiClient(
