@@ -24,6 +24,7 @@ import { appFailure } from "../src/shared/application/app-failure.js";
 import { myFriendsSeed, measuredGateway, entryRef } from "../test/support/my-friends-fixture.js";
 import type { FirestoreGateway } from "../src/shared/infrastructure/firebase/firestore-gateway.js";
 import { Buffer } from "node:buffer";
+import { emptyRecommendationProfile } from "../src/recommendation-profile/domain/recommendation-profile.js";
 
 const env=requireControlledEmulatorEnvironment(process.env);assert.equal(env.projectId,"demo-enmori-rmvp01a-r10");
 const firebase=initializeApp({projectId:env.projectId},"s3-blocker-emulator"),auth=getAuth(firebase),firestore=getFirestore(firebase),gateway=new FirebaseAdminFirestoreGateway(firestore);
@@ -88,10 +89,34 @@ test("Emulator My Friends acceptance atomically creates both pointers, fresh pri
   await friends.setFixtureProtection("a","b",{blockedByAccountIds:[]});
  }
  await firestore.doc("accounts/b").update({displayName:null});
- assert.deepEqual(await friends.listFriends("a"),ok({friends:[],nextCursor:null}));
+ assert.deepEqual(await friends.listFriends("a"),ok({friends:[{username:"member_b",displayName:"member_b"}],nextCursor:null}));
  await friends.setFixtureProtection("a","b",{permanentlyDeletedAccountId:"b"});
  for (const id of ["a","b"]) assert.equal((await firestore.collection(`friend_lists/${id}/members`).get()).size,0);
  assert.equal((await pair()).listRefs,undefined); assert.equal((await pair()).friendship,true);
+});
+
+test("Emulator HTTP acceptance shows an unnamed sender in both lists and searches, while privacy still hides the row", async () => {
+ await firestore.doc("accounts/a").update({profileVisibility:"friends_only",displayName:null,recommendationProfile:{...emptyRecommendationProfile,discoverable:true}});
+ await firestore.doc("accounts/b").update({profileVisibility:"friends_only"});
+ const api = await app();
+ try {
+  const sender={authorization:`Bearer ${tokens.a}`},recipient={authorization:`Bearer ${tokens.b}`};
+  assert.equal((await api.inject({method:"POST",url:"/v1/friend-requests",headers:sender,payload:{username:"member_b"}})).statusCode,200);
+  const inbox=await api.inject({url:"/v1/me/friend-requests",headers:recipient});
+  assert.equal(inbox.statusCode,200);assert.equal(inbox.json().requests[0].displayName,"member_a");
+  assert.equal((await api.inject({method:"POST",url:`/v1/friend-requests/${inbox.json().requests[0].requestRef}/accept`,headers:recipient})).statusCode,200);
+  for (const [headers,expected] of [[sender,{username:"member_b",displayName:"Member b"}],[recipient,{username:"member_a",displayName:"member_a"}]] as const) {
+   const reply=await api.inject({url:"/v1/me/friends",headers});assert.equal(reply.statusCode,200);
+   assert.deepEqual(reply.json(),{friends:[expected],nextCursor:null});
+  }
+  const matched=await api.inject({url:"/v1/me/friends/search?q=MEMBER_A",headers:recipient});assert.equal(matched.statusCode,200);
+  assert.deepEqual(matched.json(),{friends:[{username:"member_a",displayName:"member_a"}],nextCursor:null});
+  assert.equal((await firestore.doc("accounts/a").get()).data()!.displayName,null);
+  await firestore.doc("accounts/a").update({profileVisibility:"private"});
+  for(const url of ["/v1/me/friends","/v1/me/friends/search?q=member_a"]){
+   const hidden=await api.inject({url,headers:recipient});assert.equal(hidden.statusCode,200);assert.deepEqual(hidden.json(),{friends:[],nextCursor:null});
+  }
+ } finally {await api.close();}
 });
 
 test("Emulator failed transaction commits neither acceptance nor either pointer", async () => {

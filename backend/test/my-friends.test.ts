@@ -16,7 +16,7 @@ function fixture(count = 1) {
   const store = new InMemoryFirestoreGateway(myFriendsSeed(count)), measured = measuredGateway(store);
   return { store, ...measured, repo: new FirestoreFriendRepository(measured.gateway, clock) };
 }
-test("My Friends projects only current accepted public/friends-only actual names; reads do not mutate", async () => {
+test("My Friends projects accepted public/friends-only names with Username fallback; reads do not mutate", async () => {
   const f = fixture(4);
   await f.store.runTransaction(async tx => {
     tx.set("accounts/target_1", { ...account("target_1"), profileVisibility: "public" });
@@ -24,7 +24,7 @@ test("My Friends projects only current accepted public/friends-only actual names
     tx.set("accounts/target_4", { ...account("target_4"), displayName: null });
   });
   const before = f.store.entries();
-  assert.deepEqual(await f.repo.listFriends("owner"), ok({ friends: [1, 2].map(n => ({ username: `member_target_${n}`, displayName: `Member target_${n}` })), nextCursor: null }));
+  assert.deepEqual(await f.repo.listFriends("owner"), ok({ friends: [...[1, 2].map(n => ({ username: `member_target_${n}`, displayName: `Member target_${n}` })), { username: "member_target_4", displayName: "member_target_4" }], nextCursor: null }));
   assert.deepEqual(f.store.entries(), before);
 });
 test("requester denial and missing authority precede any target read", async () => {

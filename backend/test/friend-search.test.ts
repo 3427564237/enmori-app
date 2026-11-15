@@ -84,7 +84,7 @@ test("FS04 all scanned authority checked even for nonmatches; known denials omit
     const f=fixture();await f.store.runTransaction(async tx=>tx.delete!(path));assert.deepEqual(await f.repo.searchFriends("owner",{q:"no match"}),err("dependency_unavailable"));
   }
   for(const block of ["owner","target_1"]){const f=fixture();await f.repo.setFixtureProtection("owner","target_1",{blockedByAccountIds:[block]});assert.deepEqual(await f.repo.searchFriends("owner",{q:"member"}),ok({friends:[],nextCursor:null}));}
-  for(const change of [{profileVisibility:"private"},{displayName:null}]){const f=fixture();await f.store.runTransaction(async tx=>tx.set("accounts/target_1",{...account("target_1"),...change}));assert.deepEqual(await f.repo.searchFriends("owner",{q:"member"}),ok({friends:[],nextCursor:null}));}
+  const hidden=fixture();await hidden.store.runTransaction(async tx=>tx.set("accounts/target_1",{...account("target_1"),profileVisibility:"private",displayName:null}));assert.deepEqual(await hidden.repo.searchFriends("owner",{q:"member"}),ok({friends:[],nextCursor:null}));
   const f=fixture();await f.repo.setFixtureProtection("owner","target_1",{temporaryAccountId:"target_1"});assert.deepEqual(await f.repo.searchFriends("owner",{q:"member"}),ok({friends:[],nextCursor:null}));
 });
 test("FS02 search HTTP authorization, raw query validation and normative response agree", async () => {

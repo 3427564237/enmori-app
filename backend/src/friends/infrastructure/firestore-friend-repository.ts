@@ -202,9 +202,10 @@ export class FirestoreFriendRepository implements FriendRepository {
         if (profile === undefined) return err("dependency_unavailable");
         const reservation = await tx.get(`username_reservations/${profile.username}`);
         if (reservation?.accountId !== targetId) return err("dependency_unavailable");
-        if (profile.profileVisibility === "private" || profile.displayName === null) continue;
-        if (parsed !== undefined && !normalizeFriendDisplayName(profile.displayName).includes(parsed.q)) continue;
-        friends.push({ username: profile.username, displayName: profile.displayName,
+        if (profile.profileVisibility === "private") continue;
+        const displayName = profile.displayName ?? profile.username;
+        if (parsed !== undefined && !normalizeFriendDisplayName(displayName).includes(parsed.q)) continue;
+        friends.push({ username: profile.username, displayName,
           ...(pair.specialCareByAccount?.[ownerId]===true?{specialCare:true}:{}) });
       }
       return ok({ friends, nextCursor: rows.length > 20 ? (parsed === undefined ? Buffer.from(rows[19]!.id).toString("base64url") : encodeFriendSearchCursor(parsed.q, rows[19]!.id)) : null });
