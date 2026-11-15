@@ -20,6 +20,8 @@ The new `backend/test/event-recommendations/gaming-selection-diagnosis.test.ts` 
 
 This reproduces LI's symptom without a stale interest save and establishes a concrete existing-rule cause. It does **not** establish the current live account's saved interests, source coverage or exact response. The existing Flutter regression `saving Interests returns Home with a fresh recommendation request` also passes. Strict interest-only eligibility versus separately displayed discovery remains a product choice requested in the chat; no new formula or weight is silently selected here.
 
+After the initial v68 delivery, LI selected interest-first ordering while retaining other positive signals below interest matches. The [follow-up implementation and verification](interest-first-ordering.md) records this explicitly approved change; the preceding diagnostic remains the evidence of the original behavior.
+
 ## Verification
 
 - `fvm flutter test --no-pub --reporter expanded`: **1769 passed** on the final implementation; Flutter 3.47.2.

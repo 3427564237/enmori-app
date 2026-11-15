@@ -33,6 +33,7 @@ Score = 4 per distinct matching active interest + 2 per distinct authorized
 friend with Interested OR Going (maximum five friends contributing points) +
 1 for an exact normalized match of the owner's existing region against a
 provider venue city/country. Interested and Going by the same friend count once.
+Under the [15 November ordering amendment](../docs/decisions/2026-11-15-li-event-interest-first-ordering.md), candidates with at least one current active selected-interest match precede all candidates with none. Within each group, score remains descending.
 Ties: start instant ascending, then stable Event identity ascending. Eligibility
 requires at least one positive approved signal. Home is the first two entries of
 the same complete order; See all/next groups do not reshuffle or repeat them.

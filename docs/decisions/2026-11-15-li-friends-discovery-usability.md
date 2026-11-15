@@ -20,6 +20,8 @@ The current v3 formula admits zero-interest candidates with a location, visible-
 
 The choice between strict interest eligibility, interest-first separate discovery and existing mixed ranking is pending LI's answer. Until resolved, do not silently alter recommendation weights/eligibility or add behavioral tracking.
 
+Subsequently on 15 November, LI resolved this choice as interest-first ordering with other permitted factors ranking remaining candidates below it. See [the confirmed ordering amendment](2026-11-15-li-event-interest-first-ordering.md). The paragraph above records the state at the first v68 delivery; the amendment supersedes that pending gate only.
+
 This decision refines the affected presentation and page-local filtering behavior under the retained 14 October social-navigation, 21 October UI, 25 October recommendation-completion, 28 October acceptance-followup and 29 October usability decisions. It supersedes the former page-local filtered-result presentation only within the scope above. The old records remain available. No Sponsor decision is claimed, and existing privacy, consent, source authority, revision checks and controlled-runtime safeguards remain unchanged.
 
 ## Verification scope

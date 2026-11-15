@@ -98,3 +98,60 @@ test("pure evaluation does not mutate caller-owned arrays or records", () => {
   assert.deepEqual(candidate.interestTagIds, ["tag_b", "tag_a"]);
   assert.deepEqual(selected, ["tag_b", "tag_a"]);
 });
+
+for (const formulaVersion of ['event_recommendation_v2', 'event_recommendation_v3'] as const) {
+  test(`${formulaVersion}: one interest match precedes the maximum social/location/age score without a match`, () => {
+    const inputs = [
+      event('music', { interestTagIds: ['music'], visibleFriendCount: 1000,
+        sameRegion: true, sameArea: true, targetAgeMatch: true, startInstant: 1_500n }),
+      event('gaming', { interestTagIds: ['gaming'], startInstant: 3_000n }),
+    ];
+    const run = (events: readonly EventScoringInput[]) => rankEvents({
+      formulaVersion, asOf, activeSelectedInterestTagIds: ['gaming'], events,
+    });
+    const ranked = run(inputs);
+    assert.deepEqual(ranked.map(x => x.eventId), ['gaming', 'music']);
+    assert.equal(ranked[0]!.score, 4);
+    assert.ok(ranked[1]!.score > ranked[0]!.score);
+    assert.deepEqual(ranked[1]!.matchedInterestTagIds, []);
+    assert.ok(!ranked[1]!.reasons!.some(x => x.code === 'shared_interests'));
+    assert.deepEqual(run([...inputs].reverse()), ranked);
+  });
+
+  test(`${formulaVersion}: both groups retain score, time and identity order; no selected interests retains other signals`, () => {
+    const inputs = [
+      event('match_z'), event('match_a'), event('match_early', { startInstant: 1_500n }),
+      event('match_social', { visibleFriendCount: 1 }),
+      event('other_social', { interestTagIds: ['other'], visibleFriendCount: 5 }),
+      event('other_z', { interestTagIds: [], sameRegion: true }),
+      event('other_a', { interestTagIds: [], sameRegion: true }),
+      event('other_early', { interestTagIds: [], sameRegion: true, startInstant: 1_500n }),
+      event('no_signal', { interestTagIds: [] }),
+      event('past_match', { startInstant: asOf }),
+      event('inactive_match', { active: false }),
+    ];
+    const run = (selected: string[]) => rankEvents({
+      formulaVersion, asOf, activeSelectedInterestTagIds: selected, events: inputs,
+    });
+    assert.deepEqual(run(['tag_a']).map(x => x.eventId), [
+      'match_social', 'match_early', 'match_a', 'match_z',
+      'other_social', 'other_early', 'other_a', 'other_z',
+    ]);
+    assert.deepEqual(run([]).map(x => x.eventId), [
+      'other_social', 'match_social', 'other_early', 'other_a', 'other_z',
+    ]);
+  });
+}
+
+test('v3 area and age still differentiate candidates within either interest group', () => {
+  const ranked = rankEvents({ formulaVersion: 'event_recommendation_v3', asOf,
+    activeSelectedInterestTagIds: ['tag_a'], events: [
+      event('match_plain'), event('match_age', { targetAgeMatch: true }),
+      event('match_area', { sameArea: true }),
+      event('other_age', { interestTagIds: [], targetAgeMatch: true }),
+      event('other_area', { interestTagIds: [], sameArea: true }),
+    ] });
+  assert.deepEqual(ranked.map(x => x.eventId), [
+    'match_area', 'match_age', 'match_plain', 'other_area', 'other_age',
+  ]);
+});

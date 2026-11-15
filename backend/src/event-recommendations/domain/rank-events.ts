@@ -96,7 +96,11 @@ export function rankEvents(input: {
       },
     });
   }
-  return ranked.sort((left, right) => right.score - left.score ||
+  // LI 2026-11-15: interest matches always precede other positive signals.
+  // Keep scores/reasons truthful and preserve the existing order within each group.
+  return ranked.sort((left, right) =>
+    Number(right.matchedInterestTagIds.length > 0) - Number(left.matchedInterestTagIds.length > 0) ||
+    right.score - left.score ||
     (left.startInstant < right.startInstant ? -1 :
       left.startInstant > right.startInstant ? 1 : compareId(left.eventId, right.eventId)));
 }

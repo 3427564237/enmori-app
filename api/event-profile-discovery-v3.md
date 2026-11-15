@@ -28,6 +28,8 @@ Unknown save results/conflicts retain the local draft and require owner readback
 
 Event formula `event_recommendation_v3`: interests 4 each; visible friend involvement 2 each, max 10; same area 2, else same broad region 1; explicit target-age match 1. Explicitly age-ineligible and known closed/cancelled/sold-out events do not enter personalized recommendations but can still be browsed. Friend v3: interests 4; common authorized events 2; same area 2 else broad region 1; shared affiliation 1; age within five years 1 only after another qualifying factor. Stable tie order and reasons are retained. No unauthorized/missing factor earns points, and failed reads remain failures.
 
+The [15 November Event ordering amendment](../docs/decisions/2026-11-15-li-event-interest-first-ordering.md) places all candidates with at least one current active selected-interest match before candidates with none. Within each group, use the existing score descending, start instant ascending and stable identity ascending. Rank the complete set before Home Top 2. Non-interest candidates remain eligible only through existing permitted positive signals. This also applies to the legacy v2 Event representation, retaining its weights and allowed reasons. Formula identifiers, reason receipts and Friend ordering are unchanged.
+
 Friend responses expose only the requesting user's `ownState`: disabled, incomplete, no_matches or ready. Home retains the top-two limit; all candidates remain accessible from Friends. Field/consent changes invalidate the affected client views and stale asynchronous responses. Cross-device changes are reread on entry/refresh; no realtime push system is introduced.
 
 ## Verification boundaries
