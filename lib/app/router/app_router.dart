@@ -523,6 +523,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     openAttribution: openGroupAttribution,
                     recordBuilder: groupCheckInRecordBuilder,
                     participationBuilder: groupParticipationBuilder,
+                    participationSectionBuilder:
+                        groupProfileParticipationBuilder,
                     onOpenEvent: (id) => context.push<void>(eventPath(id)),
                   )
                 : FriendPage(

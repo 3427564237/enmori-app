@@ -163,7 +163,7 @@ void main() {
               body: SingleChildScrollView(
                 child: FriendActivityPanel(
                   home: false,
-                  onOpenProfile: (_) async {},
+                  onOpenProfile: (_, _) async {},
                 ),
               ),
             ),

@@ -319,11 +319,11 @@ void main() {
                   children: [
                     FriendActivityPanel(
                       home: true,
-                      onOpenProfile: (_) async {},
+                      onOpenProfile: (_, _) async {},
                     ),
                     FriendActivityPanel(
                       home: false,
-                      onOpenProfile: (_) async {},
+                      onOpenProfile: (_, _) async {},
                     ),
                   ],
                 ),

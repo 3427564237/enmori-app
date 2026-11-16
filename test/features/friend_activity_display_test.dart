@@ -274,7 +274,7 @@ class Harness {
                 child: FriendActivityPanel(
                   home: source == null,
                   source: source,
-                  onOpenProfile: (_) async {},
+                  onOpenProfile: (_, _) async {},
                   onOpenEvent: (id) async {
                     opened.add(id);
                   },

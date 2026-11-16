@@ -86,6 +86,20 @@ Widget groupParticipationBuilder(BuildContext context, String username) =>
       },
     );
 
+Widget groupProfileParticipationBuilder(
+  BuildContext context,
+  String username,
+  Future<void> Function(Future<void> Function() open) navigate,
+) => UserParticipationSection(
+  username: username,
+  onSelect: (id) => navigate(
+    () =>
+        context.push<void>('/events/${Uri.encodeComponent(id)}/participation'),
+  ),
+  onComparePlans: () =>
+      navigate(() => context.push<void>(AppRoutes.comparePlans(username))),
+);
+
 Widget groupCheckInRecordBuilder(BuildContext context, CheckIn record) =>
     CheckInRecordView(record: record, openAttribution: openGroupAttribution);
 
@@ -163,6 +177,7 @@ final class _ConnectedSocialProfileState
           openAttribution: openGroupAttribution,
           recordBuilder: groupCheckInRecordBuilder,
           participationBuilder: groupParticipationBuilder,
+          participationSectionBuilder: groupProfileParticipationBuilder,
           onOpenRequest: (_) => context.push<void>('/friends'),
         );
       },
@@ -204,9 +219,9 @@ final class GroupHomeSocial extends ConsumerWidget {
             children: [
               FriendActivityPanel(
                 home: false,
-                onOpenProfile: (name) async {
-                  if (current(context)) {
-                    await context.push<void>(
+                onOpenProfile: (routeContext, name) async {
+                  if (current(routeContext)) {
+                    await routeContext.push<void>(
                       '/people/${Uri.encodeComponent(name)}',
                     );
                   }
@@ -243,7 +258,13 @@ final class GroupHomeSocial extends ConsumerWidget {
         const Divider(height: 32),
         FriendActivityPanel(
           home: true,
-          onOpenProfile: profile,
+          onOpenProfile: (routeContext, name) async {
+            if (current(routeContext)) {
+              await routeContext.push<void>(
+                '/people/${Uri.encodeComponent(name)}',
+              );
+            }
+          },
           onOpenEvent: event,
           onSeeAll: all,
         ),
