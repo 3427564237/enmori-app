@@ -1,0 +1,248 @@
+{
+  "recordedAtUtc": "2026-11-16T17:34:26.836857+00:00",
+  "integrationBase": "88ed3b11135e561d7342fd2efcaa4b3f0e4ca192",
+  "preservedFriendFix": "282a3f68207ab72807c0a0da97b9b9f6d9229f96",
+  "checks": [
+    {
+      "name": "before_card_render_checks",
+      "exitCode": 0,
+      "passedTests": 11,
+      "logSha256": "2d4cac757c3832d30985f20abba3ce95971368155ceec48f62c0ac611ab04dce"
+    },
+    {
+      "name": "targeted_render_checks",
+      "exitCode": 0,
+      "passedTests": 40,
+      "logSha256": "27004f67bed64f8340010ec01070f3bd40ffb19573eb687ab01b42cf25db1aad"
+    },
+    {
+      "name": "full_flutter_suite",
+      "exitCode": 0,
+      "passedTests": 1840,
+      "logSha256": "f0159c7fab5124a25e14a95b6a9dbb94458be7fd62a598046db5895f391fb108"
+    },
+    {
+      "name": "static_analysis",
+      "exitCode": 0,
+      "passedTests": null,
+      "logSha256": "18a31fa31144e32b7516db3f6c13bb928df37c26e728da0caa6118ea36dc7280"
+    }
+  ],
+  "sourceFileSha256": {
+    "lib/core/presentation/local_time.dart": "6893de002d28e2e83e999a6e08dc6e06e1c6c0da88462ff2be8de4ecb46f1d14",
+    "lib/features/event_participation/presentation/event_card.dart": "47f69db9c183dde9d684496436d8af908f559f39c88eb1ad579ae4f17addef85",
+    "lib/features/event_recommendations/presentation/event_recommendations_page.dart": "ff4460f3f0fb1cb4f3c2e9121dfae9ef725c076fa7374b7c8ce8133d9e1d9ee4",
+    "test/app/home_scroll_stability_test.dart": "7b129126b7b05bb3abd84ce69171ce33f3b38d18180640dbc28cf99fc6aea5db",
+    "test/features/event_loading_usability_test.dart": "d2ac36bca612f83cc37c5756ecef2d046b0e8ba513c8a8f6d96a49a26e40e073",
+    "test/features/mobile_event_card_test.dart": "e30b40492265efe6f940fce9a607116b6fff456f51390946dd36a7c485d24224",
+    "test/features/recommendation_ui_polish_test.dart": "a409640393f107b7700eabfd90daff8099c53e0cc88f359f2a4aca433b57d392"
+  },
+  "renders": [
+    {
+      "path": "after/cards-en-landscape.png",
+      "widthPx": 1624,
+      "heightPx": 750,
+      "sha256": "fec31c4b3c0513fbef2804ad6997f6f18d2ba7416850dd6fcbd8b58a41d6cb25"
+    },
+    {
+      "path": "after/cards-en-large-text.png",
+      "widthPx": 640,
+      "heightPx": 1280,
+      "sha256": "8f8f720d64cd02463b34c403743a7c75eceff4f10b1ced755814046967677893"
+    },
+    {
+      "path": "after/cards-en-phone.png",
+      "widthPx": 750,
+      "heightPx": 1624,
+      "sha256": "7acd41d07e3f436ed68c594a57e052655315ac6b3f10579af6cbf83ffeab1522"
+    },
+    {
+      "path": "after/cards-en-tablet-dark.png",
+      "widthPx": 1600,
+      "heightPx": 2000,
+      "sha256": "1a204a981216f485ba019ba64f021652da938165d837f77679cfcba054d2d01b"
+    },
+    {
+      "path": "after/cards-zh-landscape.png",
+      "widthPx": 1624,
+      "heightPx": 750,
+      "sha256": "8469db4586d45233e445e57a2d06f291a977c77734f1e0ec91bbd4b67a7c5b3a"
+    },
+    {
+      "path": "after/cards-zh-large-text.png",
+      "widthPx": 640,
+      "heightPx": 1280,
+      "sha256": "276bf884d3717837c86c02405c36de6a3056b9de79481a2e4cec49b767463b8c"
+    },
+    {
+      "path": "after/cards-zh-phone.png",
+      "widthPx": 750,
+      "heightPx": 1624,
+      "sha256": "3ce0bca180b615378adcbac897305c6c6b66443a7da25985a5a77c42c2829ff7"
+    },
+    {
+      "path": "after/cards-zh-tablet-dark.png",
+      "widthPx": 1600,
+      "heightPx": 2000,
+      "sha256": "74c71c0f9479e789949710539e2fbf8bed7b2a37fa9b292092031bb581551ccb"
+    },
+    {
+      "path": "after/refresh-en-landscape.png",
+      "widthPx": 1624,
+      "heightPx": 750,
+      "sha256": "7cc2c1e82867db700ed7802301876c8425f3ee108f9b4df6230278fc827b1b5e"
+    },
+    {
+      "path": "after/refresh-en-large-text.png",
+      "widthPx": 640,
+      "heightPx": 1280,
+      "sha256": "fda94c697033bdadd388fdac9476f5bc53687d14c54fe4bd904378d0a974adaa"
+    },
+    {
+      "path": "after/refresh-en-phone.png",
+      "widthPx": 750,
+      "heightPx": 1624,
+      "sha256": "b47d3c0b572f9bc227739ed30ad6c2cdc3b11be363b0c361cd233069c44be00a"
+    },
+    {
+      "path": "after/refresh-en-tablet-dark.png",
+      "widthPx": 1600,
+      "heightPx": 2000,
+      "sha256": "de5faed89396aefa06a76930529670515d0364ef5f92c75683584f91b07873c4"
+    },
+    {
+      "path": "after/refresh-zh-landscape.png",
+      "widthPx": 1624,
+      "heightPx": 750,
+      "sha256": "6a8a5a6698b0cca2b7debab5d29a63d859c55ee5b2352946e9497453ffe5834b"
+    },
+    {
+      "path": "after/refresh-zh-large-text.png",
+      "widthPx": 640,
+      "heightPx": 1280,
+      "sha256": "e9e427673ac96fe4a2d3293bd54a59e99c096a309c015af99a1fe4302427830e"
+    },
+    {
+      "path": "after/refresh-zh-phone.png",
+      "widthPx": 750,
+      "heightPx": 1624,
+      "sha256": "15f09ae0238f2e54c9fe6ba5cc4c45ee8ed47e3618fbf095fb686023b957e2fe"
+    },
+    {
+      "path": "after/refresh-zh-tablet-dark.png",
+      "widthPx": 1600,
+      "heightPx": 2000,
+      "sha256": "82008f7f9506729592f2602c6d03187950aad1577b0748b1cf6a7ea3b09a73d2"
+    },
+    {
+      "path": "after/single-card-en-landscape.png",
+      "widthPx": 1256,
+      "heightPx": 666,
+      "sha256": "c2de7722341e29e1080abb1aca9ef5f22676452c6c89f0fde1928d9290063bf1"
+    },
+    {
+      "path": "after/single-card-en-large-text.png",
+      "widthPx": 576,
+      "heightPx": 1074,
+      "sha256": "f7d99bb42380d2b09c9139ffe424e679a70ff872e8ff2b6527d187ad50a6c68f"
+    },
+    {
+      "path": "after/single-card-en-phone.png",
+      "widthPx": 686,
+      "heightPx": 434,
+      "sha256": "fdc77c1d1bceecafcc1dcebcbdbafc996d10062b8509b390aeeaef2f834bbf08"
+    },
+    {
+      "path": "after/single-card-en-tablet-dark.png",
+      "widthPx": 1256,
+      "heightPx": 434,
+      "sha256": "7c4e6bdebdfe41f6b23cd30b1cac33905f7bd14f326d50fbe68ad28f91852c8f"
+    },
+    {
+      "path": "after/single-card-zh-landscape.png",
+      "widthPx": 1256,
+      "heightPx": 676,
+      "sha256": "88abca789cb9e1b929f921f9d36170f97eaaa77c587f0a6981490dd1f3ecc59e"
+    },
+    {
+      "path": "after/single-card-zh-large-text.png",
+      "widthPx": 576,
+      "heightPx": 1170,
+      "sha256": "d57ef93228468a48c5bd956dde37e8dac420250600a142b4b48a4acb5b2d264a"
+    },
+    {
+      "path": "after/single-card-zh-phone.png",
+      "widthPx": 686,
+      "heightPx": 438,
+      "sha256": "8076489b32a4b406c9aa4668df0b82ec99ddb1d710f63006057fd53262b9a18b"
+    },
+    {
+      "path": "after/single-card-zh-tablet-dark.png",
+      "widthPx": 1256,
+      "heightPx": 438,
+      "sha256": "576b8cc6cb9b3a5a373ab3f10607da120443fa3e0451544794e3293ccbd77be0"
+    },
+    {
+      "path": "before-cards/cards-en-landscape.png",
+      "widthPx": 1624,
+      "heightPx": 750,
+      "sha256": "10404eb10fa5932dee060b66355780e0cd32bf9c78484f8c24c7c1ce9c1a0b46"
+    },
+    {
+      "path": "before-cards/cards-en-large-text.png",
+      "widthPx": 640,
+      "heightPx": 1280,
+      "sha256": "85a7cf9fcc42e24ce48c4b849a0eb8be45a82a0b0136582efc35144a140fe3c0"
+    },
+    {
+      "path": "before-cards/cards-en-phone.png",
+      "widthPx": 750,
+      "heightPx": 1624,
+      "sha256": "03dcb9b41bcab4a8727e50e2ad5ac2577650e9e6be6a5c2effe8f4303a555b25"
+    },
+    {
+      "path": "before-cards/cards-en-tablet-dark.png",
+      "widthPx": 1600,
+      "heightPx": 2000,
+      "sha256": "db002187e66a884e2feacbdd3c31f5e9262f39842a1ef075e8326fa3281225ac"
+    },
+    {
+      "path": "before-cards/cards-zh-landscape.png",
+      "widthPx": 1624,
+      "heightPx": 750,
+      "sha256": "d34538cef7da9ebee43a72f85360fc64dd4b08cffc7cf42264e516793248f869"
+    },
+    {
+      "path": "before-cards/cards-zh-large-text.png",
+      "widthPx": 640,
+      "heightPx": 1280,
+      "sha256": "7214800306bbd383e9d46af7f4cd06b2dd4feb096cb6f7836cf6345f4c2bec27"
+    },
+    {
+      "path": "before-cards/cards-zh-phone.png",
+      "widthPx": 750,
+      "heightPx": 1624,
+      "sha256": "6285e35c63e2be95a15c897d3b867851976e52a2f62751de15cb4596cce1b204"
+    },
+    {
+      "path": "before-cards/cards-zh-tablet-dark.png",
+      "widthPx": 1600,
+      "heightPx": 2000,
+      "sha256": "6a090ae83fbb01dfd251bda3afffa5a4a74c111dac22a3d6b570d827c8180604"
+    }
+  ],
+  "rasterEvidence": "Actual Flutter production widgets, synthetic repositories, not a physical phone",
+  "baselineScope": "before-cards preserves old card UI; loading fix had already been applied",
+  "reproducedReturnOffsetDp": {
+    "beforeReturn": 914,
+    "beforeFixDuringLoading": 472,
+    "difference": 442
+  },
+  "geometryOnlyDuringLoading": true,
+  "oldRecommendationDataRetained": false,
+  "dependenciesUnchanged": true,
+  "backendChanged": false,
+  "realAccountWrites": false,
+  "remotePublished": false,
+  "phoneAcceptance": false
+}

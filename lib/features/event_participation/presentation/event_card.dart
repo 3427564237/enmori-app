@@ -66,43 +66,23 @@ final class EventCard extends StatelessWidget {
               key: ValueKey('event-open-${id ?? summary?.browseId}'),
               onTap: open,
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if ((event?.coverImageUrl ?? summary?.coverImageUrl)
-                        case final cover?)
-                      EventCover(key: ValueKey(cover), url: cover)
-                    else
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.image_not_supported_outlined,
-                            size: 18,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              context.tr(
-                                'No cover provided by source.',
-                                '来源未提供封面。',
-                              ),
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ),
-                        ],
-                      ),
-                    const SizedBox(height: 12),
+                        case final cover?) ...[
+                      EventCover(key: ValueKey(cover), url: cover),
+                      const SizedBox(height: 12),
+                    ],
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
                           child: Text(
                             title,
-                            style: Theme.of(context).textTheme.titleLarge,
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w700),
                           ),
                         ),
                         if (open != null) ...[
@@ -115,10 +95,12 @@ final class EventCard extends StatelessWidget {
                     Text(
                       start == null
                           ? context.tr('Time unavailable', '暂无时间信息')
-                          : singaporeEventTimeLabel(context, start),
+                          : end == null
+                          ? singaporeEventTimeLabel(context, start)
+                          : singaporeEventTimeRangeLabel(context, start, end),
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
-                    if (end != null)
+                    if (end != null && start == null)
                       Text(
                         context.tr(
                           'Until ${singaporeEventTimeLabel(context, end)}',
@@ -127,7 +109,10 @@ final class EventCard extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     if (end == null)
-                      Text(context.tr('End time not provided.', '未提供结束时间。')),
+                      Text(
+                        context.tr('End time not provided.', '未提供结束时间。'),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                     const SizedBox(height: 4),
                     Text(
                       location ??
@@ -135,27 +120,47 @@ final class EventCard extends StatelessWidget {
                           context.tr('Location not provided.', '未提供地点。'),
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
-                    if (category != null) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        category,
-                        style: Theme.of(context).textTheme.bodySmall,
+                    if (content != null || category != null) ...[
+                      const SizedBox(height: 8),
+                      DefaultTextStyle(
+                        style: Theme.of(context).textTheme.bodySmall!,
+                        child: Wrap(
+                          spacing: 12,
+                          runSpacing: 4,
+                          children: [
+                            if (content != null) Text(content.sourceName),
+                            if (content?.priceLabel != null)
+                              Text(
+                                eventPriceLabel(context, content!.priceLabel),
+                              ),
+                            if (category != null) Text(category),
+                          ],
+                        ),
                       ),
                     ],
                     if (content != null) ...[
-                      const SizedBox(height: 8),
-                      Text(content.sourceName),
-                      if (content.priceLabel != null)
-                        Text(eventPriceLabel(context, content.priceLabel)),
                       if (content.status != null &&
                           content.status != 'unknown' &&
                           content.status != 'available')
-                        Text(eventStatusLabel(context, content.status)),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            eventStatusLabel(context, content.status),
+                            style: Theme.of(context).textTheme.labelLarge
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
+                          ),
+                        ),
                       if (content.registrationDeadline != null)
-                        Text(
-                          context.tr(
-                            'Closes: ${eventDeadlineLabel(context, content.registrationDeadline!)}',
-                            '截止：${eventDeadlineLabel(context, content.registrationDeadline!)}',
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            context.tr(
+                              'Closes: ${eventDeadlineLabel(context, content.registrationDeadline!)}',
+                              '截止：${eventDeadlineLabel(context, content.registrationDeadline!)}',
+                            ),
+                            style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ),
                     ],
@@ -181,7 +186,7 @@ final class EventCard extends StatelessWidget {
             if (actions != null) ...[
               const Divider(height: 1),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
                 child: actions!,
               ),
             ],

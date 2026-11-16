@@ -1,5 +1,10 @@
+import 'dart:async';
+
 import 'package:enmori/app/home_shell_page.dart';
+import 'package:enmori/core/result/result.dart';
+import 'package:enmori/features/event_recommendations/domain/event_recommendation_repository.dart';
 import 'package:enmori/features/auth/auth_providers.dart';
+import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/event_recommendations/event_recommendations_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +13,93 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/fakes.dart';
 
 void main() {
+  for (final scale in [1.0, 2.0]) {
+    testWidgets('slow detail return preserves Home scroll at ${scale}x text', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final repository = _DelayedHomeRepository();
+      final container = ProviderContainer(
+        overrides: [
+          authSessionProvider.overrideWithValue(
+            const AsyncData(AuthSessionAuthenticated(subject: 'scroll-owner')),
+          ),
+          currentAuthSubjectProvider.overrideWithValue('scroll-owner'),
+          eventRecommendationRepositoryProvider.overrideWithValue(repository),
+        ],
+      );
+      addTearDown(container.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context)
+                  .copyWith(textScaler: TextScaler.linear(scale)),
+              child: child!,
+            ),
+            home: Builder(
+              builder: (context) => HomeShellPage(
+                socialStyle: true,
+                onStartCheckIn: () {},
+                onSeeAllEvents: () {},
+                onBrowseActivities: () {},
+                onContinueDiscovery: () {},
+                onOpenEvent: (_) => Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                    builder: (_) => Scaffold(
+                      appBar: AppBar(title: const Text('Event detail')),
+                    ),
+                  ),
+                ),
+                recommendationCardBuilder: (context, event, onOpen) => SizedBox(
+                  height: 360,
+                  child: TextButton(
+                    onPressed: () => onOpen!(event.eventId),
+                    child: Text(event.title),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final second = find.text('First-ranked event');
+      await tester.scrollUntilVisible(second, 200);
+      await tester.ensureVisible(second);
+      await tester.pumpAndSettle();
+      final position = tester
+          .state<ScrollableState>(find.byType(Scrollable).first)
+          .position;
+      final offset = position.pixels;
+      final extent = position.maxScrollExtent;
+      expect(offset, greaterThan(100));
+      await tester.tap(second);
+      await tester.pumpAndSettle();
+      repository.pending = Completer<Result<EventRecommendationResponse>>();
+      await tester.pageBack();
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(repository.reads, 2);
+      expect(find.text('First-ranked event'), findsNothing);
+      expect(
+        find.byKey(const Key('event-recommendations-loading')),
+        findsOneWidget,
+      );
+      expect(position.pixels, closeTo(offset, 1));
+      expect(position.maxScrollExtent, closeTo(extent, 1));
+      repository.pending!.complete(Success(testEventRecommendations()));
+      await tester.pumpAndSettle();
+      expect(position.pixels, closeTo(offset, 1));
+      expect(repository.reads, 2);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+  }
   testWidgets(
     'returning from Home bottom keeps loaded events and scroll extent',
     (tester) async {
@@ -90,4 +182,16 @@ void main() {
       }
     },
   );
+}
+
+class _DelayedHomeRepository implements EventRecommendationRepository {
+  Completer<Result<EventRecommendationResponse>>? pending;
+  int reads = 0;
+  @override
+  Future<Result<EventRecommendationResponse>> read({
+    required EventRecommendationView view,
+  }) {
+    reads++;
+    return pending?.future ?? Future.value(Success(testEventRecommendations()));
+  }
 }

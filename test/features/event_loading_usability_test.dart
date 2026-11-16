@@ -268,7 +268,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('My plans').hitTestable(), findsOneWidget);
       expect(find.text('Garden walk').hitTestable(), findsOneWidget);
-      expect(find.text('No cover provided by source.'), findsOneWidget);
+      expect(find.text('No cover provided by source.'), findsNothing);
       expect(find.text('onePA: unavailable'), findsOneWidget);
       expect(find.byType(DropdownButtonFormField<int>), findsNothing);
       await tester.tap(find.text('My plans'));

@@ -131,6 +131,7 @@ final class _EventRecommendationsSectionState
     return RefreshOnReturn(
       onRefresh: _load,
       child: _RecommendationContent(
+        key: ValueKey(ref.watch(currentAuthSubjectProvider)),
         state: state,
         onRetry: () => _load(userInitiated: true),
         onSeeAll: widget.onSeeAll,
@@ -365,7 +366,7 @@ final class _EventRecommendationsPageState
   }
 }
 
-final class _RecommendationContent extends StatelessWidget {
+final class _RecommendationContent extends StatefulWidget {
   const _RecommendationContent({
     required this.state,
     required this.onRetry,
@@ -379,6 +380,7 @@ final class _RecommendationContent extends StatelessWidget {
     this.recommendationCardBuilder,
     this.syntheticPreview = false,
     this.eventKeys = const {},
+    super.key,
   });
 
   final AsyncValue<EventRecommendationResponse> state;
@@ -395,13 +397,64 @@ final class _RecommendationContent extends StatelessWidget {
   final RecommendationCardBuilder? recommendationCardBuilder;
 
   @override
+  State<_RecommendationContent> createState() => _RecommendationContentState();
+}
+
+final class _RecommendationContentState extends State<_RecommendationContent> {
+  final _contentKey = GlobalKey();
+  double? _loadingHeight;
+  int _slots = 0;
+  (double, double, Locale)? _layout;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final layout = (
+      MediaQuery.sizeOf(context).width,
+      MediaQuery.textScalerOf(context).scale(14),
+      Localizations.localeOf(context),
+    );
+    if (_layout != layout) {
+      _loadingHeight = null;
+      _slots = 0;
+      _layout = layout;
+    }
+  }
+
+  @override
+  void didUpdateWidget(_RecommendationContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.home && oldWidget.state.asData?.value.items.isNotEmpty == true) {
+      final box = _contentKey.currentContext?.findRenderObject();
+      if (box is RenderBox && box.hasSize) {
+        // Keep layout geometry only; refreshed cards/authorization are never cached.
+        _loadingHeight = box.size.height;
+        _slots = oldWidget.state.requireValue.items.length.clamp(1, 2);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final state = widget.state;
+    final home = widget.home;
+    final heading = widget.heading;
+    final onRetry = widget.onRetry;
+    final onSeeAll = widget.onSeeAll;
+    final contextControls = widget.contextControls;
+    final onBrowseAll = widget.onBrowseAll;
+    final onContinueDiscovery = widget.onContinueDiscovery;
+    final onOpenEvent = widget.onOpenEvent;
+    final recommendationCardBuilder = widget.recommendationCardBuilder;
+    final syntheticPreview = widget.syntheticPreview;
+    final eventKeys = widget.eventKeys;
     final inlineHeader = home && heading != null;
     final continueDiscovery =
         home &&
         onContinueDiscovery != null &&
-        state is AsyncData<EventRecommendationResponse> &&
-        state.requireValue.items.isNotEmpty;
+        ((state is AsyncData<EventRecommendationResponse> &&
+                state.requireValue.items.isNotEmpty) ||
+            (state.isLoading && _loadingHeight != null));
     Widget status({
       required Key key,
       required String title,
@@ -460,6 +513,9 @@ final class _RecommendationContent extends StatelessWidget {
     }
 
     final content = switch (state) {
+      AsyncLoading<EventRecommendationResponse>()
+          when home && _loadingHeight != null =>
+        _RecommendationLoadingSpace(height: _loadingHeight!, slots: _slots),
       AsyncLoading<EventRecommendationResponse>() => status(
         key: const Key('event-recommendations-loading'),
         title: context.tr('Loading event recommendations', '正在加载活动推荐'),
@@ -538,7 +594,7 @@ final class _RecommendationContent extends StatelessWidget {
       children: [
         if (inlineHeader)
           SectionHeading(
-            title: heading!,
+            title: heading,
             actions: [
               if (onBrowseAll != null)
                 TextButton(
@@ -549,7 +605,7 @@ final class _RecommendationContent extends StatelessWidget {
               if (continueDiscovery)
                 TextButton.icon(
                   key: const Key('event-recommendations-continue'),
-                  onPressed: onContinueDiscovery,
+                  onPressed: state.isLoading ? null : onContinueDiscovery,
                   icon: const Icon(Icons.arrow_forward),
                   label: Text(context.tr('Next group', '下一组')),
                 )
@@ -572,7 +628,7 @@ final class _RecommendationContent extends StatelessWidget {
         if (contextControls != null)
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
-            child: contextControls!,
+            child: contextControls,
           ),
         if (syntheticPreview) ...[
           Card(
@@ -595,7 +651,7 @@ final class _RecommendationContent extends StatelessWidget {
           enabled:
               recommendationCardBuilder == null &&
               state is AsyncData<EventRecommendationResponse>,
-          child: content,
+          child: SizedBox(key: _contentKey, child: content),
         ),
         if (state is AsyncData<EventRecommendationResponse> &&
             !inlineHeader) ...[
@@ -632,6 +688,97 @@ final class _RecommendationContent extends StatelessWidget {
     return context.tr(
       'This service is temporarily unavailable. Try again.',
       '服务暂不可用，请重试。',
+    );
+  }
+}
+
+/// Neutral placeholders replace old content while the required fresh read runs.
+final class _RecommendationLoadingSpace extends StatelessWidget {
+  const _RecommendationLoadingSpace({
+    required this.height,
+    required this.slots,
+  });
+  final double height;
+  final int slots;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = context.tr('Updating recommendations…', '正在更新推荐…');
+    final minimumSlot = 100 + MediaQuery.textScalerOf(context).scale(12) * 3;
+    final compact = slots == 0 || height / slots < minimumSlot;
+    return Semantics(
+      key: const Key('event-recommendations-loading'),
+      liveRegion: true,
+      label: label,
+      child: ExcludeSemantics(
+        child: SizedBox(
+          height: height,
+          child: compact
+              ? const Center(child: LinearProgressIndicator())
+              : Column(
+                  children: [
+                    for (var index = 0; index < slots; index++)
+                      Expanded(
+                        child: Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text(
+                                  label,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                                const SizedBox(height: 8),
+                                Expanded(
+                                  child: LayoutBuilder(
+                                    builder: (context, constraints) {
+                                      final rows = (constraints.maxHeight / 80)
+                                          .ceil()
+                                          .clamp(1, 100);
+                                      return Column(
+                                        children: [
+                                          for (var row = 0; row < rows; row++)
+                                            Expanded(
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.stretch,
+                                                children: [
+                                                  FractionallySizedBox(
+                                                    alignment:
+                                                        Alignment.centerLeft,
+                                                    widthFactor: row.isEven
+                                                        ? .75
+                                                        : .45,
+                                                    child: Container(
+                                                      height: 10,
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .surfaceContainerHighest,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 8),
+                                                  const LinearProgressIndicator(),
+                                                ],
+                                              ),
+                                            ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+        ),
+      ),
     );
   }
 }
