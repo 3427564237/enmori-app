@@ -32,7 +32,7 @@ final class FriendActivityPanel extends ConsumerStatefulWidget {
   final bool home;
   final FriendActivityLocator? source;
   final Future<void> Function(String eventId)? onOpenEvent;
-  final Future<void> Function(String) onOpenProfile;
+  final Future<void> Function(BuildContext, String) onOpenProfile;
   final Future<void> Function()? onSeeAll;
   @override
   ConsumerState<FriendActivityPanel> createState() =>
@@ -88,6 +88,8 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
   bool _valid(int epoch, AuthSession? session) =>
       mounted &&
       _active &&
+      ModalRoute.of(context)?.isCurrent == true &&
+      ref.read(contentAccessProvider).foreground &&
       epoch == _epoch &&
       session is AuthSessionAuthenticated &&
       identical(session, ref.read(authSessionProvider).asData?.value);
@@ -382,7 +384,7 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
                             if (!_valid(renderedEpoch, renderedSession)) return;
                             _epoch++;
                             setState(() => _result = null);
-                            await widget.onOpenProfile(item.username);
+                            await widget.onOpenProfile(context, item.username);
                             if (mounted &&
                                 identical(
                                   renderedSession,

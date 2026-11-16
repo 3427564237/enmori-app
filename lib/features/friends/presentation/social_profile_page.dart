@@ -1,3 +1,5 @@
+import '../../auth/auth_providers.dart';
+
 import '../../../core/presentation/identity_avatar.dart';
 
 import 'package:flutter/material.dart';
@@ -6,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/presentation/enmori_localizations.dart';
 import '../../../core/presentation/local_time.dart';
 import '../../account/domain/account_repository.dart';
+import '../../account/domain/profile_details.dart';
 import '../../check_in/domain/check_in_repository.dart';
 import '../../weather/weather_providers.dart';
 import '../domain/social_repository.dart';
@@ -18,6 +21,12 @@ typedef ParticipationBuilder = Widget Function(
   String username,
 );
 
+typedef ProfileParticipationBuilder = Widget Function(
+  BuildContext context,
+  String username,
+  Future<void> Function(Future<void> Function() open) navigate,
+);
+
 /// LI supplies the existing device civil date/time-zone and approved URL opener.
 /// SHI's participation builder must use its server-authorized people projection.
 final class SocialProfilePage extends ConsumerStatefulWidget {
@@ -27,6 +36,7 @@ final class SocialProfilePage extends ConsumerStatefulWidget {
     required this.timeZone,
     required this.openAttribution,
     this.participationBuilder,
+    this.participationSectionBuilder,
     this.onOpenRequest,
     this.tileLayerBuilder,
     this.initialTab = SocialTab.profile,
@@ -44,6 +54,7 @@ final class SocialProfilePage extends ConsumerStatefulWidget {
   final Future<void> Function(String)? onOpenOwnRecord;
   final Future<bool> Function(Uri) openAttribution;
   final ParticipationBuilder? participationBuilder;
+  final ProfileParticipationBuilder? participationSectionBuilder;
   final Future<void> Function(String)? onOpenRequest;
   final Widget Function()? tileLayerBuilder;
   @override
@@ -144,6 +155,25 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
     }
   }
 
+  Future<void> _openParticipation(Future<void> Function() open) async {
+    final source = controller;
+    final state = ref.read(socialProfileControllerProvider(widget.username));
+    if (state.profile?.participationAvailable != true ||
+        state.busy ||
+        ModalRoute.of(context)?.isCurrent != true) {
+      return;
+    }
+    final session = ref.read(authSessionProvider).asData?.value;
+    source.clear();
+    await open();
+    if (mounted &&
+        identical(session, ref.read(authSessionProvider).asData?.value) &&
+        ModalRoute.of(context)?.isCurrent == true) {
+      controller.clear();
+      _loadInitial();
+    }
+  }
+
   Future<void> _load(SocialTab tab, {bool next = false}) =>
       controller.load(tab, date: _date, timeZone: widget.timeZone, next: next);
   @override
@@ -167,11 +197,10 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: IdentityAvatar(username: widget.username, size: 52),
-                ),
-                const SizedBox(height: 12),
+                if (state.profile case final profile?) ...[
+                  _ProfileIdentity(profile: profile),
+                  const SizedBox(height: 24),
+                ],
                 if (widget.recordId == null &&
                     widget.initialTab != SocialTab.map)
                   Wrap(
@@ -355,10 +384,6 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
   }
 
   List<Widget> _profile(SocialProfile profile, SocialState state) => [
-    Text(
-      profile.displayName ?? profile.username,
-      style: Theme.of(context).textTheme.headlineSmall,
-    ),
     if (profile.relationship == SocialRelationship.other &&
         widget.onOpenRequest != null)
       OutlinedButton(
@@ -369,25 +394,64 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
         },
         child: Text(context.tr('Friend request', '好友请求')),
       ),
-    if (profile.details.bio case final bio?)
-      Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Text(bio),
+    _ProfileSection(
+      title: context.tr('Interests', '兴趣'),
+      icon: Icons.interests_outlined,
+      child: profile.interests.isEmpty
+          ? Text(context.tr('No shared interests to show.', '暂无可查看的兴趣。'))
+          : Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                for (final interest in profile.interests)
+                  Chip(label: Text(interest.name)),
+              ],
+            ),
+    ),
+    const SizedBox(height: 24),
+    if (profile.participationAvailable &&
+        widget.participationSectionBuilder != null)
+      widget.participationSectionBuilder!(
+        context,
+        profile.username,
+        _openParticipation,
+      )
+    else if (!profile.participationAvailable)
+      _ProfileSection(
+        title: context.tr('Events', '活动'),
+        icon: Icons.event_outlined,
+        child: Text(
+          context.tr(
+            'No event participation is available to view.',
+            '暂无可查看的活动参与信息。',
+          ),
+        ),
       ),
-    if (profile.details.affiliationName case final affiliation?)
-      Text(affiliation),
-    if (profile.details.region case final region?) Text(region),
-    if (profile.interests.isNotEmpty)
-      Wrap(
-        spacing: 8,
-        children: [
-          for (final interest in profile.interests)
-            Chip(label: Text(interest.name)),
-        ],
+    if (profile.participationAvailable && widget.participationBuilder != null)
+      Align(
+        alignment: Alignment.centerLeft,
+        child: TextButton.icon(
+          icon: const Icon(Icons.open_in_new, size: 18),
+          label: Text(context.tr('Event participation', '活动参与')),
+          onPressed: () => _openParticipation(
+            () => Navigator.of(context).push<void>(
+              MaterialPageRoute(
+                builder: (context) =>
+                    widget.participationBuilder!(context, profile.username),
+              ),
+            ),
+          ),
+        ),
       ),
+    const SizedBox(height: 24),
     if (profile.relationship == SocialRelationship.friend) ...[
-      SwitchListTile(
+      const Divider(),
+      const SizedBox(height: 8),
+      SwitchListTile.adaptive(
         contentPadding: EdgeInsets.zero,
+        secondary: Icon(
+          profile.specialCare ? Icons.star_rounded : Icons.star_outline_rounded,
+        ),
         title: Text(context.tr('Starred friend', '星标好友')),
         subtitle: Text(
           context.tr('Only you can see this choice.', '只有你能看到这个选择。'),
@@ -431,20 +495,6 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
         },
       ),
     ],
-    if (profile.participationAvailable && widget.participationBuilder != null)
-      OutlinedButton(
-        child: Text(context.tr('Event participation', '活动参与')),
-        onPressed: () async {
-          controller.clear();
-          await Navigator.of(context).push<void>(
-            MaterialPageRoute(
-              builder: (context) =>
-                  widget.participationBuilder!(context, widget.username),
-            ),
-          );
-          if (mounted) _loadInitial();
-        },
-      ),
   ];
   Widget _record(CheckIn record) => Card(
     color: record.checkInId == _selectedRecord
@@ -489,5 +539,156 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
         ],
       ),
     ),
+  );
+}
+
+class _ProfileIdentity extends StatelessWidget {
+  const _ProfileIdentity({required this.profile});
+  final SocialProfile profile;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      margin: EdgeInsets.zero,
+      color: theme.colorScheme.primaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 40,
+                  backgroundColor: theme.colorScheme.surface,
+                  child: IdentityAvatar(username: profile.username, size: 72),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    switch (profile.relationship) {
+                      SocialRelationship.friend => context.tr('Friend', '好友'),
+                      SocialRelationship.self => context.tr(
+                        'Your profile',
+                        '你的资料',
+                      ),
+                      SocialRelationship.other => context.tr('Profile', '个人资料'),
+                    },
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: theme.colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Semantics(
+              header: true,
+              child: Text(
+                profile.displayName ?? profile.username,
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  color: theme.colorScheme.onPrimaryContainer,
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '@${profile.username}',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onPrimaryContainer,
+              ),
+            ),
+            if (profile.details.bio case final bio?) ...[
+              const SizedBox(height: 16),
+              Text(
+                bio,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onPrimaryContainer,
+                ),
+              ),
+            ],
+            if (profile.details.affiliationName != null ||
+                profile.details.region != null) ...[
+              const SizedBox(height: 16),
+              if (profile.details.affiliationName case final affiliation?)
+                _ProfileFact(
+                  icon:
+                      profile.details.affiliationType == AffiliationType.company
+                      ? Icons.business_outlined
+                      : Icons.school_outlined,
+                  text: affiliation,
+                ),
+              if (profile.details.region case final region?)
+                _ProfileFact(icon: Icons.place_outlined, text: region),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileFact extends StatelessWidget {
+  const _ProfileFact({required this.icon, required this.text});
+  final IconData icon;
+  final String text;
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: 8),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ExcludeSemantics(
+          child: Icon(
+            icon,
+            size: 20,
+            color: Theme.of(context).colorScheme.onPrimaryContainer,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _ProfileSection extends StatelessWidget {
+  const _ProfileSection({
+    required this.title,
+    required this.icon,
+    required this.child,
+  });
+  final String title;
+  final IconData icon;
+  final Widget child;
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Row(
+        children: [
+          ExcludeSemantics(
+            child: Icon(icon, color: Theme.of(context).colorScheme.primary),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Semantics(
+              header: true,
+              child: Text(title, style: Theme.of(context).textTheme.titleLarge),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 12),
+      child,
+    ],
   );
 }

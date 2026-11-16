@@ -1,0 +1,77 @@
+{
+  "base": "dbde9e4a",
+  "checks": [
+    {
+      "check": "navigation",
+      "log": "/home/miku/.local/state/enmori-friend-profile-20261116/friend-profile-navigation.log",
+      "sha256": "f78c0a517594fd502cb23c1295864bf1b696f73bf1248331fd9d3562fc504df8",
+      "passed": true,
+      "testsPassed": 6
+    },
+    {
+      "check": "presentation",
+      "log": "/home/miku/.local/state/enmori-friend-profile-20261116/friend-profile-final-targeted.log",
+      "sha256": "4d775e2dff53a992a21dbe0faf679ce228efdc9d2df23777f454bda0ea025c64",
+      "passed": true,
+      "testsPassed": 13
+    },
+    {
+      "check": "presentationWithFonts",
+      "log": "/home/miku/.local/state/enmori-friend-profile-20261116/friend-profile-previews-final.log",
+      "sha256": "884a8919ef2368773d5cfdecb6d0b9510c75ebd3faa3c22d1eebc0f17e0b8932",
+      "passed": true,
+      "testsPassed": 13
+    },
+    {
+      "check": "staticAnalysis",
+      "log": "/home/miku/.local/state/enmori-friend-profile-20261116/friend-profile-analyze-final.log",
+      "sha256": "b92ca334434a05e2c42bfe8c1e97ea602a9c8f07a46ca4bd562ce97b192091fd",
+      "passed": true,
+      "testsPassed": null
+    }
+  ],
+  "fullSuitePassed": false,
+  "fullSuiteStatus": "First run terminated after 1589 passing tests, exit 143; rerun stopped at explicit user request to install first. Counts are not additive.",
+  "sourceFileSha256": {
+    "lib/app/remote_social_composition.dart": "66d38d8c57c10178478858f95cc6476587bfaac6cca53183b25afd0fc0efdd3d",
+    "lib/app/router/app_router.dart": "e6a401bb3fd7aa741c552724e6190da513a3648067a7c110c0f367ae58a24144",
+    "lib/features/event_participation/presentation/user_participation_section.dart": "123fe33f365805140e96b841cb931152d568e32bfa289d5795e4a7e060183613",
+    "lib/features/friends/presentation/friend_activity_panel.dart": "3ed289ad885c1bd63529e2a4efd286cacce7272a28e5ee53c6e8372bb44d64d0",
+    "lib/features/friends/presentation/friend_module_page.dart": "7004478b9572edda4a68312f84192dd522814c5a6651187612b550d6647f815c",
+    "lib/features/friends/presentation/social_profile_page.dart": "543103866249b21c0322368074eae810fd84a8be64b5abe9c11915846436178b",
+    "test/app/history_ai_home_router_test.dart": "cd2945aadd0e9b8d5999da5622874be29d08d502a0db1b207ff86c44bbd0a26f",
+    "test/features/content_coherence_edges_test.dart": "88abbc312fff81777bdd4b80641712dfa6cf6c66b0d76bbf29a1468165fbbb64",
+    "test/features/friend_activity_display_test.dart": "0ee4ddf02a3409bf661e55af075377fb1780fd4ab5c6ac8bf48bdbd95947e363",
+    "test/features/friend_discovery_activity_map_test.dart": "f11d281b6faa9ba12dc3d039cb4b7c8ba6d20a7656793e0b2a2472098041252f",
+    "test/app/friend_activity_profile_navigation_test.dart": "53e137ea52a98dcaba383bbe0f6e219fee78323a1def361cd037c96f1fea23fd",
+    "test/features/friend_profile_presentation_test.dart": "bc6321e9853c9601653dab2ffbc3a793a7f892c42cbfca4fd32aa172a8a4872f"
+  },
+  "previews": {
+    "events-zh-phone.png": "220808df26bcf09a169858a8077d07772466d1b0f495cb7b6519d779c1965de6",
+    "profile-en-narrow-large.png": "d9a39d8b05a537f073e8f717fd2ccca82a439f41598ec7d19ab5dcc9801fd7f0",
+    "profile-en-phone.png": "5715af685b871b215cfe59031b767e920e081bc03258b89f1dc85daeeff5d33d",
+    "events-en-tablet-dark.png": "6be1670d1b10cf0f526069651fa35a106c9ea516f15a1cdee523ae220c8437e0",
+    "events-en-phone.png": "1d787eaba3bd3269c389eef37674432853ae7751209feaeb9fc7b561fba278d0",
+    "events-en-narrow-large.png": "1925ef77aded0047a5dd2d441c92c0cd248f07a7ce0be08aff003c98feb2e7b1",
+    "events-zh-narrow-large.png": "a4f7936566f04f987003d930c7a272d6e4daff5a49a7f25264b687bc1f6d920b",
+    "profile-en-tablet-dark.png": "1888450ab460835dabb723de9aa4eacaf9de255e4561d92a4148ba7f778769bc",
+    "events-zh-tablet-dark.png": "342200403131086d94851660590bf643ad0e79308ae7a2a5ea8911d288f2f729",
+    "events-zh-landscape.png": "40615c50cd0745744398532790d77619a98b8152b75f247d0b5e32f91c4193d3",
+    "profile-zh-narrow-large.png": "c6a71cff7cd1b7254bb5f5c858eccfb327aff029afe73440e8ea19e3dc0a5f1f",
+    "events-en-landscape.png": "1acfcaa5fd81d6159a36fd274ce3adcaec1632f5953728f6b3758c90991f4ff0",
+    "profile-zh-tablet-dark.png": "80aa4eb8679847157e6072a619cbe393b2f74fcbfad99a033f4bb41f9ea5f819",
+    "profile-zh-phone.png": "1be828adfc3b0b5f0f299cc12d82f3cf2780afb7d2a4d6ce3c92957a7844784d",
+    "profile-en-landscape.png": "b40f60d12dad6f2d753524dda79f387fdd8349534b9725ddbfcb0a9672321f6b",
+    "profile-zh-landscape.png": "2966003fe8be3172aa474918fd25d57a064f93b73d8fa30bb72236e97aad3b17"
+  },
+  "failingReproductions": [
+    {
+      "log": "/home/miku/.local/state/enmori-friend-profile-20261116/friend-profile-red.log",
+      "sha256": "98d0c4d5e24972cdc5acafecf8d66ff1fd3a0dd7541700e8c9af56ebacbb6d2d"
+    },
+    {
+      "log": "/home/miku/.local/state/enmori-friend-profile-20261116/friend-profile-return-red.log",
+      "sha256": "ae20fd18d40c5961a36db258035e24315119c28da79a6ee424ea2783e2c3aeee"
+    }
+  ]
+}

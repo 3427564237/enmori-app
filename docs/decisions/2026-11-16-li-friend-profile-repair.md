@@ -1,0 +1,9 @@
+# Friend profile navigation and presentation — 16 November 2026
+
+LI reports that View Profile inside Friends Activity only refreshes, asks to repair it, improve the rough friend profile UI, and show the friend's Interested/Going events.
+
+This authorizes the bounded Flutter navigation repair and presentation changes. Preserve the 15 November Friends tab/star decisions, 23 October social increment, approved social profile projection and EP1 participation contract. The profile now presents its existing authorized fields with clearer identity, biography, interest and relationship hierarchy and embeds the existing authorized participation section, rather than requiring a separate page as the only entry. This supersedes only that presentation choice; the existing full participation page can remain accessible.
+
+Use the current displayed route for Activity → Profile navigation while retaining session, foreground and route checks. Read friend participation through the existing username projection, including its sparse pagination, source authorization and Interested/Going statuses. Do not substitute a bounded seven-day activity feed for the friend's participation list. Hidden/missing fields and inaccessible records remain hidden; failures and empty pages remain distinct. No API, data model, dependency, privacy, ranking or infrastructure changes are selected.
+
+Implementation starts from the v73 delivery head `dbde9e4a` in an isolated worktree. Verify the failing navigation path before repair, normal/nested entry and Back, inline events and event detail navigation, error/empty/continuation states, revoked content and replaced sessions, and responsive English/Chinese layouts. Build a signed Android candidate with existing prerequisites. Source, rendered-fixture, APK and physical-device evidence must be reported separately.

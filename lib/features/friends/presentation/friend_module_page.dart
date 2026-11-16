@@ -20,6 +20,7 @@ final class FriendModulePage extends ConsumerStatefulWidget {
   const FriendModulePage({
     required this.openAttribution,
     this.participationBuilder,
+    this.participationSectionBuilder,
     this.onOpenEvent,
     this.recordBuilder,
     this.initialDiscovery = false,
@@ -27,6 +28,7 @@ final class FriendModulePage extends ConsumerStatefulWidget {
   });
   final Future<bool> Function(Uri) openAttribution;
   final ParticipationBuilder? participationBuilder;
+  final ProfileParticipationBuilder? participationSectionBuilder;
   final Future<void> Function(String eventId)? onOpenEvent;
   final Widget Function(BuildContext, CheckIn)? recordBuilder;
   final bool initialDiscovery;
@@ -71,6 +73,7 @@ final class _FriendModulePageState extends ConsumerState<FriendModulePage> {
               timeZone: zone,
               openAttribution: widget.openAttribution,
               participationBuilder: widget.participationBuilder,
+              participationSectionBuilder: widget.participationSectionBuilder,
               recordBuilder: widget.recordBuilder,
               onOpenRequest: (name) => Navigator.of(context).push<void>(
                 MaterialPageRoute(
@@ -165,7 +168,7 @@ final class _FriendModulePageState extends ConsumerState<FriendModulePage> {
           FriendActivityPanel(
             home: false,
             onOpenEvent: widget.onOpenEvent,
-            onOpenProfile: profile,
+            onOpenProfile: (_, username) => profile(username),
           ),
         ],
       ),

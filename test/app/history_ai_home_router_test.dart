@@ -92,6 +92,11 @@ void main() {
         );
       f.router.go('/people/member_b');
       await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Event participation'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.ensureVisible(find.text('Event participation'));
       await tester.tap(find.text('Event participation'));
       await tester.pumpAndSettle();
