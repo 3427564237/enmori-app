@@ -4,6 +4,25 @@ import '../../../core/result/result.dart';
 
 import '../../../core/presentation/enmori_localizations.dart';
 
+/// Home has no Check-in draft to "continue without location". Keep the cause
+/// visible while leaving the detailed Check-in guidance below unchanged.
+String homeWeatherFeedback(
+  BuildContext context,
+  AppFailure failure,
+) => switch (failure.message) {
+  'Location services are off. You can continue without location.' => context.tr(
+    'Location services are off.',
+    '位置服务已关闭。',
+  ),
+  'Location permission was not granted. You can continue without location.' =>
+    context.tr('Location permission not granted.', '未获得定位权限。'),
+  'Location permission changed. You can continue without location.' =>
+    context.tr('Location permission changed.', '定位权限已改变。'),
+  'Current location is unavailable. You can try again or continue without it.' =>
+    context.tr('Current location is unavailable.', '无法获取当前位置。'),
+  _ => weatherFeedback(context, failure),
+};
+
 // Only application-owned feedback is mapped; never apply this to user content.
 String weatherFeedback(BuildContext context, AppFailure failure) {
   final message = failure.message;

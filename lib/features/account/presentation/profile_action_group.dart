@@ -37,16 +37,29 @@ final class ProfileActionGroup extends StatelessWidget {
       final columns = actions.isNotEmpty && actions.length < availableColumns
           ? actions.length
           : availableColumns;
-      final width = (constraints.maxWidth - spacing * (columns - 1)) / columns;
-      return Wrap(
-        spacing: spacing,
-        runSpacing: 8,
+      return Column(
         children: [
-          for (final action in actions)
-            SizedBox(
-              width: width,
-              child: _ProfileActionButton(action: action),
+          for (var start = 0; start < actions.length; start += columns) ...[
+            if (start > 0) const SizedBox(height: 8),
+            // A wrapped label grows both shortcuts in its row equally.
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var column = 0; column < columns; column++) ...[
+                    if (column > 0) const SizedBox(width: spacing),
+                    Expanded(
+                      child: start + column < actions.length
+                          ? _ProfileActionButton(
+                              action: actions[start + column],
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
+                ],
+              ),
             ),
+          ],
         ],
       );
     },
@@ -62,52 +75,71 @@ final class _ProfileActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final enabled = action.onPressed != null;
-    return TextButton(
+    return OutlinedButton(
       key: action.key,
       onPressed: action.onPressed,
-      style: TextButton.styleFrom(
+      style: OutlinedButton.styleFrom(
         foregroundColor: colors.onSurface,
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
+        textStyle: theme.textTheme.labelLarge?.copyWith(
+          fontWeight: action.emphasized ? FontWeight.w700 : FontWeight.w500,
+        ),
+        backgroundColor: action.emphasized
+            ? colors.primaryContainer
+            : colors.surfaceContainerLowest,
+        minimumSize: const Size(48, 56),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+        side: BorderSide(color: colors.outlineVariant),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: Row(
         children: [
-          ExcludeSemantics(
-            child: Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: !enabled
-                    ? colors.surfaceContainerHighest
-                    : action.emphasized
-                    ? colors.primary
-                    : colors.primaryContainer,
-              ),
-              child: Icon(
-                action.icon,
-                size: 26,
-                color: !enabled
-                    ? colors.onSurfaceVariant
-                    : action.emphasized
-                    ? colors.onPrimary
-                    : colors.onPrimaryContainer,
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            action.label,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.labelLarge?.copyWith(
-              fontWeight: action.emphasized ? FontWeight.w700 : FontWeight.w500,
-              color: enabled ? colors.onSurface : colors.onSurfaceVariant,
-            ),
-          ),
+          ExcludeSemantics(child: Icon(action.icon, size: 24)),
+          const SizedBox(width: 8),
+          Expanded(child: Text(action.label)),
         ],
       ),
     );
   }
+}
+
+/// Lower-frequency Profile destinations keep their existing callbacks and labels.
+final class ProfileSettingsList extends StatelessWidget {
+  const ProfileSettingsList({required this.actions, super.key});
+
+  final List<ProfileAction> actions;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    margin: EdgeInsets.zero,
+    clipBehavior: Clip.antiAlias,
+    child: Column(
+      children: [
+        for (var index = 0; index < actions.length; index++) ...[
+          if (index > 0) const Divider(height: 1, indent: 16, endIndent: 16),
+          TextButton(
+            key: actions[index].key,
+            onPressed: actions[index].onPressed,
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.onSurface,
+              textStyle: Theme.of(context).textTheme.bodyMedium,
+              minimumSize: const Size(48, 56),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              shape: const RoundedRectangleBorder(),
+            ),
+            child: Row(
+              children: [
+                ExcludeSemantics(child: Icon(actions[index].icon, size: 24)),
+                const SizedBox(width: 12),
+                Expanded(child: Text(actions[index].label)),
+                const SizedBox(width: 8),
+                const ExcludeSemantics(
+                  child: Icon(Icons.chevron_right, size: 20),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    ),
+  );
 }

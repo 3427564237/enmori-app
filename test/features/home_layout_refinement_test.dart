@@ -117,6 +117,16 @@ void main() {
         expect(fixture.prefs.profileNames, isEmpty);
         await _top(tester);
         await _capture(tester, 'profile-$locale-$label');
+        await _show(tester, find.byKey(const Key('profile-history')));
+        final history = tester.getRect(
+          find.byKey(const Key('profile-history')),
+        );
+        final footprint = tester.getRect(
+          find.byKey(const Key('profile-footprint')),
+        );
+        if (history.top == footprint.top) {
+          expect(history.height, footprint.height);
+        }
         await _show(tester, edit);
         await _capture(tester, 'profile-interests-$locale-$label');
         expect(tester.takeException(), isNull);
@@ -213,6 +223,131 @@ void main() {
       fixture.container.dispose();
     },
   );
+
+  for (final locale in ['en', 'zh']) {
+    testWidgets('$locale complete profile keeps all settings reachable', (
+      tester,
+    ) async {
+      _surface(tester, const Size(375, 812));
+      await _fonts(tester);
+      final fixture = _Fixture();
+      fixture.prefs.profile = const OwnProfile(
+        username: 'alex_w',
+        displayName: 'Alex',
+        visibility: ProfileVisibility.private,
+        revision: 1,
+        details: ProfileDetails(
+          bio: 'Finding quiet moments between classes.',
+          affiliationType: AffiliationType.school,
+          affiliationName: 'School of Design',
+          region: 'Tampines',
+        ),
+      );
+      await _mount(
+        tester,
+        fixture,
+        locale: locale,
+        profile: true,
+        personas: true,
+      );
+      await _capture(tester, 'profile-complete-$locale');
+      final persona = find.byKey(const Key('profile-manage-personas'));
+      await _show(tester, persona);
+      await _capture(tester, 'profile-settings-$locale');
+      await tester.tap(persona);
+      await tester.pumpAndSettle();
+      expect(fixture.personaOpens, 1);
+      expect(fixture.prefs.settingsSaveCount, 0);
+      expect(fixture.prefs.profileNames, isEmpty);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      fixture.container.dispose();
+    });
+
+    for (final automatic in [false, true]) {
+      testWidgets(
+        '$locale empty weather failure stays concise and retry recovers; auto=$automatic',
+        (tester) async {
+          _surface(tester, const Size(320, 640));
+          await _fonts(tester);
+          final fixture = _Fixture(automatic: automatic, entries: 0);
+          fixture.location.result = const Failure(
+            AppFailure(
+              kind: AppFailureKind.serviceUnavailable,
+              message: 'Location services are off. You can continue without location.',
+            ),
+          );
+          await _mount(tester, fixture, locale: locale, scale: 2);
+          final action = find.byKey(const Key('r6-new-check-in-button'));
+          final introduction = find.byKey(const Key('home-introduction'));
+          Offset actionPosition() =>
+              tester.getTopLeft(action) - tester.getTopLeft(introduction);
+          final before = actionPosition();
+          final request = find.byKey(const Key('home-weather-request'));
+          final once = find.text(locale == 'zh' ? '仅这一次' : 'Only this time');
+          if (!automatic) {
+            expect(fixture.location.calls, 0);
+            await _show(tester, request);
+            await tester.tap(request);
+            await tester.pumpAndSettle();
+            await tester.ensureVisible(once);
+            await tester.tap(once);
+            await tester.pumpAndSettle();
+          }
+          expect(fixture.location.calls, 1);
+          final status = find.byKey(const Key('home-weather-status'));
+          final expected = locale == 'zh'
+              ? '${automatic ? '自动获取已开启' : '可选'} · 位置服务已关闭。'
+              : '${automatic ? 'Auto on' : 'Optional'} · Location services are off.';
+          expect(find.text(expected), findsOneWidget);
+          expect(
+            find.descendant(of: status, matching: find.byType(Text)),
+            findsOneWidget,
+          );
+          expect(
+            tester.widget<Semantics>(status).properties.liveRegion,
+            isTrue,
+          );
+          expect(find.textContaining('continue without'), findsNothing);
+          expect(find.text('Weather data by Open-Meteo'), findsNothing);
+          expect(actionPosition(), before);
+          await _top(tester);
+          await _capture(tester, 'home-location-off-$locale-auto-$automatic');
+          fixture.location.result = const Success(GeoPoint(1.3, 103.8));
+          await _show(tester, request);
+          expect(tester.getSize(request).height, greaterThanOrEqualTo(48));
+          expect(
+            find.text(locale == 'zh' ? '重试天气' : 'Retry weather'),
+            findsOneWidget,
+          );
+          await tester.tap(request);
+          await tester.pumpAndSettle();
+          if (!automatic) {
+            // A retry does not silently turn one-time consent into automatic use.
+            expect(fixture.location.calls, 1);
+            await tester.ensureVisible(once);
+            await tester.tap(once);
+            await tester.pumpAndSettle();
+          }
+          expect(fixture.location.calls, 2);
+          expect(find.text(expected), findsNothing);
+          expect(fixture.prefs.settingsSaveCount, 0);
+          expect(fixture.prefs.settings.homeWeatherAuto, automatic);
+          expect(actionPosition(), before);
+          expect(
+            fixture.container.read(homeWeatherControllerProvider).weather,
+            _weather,
+          );
+          await _show(tester, action);
+          await tester.tap(action);
+          expect(fixture.checkIns, 1);
+          expect(tester.takeException(), isNull);
+          await tester.pumpWidget(const SizedBox.shrink());
+          fixture.container.dispose();
+        },
+      );
+    }
+  }
 }
 
 class _Fixture {
@@ -248,7 +383,7 @@ class _Fixture {
           FakeEventRecommendationRepository()
             ..homeResult = Success(
               EventRecommendationResponse(
-                asOf: DateTime.utc(2026, 11, 15),
+                asOf: DateTime.utc(2026, 11, 17),
                 formulaVersion: 'synthetic-preview',
                 items: [
                   EventRecommendation(
@@ -267,7 +402,7 @@ class _Fixture {
         ),
         homeTodayProvider.overrideWith(
           (ref) async => HomeTodaySnapshot(
-            date: DateTime(2026, 11, 15),
+            date: DateTime(2026, 11, 17),
             timeZone: 'Asia/Singapore',
             entries: [
               for (var i = 0; i < entries; i++)
@@ -276,7 +411,7 @@ class _Fixture {
                     checkInId: 'preview-$i',
                     note: 'A quiet walk after class.',
                     mood: 'Calm',
-                    createdAt: DateTime.utc(2026, 11, 15, 2),
+                    createdAt: DateTime.utc(2026, 11, 17, 2),
                   ),
                   '10:00',
                 ),
@@ -316,7 +451,7 @@ class _Fixture {
   final location = _Location();
   final regions = _Regions();
   late final ProviderContainer container;
-  int checkIns = 0, interestEdits = 0;
+  int checkIns = 0, interestEdits = 0, personaOpens = 0;
   Future<void> editInterests() async {
     interestEdits++;
     interests.ownResult = const Success(
@@ -340,6 +475,7 @@ Future<void> _mount(
   String locale = 'en',
   double scale = 1,
   bool profile = false,
+  bool personas = false,
   bool settle = true,
   Widget? trailing,
 }) async {
@@ -384,6 +520,9 @@ Future<void> _mount(
                     onEditProfile: () async {},
                     onOpenSettings: () async {},
                     onOpenRecommendationProfile: () async {},
+                    onManagePersonas: personas
+                        ? () async => fixture.personaOpens++
+                        : null,
                   ),
                 )
               : HomeShellPage(
@@ -451,7 +590,7 @@ class _Regions implements RegionRepository {
 }
 
 final _weather = WeatherSnapshot(
-  observedAt: DateTime.utc(2026, 11, 15, 10),
+  observedAt: DateTime.utc(2026, 11, 17, 10),
   temperatureCelsius: 28.4,
   condition: WeatherCondition.partlyCloudy,
 );
@@ -477,10 +616,11 @@ class _Weather implements HomeWeatherRepository {
 
 class _Location implements ForegroundLocation {
   int calls = 0;
+  Result<GeoPoint> result = const Success(GeoPoint(1.3, 103.8));
   @override
   Future<Result<GeoPoint>> capture({required bool precise}) async {
     calls++;
-    return const Success(GeoPoint(1.3, 103.8));
+    return result;
   }
 }
 

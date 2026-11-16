@@ -141,25 +141,25 @@ final class OwnProfilePage extends ConsumerWidget {
                       Card(
                         margin: EdgeInsets.zero,
                         child: Padding(
-                          padding: const EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              OwnProfileHeader(profile: value),
+                              OwnProfileHeader(profile: value, compact: true),
                               if (value.details.bio case final bio?)
                                 Padding(
-                                  padding: const EdgeInsets.only(top: 16),
+                                  padding: const EdgeInsets.only(top: 8),
                                   child: Text(
                                     bio,
                                     style: Theme.of(context)
                                         .textTheme
-                                        .bodyLarge,
+                                        .bodyMedium,
                                   ),
                                 ),
                               if (value.details.affiliationName != null ||
                                   value.details.region != null)
                                 Padding(
-                                  padding: const EdgeInsets.only(top: 12),
+                                  padding: const EdgeInsets.only(top: 8),
                                   child: Wrap(
                                     spacing: 16,
                                     runSpacing: 8,
@@ -218,15 +218,15 @@ final class OwnProfilePage extends ConsumerWidget {
                     _ => const LinearProgressIndicator(),
                   },
                   if (commonActions.isNotEmpty) ...[
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
                     Text(
                       context.tr('Quick access', '常用功能'),
-                      style: Theme.of(context).textTheme.titleLarge,
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 4),
                     ProfileActionGroup(actions: commonActions),
                   ],
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
                   Wrap(
                     key: const Key('profile-interests-heading'),
                     alignment: WrapAlignment.spaceBetween,
@@ -299,13 +299,13 @@ final class OwnProfilePage extends ConsumerWidget {
                       ],
                     ),
                   if (settingsActions.isNotEmpty) ...[
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
                     Text(
                       context.tr('Profile & privacy', '资料与隐私'),
-                      style: Theme.of(context).textTheme.titleLarge,
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 4),
-                    ProfileActionGroup(actions: settingsActions),
+                    const SizedBox(height: 8),
+                    ProfileSettingsList(actions: settingsActions),
                   ],
                   if (participationSection != null) ...[
                     const SizedBox(height: 20),

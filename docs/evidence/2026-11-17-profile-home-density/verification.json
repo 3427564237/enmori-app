@@ -1,0 +1,555 @@
+{
+  "recordedAtUtc": "2026-11-16T16:18:46.386402+00:00",
+  "branch": "souma/profile-home-density-20261117",
+  "baseCommit": "dbde9e4a65a1eadd6132c97adc0e24fe01101e87",
+  "authority": "../../decisions/2026-11-17-li-profile-home-density.md",
+  "scope": [
+    "Profile identity and action density",
+    "Home introduction and empty/error weather density"
+  ],
+  "checks": [
+    {
+      "name": "v73_baseline_renders",
+      "command": "fvm flutter test --no-pub test/features/home_layout_refinement_test.dart",
+      "exitCode": 0,
+      "passedTests": 11,
+      "logSha256": "6c4780c61c8e19dd1f343423d0f63f6fecdf1a393eb8326ab49ffed21369fdaf"
+    },
+    {
+      "name": "captured_font_regressions",
+      "command": "fvm flutter test --no-pub test/features/home_layout_refinement_test.dart test/features/own_profile_shortcuts_test.dart",
+      "exitCode": 0,
+      "passedTests": 26,
+      "logSha256": "0d48bf53a3aa797060d9f62f692837088c5d7fab10f3e8f219191b600eb2d628"
+    },
+    {
+      "name": "full_flutter_suite",
+      "command": "fvm flutter test --no-pub",
+      "exitCode": 0,
+      "passedTests": 1809,
+      "logSha256": "49490aa7e00dff63a9f6d1b2a71ce14fc98ec968c526dd3ca348a4f29f1ccec3"
+    },
+    {
+      "name": "static_analysis",
+      "command": "fvm flutter analyze --no-pub",
+      "exitCode": 0,
+      "passedTests": null,
+      "logSha256": "73444bb119083ebafa40f98f0eb1d5ea8a266eb51b683267e6aec0b9fc7e2ee7"
+    }
+  ],
+  "sourceFilesSha256": {
+    "lib/app/home_introduction.dart": "74a12fd39f71221268d144d5f43096cfb0cb62c4249de20fba9a2b7282a36f80",
+    "lib/features/account/presentation/own_profile_page.dart": "c0d096a263e6c4818f91ac69a194e2b056b0ea71dfe8412fdf8ea994030a2ada",
+    "lib/features/account/presentation/profile_action_group.dart": "95e0739c6521ac0053dbe4cead1d191a061b47c1db3e4a52fcfd9d6098f43474",
+    "lib/features/weather/presentation/home_weather_card.dart": "77a6782ae4b9fd782e21bb477153f2a7bbc98134b05cae2403405444d2f3c9cd",
+    "lib/features/weather/presentation/weather_feedback.dart": "648f34d007bc39cc64bd5ae077f15832ef482ed7d047f375fbfad5ddbc63cf75",
+    "test/features/home_layout_refinement_test.dart": "ce81d7b95ac139e27de72ba9fbfb339fc1f01464ffeb1fd58fbff40ea1a11261",
+    "test/features/own_profile_shortcuts_test.dart": "b7831576daa53cc722e44cddde44764c30c5ba287aace6bfb736b760263ae7bf"
+  },
+  "imageEvidence": {
+    "kind": "production Flutter widgets with synthetic repositories; no real account data",
+    "baselineCount": 35,
+    "afterCount": 43,
+    "pixelRatio": 2,
+    "viewports": [
+      "375x812, 1x text",
+      "320x640, 1x text",
+      "320x640, 2x text",
+      "812x375, 2x text"
+    ],
+    "locales": [
+      "en",
+      "zh"
+    ],
+    "images": [
+      {
+        "path": "after/home-en-landscape.png",
+        "widthPx": 1624,
+        "heightPx": 750,
+        "sha256": "22be108047ffe15c71941f51168efeda6c45051c59fcee195c697ab2ee7c5a9e"
+      },
+      {
+        "path": "after/home-en-large-text.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "bf42e6bd0c62ae84adc99255d937f1d8b95da87bd8dac98a7be0a87371660730"
+      },
+      {
+        "path": "after/home-en-narrow.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "b802f3e205f05b542b1388db95daa98237a3be8af125af4868f5fe7a84b10d57"
+      },
+      {
+        "path": "after/home-en-phone.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "ba409cb46f92c2237bdef1fca0af9f3b9995490ecb2afecebbac61e2e15cdca6"
+      },
+      {
+        "path": "after/home-events-en-landscape.png",
+        "widthPx": 1624,
+        "heightPx": 750,
+        "sha256": "75652c0e68d199ac925dbdfe2ab7b14e6d05b64532aef223ba7150cc477bf93c"
+      },
+      {
+        "path": "after/home-events-en-large-text.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "d0a7e42a551960714dab6134101c1380da2bb6320f36b11fede195c5795ae5ea"
+      },
+      {
+        "path": "after/home-events-en-narrow.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "ba80d2dda9b1d9a23c5ebef7ee9e8724c139d9df52c3a976a15572618dd957cb"
+      },
+      {
+        "path": "after/home-events-en-phone.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "95983efc190ae24680ffd7ef7cbfa11983e7b93ef14caae342e382c9f13faf1d"
+      },
+      {
+        "path": "after/home-events-zh-landscape.png",
+        "widthPx": 1624,
+        "heightPx": 750,
+        "sha256": "075e6cab7e73f635aa71b4d8a72318db674a55df472aa842b1a75eb0eb47b5e9"
+      },
+      {
+        "path": "after/home-events-zh-large-text.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "345ac59cf324f35b8efb7436b15e9f303f5ab0d9f8bf079db8e39e2cb00ee1f3"
+      },
+      {
+        "path": "after/home-events-zh-narrow.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "91e8aa250b4bf67dfcca520547a2059f34022351f1b4f9b6b8dd6bfd8fa52fde"
+      },
+      {
+        "path": "after/home-events-zh-phone.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "00976de51500c3cd44c405e863213741dbc2865ebf76a0379f19736a374cce6b"
+      },
+      {
+        "path": "after/home-loading.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "1de4628a8f8ca59d7b7fa09d8b38e8f8e08ddeda675c7c7aa0cabce7fbfefbf9"
+      },
+      {
+        "path": "after/home-location-off-en-auto-false.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "77720de2115e2303fdd27e6d2322afdfed728f780948d36a3aaec1c31304c221"
+      },
+      {
+        "path": "after/home-location-off-en-auto-true.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "3420e21586fc9c1e68c0a78064251eb5aa57ae9dd815edab2a8f9db2769fb030"
+      },
+      {
+        "path": "after/home-location-off-zh-auto-false.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "1075910f89553c96e6ad8a6ea735e8277fe86bdb5457126a5b68c7b1b3765e4b"
+      },
+      {
+        "path": "after/home-location-off-zh-auto-true.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "cecbccf2715a60cbfc0d142c84b68715a86ee1bf44f069b8e2e51f388b64eb68"
+      },
+      {
+        "path": "after/home-weather-failed.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "edd456fa919e7e2fe230433b7227bc3f393d6aa7154f1bf19dbd0b90f8644f09"
+      },
+      {
+        "path": "after/home-weather-off-empty-day.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "9d06e25653e7592186662a0fd643ce2f4756ba2cc4c74389c6c5e989f9e4e807"
+      },
+      {
+        "path": "after/home-zh-landscape.png",
+        "widthPx": 1624,
+        "heightPx": 750,
+        "sha256": "05cf1ef052aad97cba3c93ba4e9f8b8d01a171cb1558e3277d48a741552f1142"
+      },
+      {
+        "path": "after/home-zh-large-text.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "2ed7f07beeee8201c122aeec22f7319b3ad968301b9c0f01835599e1bf783bd1"
+      },
+      {
+        "path": "after/home-zh-narrow.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "c7b67a5ee04f4a71afe918ca2f80a5a37bc1a04401eaaec9ee776c1fa91f9850"
+      },
+      {
+        "path": "after/home-zh-phone.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "2f1df5c680b4ed6dc64ccd2561f31fd020cfdaa501aee1ec511a0bc82c8b9a5a"
+      },
+      {
+        "path": "after/profile-complete-en.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "0658e31975be378ca5fab7fefc6faf46eb11ba9718754118f7ad1f9a0b342f7c"
+      },
+      {
+        "path": "after/profile-complete-zh.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "674eaf7db4b45367310e87a8a99f70ff4c7fa18145f658f48e4381fb10cb7d93"
+      },
+      {
+        "path": "after/profile-en-landscape.png",
+        "widthPx": 1624,
+        "heightPx": 750,
+        "sha256": "cc90c314700cfa08106e23fed6795451dc375d00aaaed5343c6e19d1088a6289"
+      },
+      {
+        "path": "after/profile-en-large-text.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "3858a82bdf583f440c76b8a09f49a81357d7675c19d6633b81ef848fee801ffc"
+      },
+      {
+        "path": "after/profile-en-narrow.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "5c340c31bdce50d484446fef3718c03ce3a171d38883c5f713fa0e01e533136f"
+      },
+      {
+        "path": "after/profile-en-phone.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "f0bc94d59a5e8011ba65ab988a3fa84edb0a4101975fc9bf1fe90b1ee4c3f4c8"
+      },
+      {
+        "path": "after/profile-interests-en-landscape.png",
+        "widthPx": 1624,
+        "heightPx": 750,
+        "sha256": "06e198cabf092768bda23e82a914a90db787dfdf1fc8a53a2f7c91558128eb3e"
+      },
+      {
+        "path": "after/profile-interests-en-large-text.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "a3a81efb13d475455c4db25fe0b6bc87b56dc29ace99c658557947785b82dc9a"
+      },
+      {
+        "path": "after/profile-interests-en-narrow.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "4825669112b6e0f6edd5011676ba8b81e1264a176dc7942ac30e8106a41aa390"
+      },
+      {
+        "path": "after/profile-interests-en-phone.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "3117034b70bddacc4f2f94521a6302124a08bc2a0cf82f240de7d27e4a60f749"
+      },
+      {
+        "path": "after/profile-interests-zh-landscape.png",
+        "widthPx": 1624,
+        "heightPx": 750,
+        "sha256": "5e9f2525048c1128b8182d82132c593c0deb6db9125cf0bc9ee64265b751f7ae"
+      },
+      {
+        "path": "after/profile-interests-zh-large-text.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "9aa7b4b178a9ff05b332736fc4f8aa84690c727e1418864256780d3bcf1293ed"
+      },
+      {
+        "path": "after/profile-interests-zh-narrow.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "05bcd31da87e5a5579679427214e1c06227137fd3bc7289f49cea18b54e130f2"
+      },
+      {
+        "path": "after/profile-interests-zh-phone.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "8b7f9e52473aae505a3dc2fcf141c7a81ef419dfb1da7262af4f5a27cb7a2288"
+      },
+      {
+        "path": "after/profile-settings-en.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "7611b6800cdee8fd608a4c853f34786575bb14917931b835527d67dcd18dd051"
+      },
+      {
+        "path": "after/profile-settings-zh.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "654489ef31df9db3ed5f6883e5a724afd936cbdbdcf1eb3ba4764035ccd88cbc"
+      },
+      {
+        "path": "after/profile-zh-landscape.png",
+        "widthPx": 1624,
+        "heightPx": 750,
+        "sha256": "b155f15422bb77b1b694a42061575a95879fcdee43c082dd7918dcfe2751dd02"
+      },
+      {
+        "path": "after/profile-zh-large-text.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "2966277bdcf015c13b2f75f279483a6ab5ed5853ea75b48e08fc203b4ea0cc68"
+      },
+      {
+        "path": "after/profile-zh-narrow.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "bf3ed768e981a7fe21b2944d171e836498641a77c173a1baed9cf64130716365"
+      },
+      {
+        "path": "after/profile-zh-phone.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "036030c15b1311f33c0a1d4f9f90f9ad851bf39ce31704fdfb2c50c90db9b569"
+      },
+      {
+        "path": "before/home-en-landscape.png",
+        "widthPx": 1624,
+        "heightPx": 750,
+        "sha256": "140e9b8b67fd5d51d9f28065eedeb93062758040d28ab2e67109003bcedc02b5"
+      },
+      {
+        "path": "before/home-en-large-text.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "8cbe4b135d1bcdbe116a8fced7d704f2de4dfe57e606bb967a0981082f18b779"
+      },
+      {
+        "path": "before/home-en-narrow.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "9120f672c6c6f0ac932e2592182fe62cfcb5df4851b9c1e6ea03986f5bedaf45"
+      },
+      {
+        "path": "before/home-en-phone.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "013fb32cc314553294a0213b21ba4e31f483cb6161ad8f743ec6142f56efe925"
+      },
+      {
+        "path": "before/home-events-en-landscape.png",
+        "widthPx": 1624,
+        "heightPx": 750,
+        "sha256": "75652c0e68d199ac925dbdfe2ab7b14e6d05b64532aef223ba7150cc477bf93c"
+      },
+      {
+        "path": "before/home-events-en-large-text.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "d0a7e42a551960714dab6134101c1380da2bb6320f36b11fede195c5795ae5ea"
+      },
+      {
+        "path": "before/home-events-en-narrow.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "ba80d2dda9b1d9a23c5ebef7ee9e8724c139d9df52c3a976a15572618dd957cb"
+      },
+      {
+        "path": "before/home-events-en-phone.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "95983efc190ae24680ffd7ef7cbfa11983e7b93ef14caae342e382c9f13faf1d"
+      },
+      {
+        "path": "before/home-events-zh-landscape.png",
+        "widthPx": 1624,
+        "heightPx": 750,
+        "sha256": "075e6cab7e73f635aa71b4d8a72318db674a55df472aa842b1a75eb0eb47b5e9"
+      },
+      {
+        "path": "before/home-events-zh-large-text.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "345ac59cf324f35b8efb7436b15e9f303f5ab0d9f8bf079db8e39e2cb00ee1f3"
+      },
+      {
+        "path": "before/home-events-zh-narrow.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "91e8aa250b4bf67dfcca520547a2059f34022351f1b4f9b6b8dd6bfd8fa52fde"
+      },
+      {
+        "path": "before/home-events-zh-phone.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "32f8a2792fee31f38af7f1e6162bbda234974c1e7045b9d90a6c87ae47909814"
+      },
+      {
+        "path": "before/home-loading.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "cdafcf40be74152a9e11571e18883f8d8ea62237ea60b3aac563c6fb3cc5eb22"
+      },
+      {
+        "path": "before/home-weather-failed.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "d8617ef7e19b75ebcc87e4fd8afb86ba6679c5de829110c94ffac31a41fecbc3"
+      },
+      {
+        "path": "before/home-weather-off-empty-day.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "c6ab6c1c9f8041ef626ec5777c84f05e7a05112301b43e79faf907a588f0878d"
+      },
+      {
+        "path": "before/home-zh-landscape.png",
+        "widthPx": 1624,
+        "heightPx": 750,
+        "sha256": "5dee369922fd289dc020b9c901350a08eea0fb6bf8249e38aba27a012aefbafe"
+      },
+      {
+        "path": "before/home-zh-large-text.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "8db69e91d62f55d42086141db7aa4ff5df27fc9e9b41ffe3c6ee777b1f69c6b8"
+      },
+      {
+        "path": "before/home-zh-narrow.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "8724d11ed36afb7b11667e7950fcb7a0da086ef704060aa4496d89f687288df4"
+      },
+      {
+        "path": "before/home-zh-phone.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "24b78c0b7dfb47e95c494ea32e2e3c7c833edcbf8bfe4a88ea496e9ecb8d192c"
+      },
+      {
+        "path": "before/profile-en-landscape.png",
+        "widthPx": 1624,
+        "heightPx": 750,
+        "sha256": "8b4395e6a02d55ef1dda7c35f44ce442560b951eb7f69705b220bf4bfea928a8"
+      },
+      {
+        "path": "before/profile-en-large-text.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "a0e31e355630993a408d81db6558b371fadb923d31b8e38de0aaec9e96910cae"
+      },
+      {
+        "path": "before/profile-en-narrow.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "22f3d65ae2aed87bb04ef322aaddddd07c97534b2f6d1de7a9a940b520445ada"
+      },
+      {
+        "path": "before/profile-en-phone.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "125ee757c0db9d09d7ad0049fd952a8b018390a589bf53d2f1952707951a859e"
+      },
+      {
+        "path": "before/profile-interests-en-landscape.png",
+        "widthPx": 1624,
+        "heightPx": 750,
+        "sha256": "0dd5156726cd951d7d79b83b7775a83520a3d3976b1549a4178476224d7f44f0"
+      },
+      {
+        "path": "before/profile-interests-en-large-text.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "33c9814a781ab5b01c4f6e45a9a1990c5882cac5c0317d4f6d3b180b5660ed89"
+      },
+      {
+        "path": "before/profile-interests-en-narrow.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "e040cd71b844f76ff87c32a3fa54991e3e412c9d4d62c8e605a765aa64cdf873"
+      },
+      {
+        "path": "before/profile-interests-en-phone.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "5db8fa1b879be6d68d3ad6939a71f51f34e9e4e95d8e523557185d5696d1adf2"
+      },
+      {
+        "path": "before/profile-interests-zh-landscape.png",
+        "widthPx": 1624,
+        "heightPx": 750,
+        "sha256": "b8860b171864a1211f523641fa5db743470a48889e5cd07756b9bb10bcf3e5d1"
+      },
+      {
+        "path": "before/profile-interests-zh-large-text.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "d231291d2a53aa87d8a9f19470679e56fd6c5f7ea3404b16ac7d4f7653e7709c"
+      },
+      {
+        "path": "before/profile-interests-zh-narrow.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "a0f7f34d24aaf4836a86e79c3435e7b08bc4fb01565f3663774159429308bd3c"
+      },
+      {
+        "path": "before/profile-interests-zh-phone.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "a0551d5589e79d55e4fa8cef0fa3e24e0f2f3466950bd4860f786f33e824a932"
+      },
+      {
+        "path": "before/profile-zh-landscape.png",
+        "widthPx": 1624,
+        "heightPx": 750,
+        "sha256": "6346736f628f838592584fc972c518f892acdfd6f0047b0cd716b68842bc85e5"
+      },
+      {
+        "path": "before/profile-zh-large-text.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "fb8bcd86985c237481ca6a2c1ad65323a95484a8f239b6a36dfcf0e3de1399b0"
+      },
+      {
+        "path": "before/profile-zh-narrow.png",
+        "widthPx": 640,
+        "heightPx": 1280,
+        "sha256": "445c0299c6678dec0e011c7d4f043b6f4055d02c4b96e54b7c3eaac061889cac"
+      },
+      {
+        "path": "before/profile-zh-phone.png",
+        "widthPx": 750,
+        "heightPx": 1624,
+        "sha256": "c87ab5f3d3c7fb48436bebf096212cd6bf34256e28327143b962f2031a953566"
+      }
+    ]
+  },
+  "reproducedAndFixed": {
+    "issue": "Unequal heights in narrow English Profile shortcut row",
+    "beforeDp": {
+      "history": 64,
+      "footprint": 56
+    },
+    "finalDp": {
+      "history": 64,
+      "footprint": 64
+    },
+    "reproductionLogSha256": "26dd921a3eeb8e2a21cadde75739736dcb06e0b0b2a2fb552e07b4e6c6fa1013"
+  },
+  "dependenciesUnchanged": true,
+  "androidDevicesAtFinalCheck": 0,
+  "newApkBuilt": false,
+  "installedOnPhone": false,
+  "backendChanged": false,
+  "realAccountWrites": false,
+  "remotePublished": false,
+  "fullUatClaimed": false
+}

@@ -78,6 +78,22 @@ void main() {
           tester.getTopLeft(find.byKey(const Key('profile-footprint'))).dy,
         );
 
+        final avatar = find.byKey(const Key('own-avatar-edit'));
+        expect(tester.getSize(avatar).shortestSide, greaterThanOrEqualTo(48));
+        final audience = find.byKey(const Key('profile-audience'));
+        await _show(tester, audience);
+        expect(tester.getSize(audience).height, greaterThanOrEqualTo(48));
+        await tester.tap(audience);
+        await _frames(tester);
+        expect(find.byType(AlertDialog), findsOneWidget);
+        expect(
+          find.textContaining('Your records and sharing choices'),
+          findsOneWidget,
+        );
+        await tester.tap(find.text('Done'));
+        await _frames(tester);
+        expect(find.byType(AlertDialog), findsNothing);
+
         for (final (key, label, destination) in [
           ('profile-history', 'Check-in History', 'History'),
           ('profile-edit-interests', 'Edit interests', 'Interests'),

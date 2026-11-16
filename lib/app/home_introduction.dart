@@ -21,7 +21,7 @@ final class HomeIntroduction extends StatelessWidget {
     final theme = Theme.of(context);
     return Container(
       key: const Key('home-introduction'),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(20),
@@ -35,25 +35,34 @@ final class HomeIntroduction extends StatelessWidget {
                 style: theme.textTheme.bodyMedium,
               ),
           const SizedBox(height: 4),
-          Semantics(
-            header: true,
-            child: Text(
-              context.tr('Today', '今天'),
-              style: theme.textTheme.headlineLarge,
-            ),
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 12,
+            runSpacing: 4,
+            children: [
+              Semantics(
+                header: true,
+                child: Text(
+                  context.tr('Today', '今天'),
+                  style: theme.textTheme.titleLarge,
+                ),
+              ),
+              Text(
+                MaterialLocalizations.of(context)
+                    .formatFullDate(DateTime.now()),
+                style: theme.textTheme.bodySmall,
+              ),
+            ],
           ),
-          Text(
-            MaterialLocalizations.of(context).formatFullDate(DateTime.now()),
-            style: theme.textTheme.bodySmall,
-          ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           FilledButton.icon(
             key: const Key('r6-new-check-in-button'),
             onPressed: onStartCheckIn,
             icon: const Icon(Icons.edit_note),
             label: Text(context.tr('New Check-in', '新建签到')),
           ),
-          if (weather != null) ...[const Divider(height: 24), weather!],
+          if (weather != null) ...[const Divider(height: 16), weather!],
         ],
       ),
     );

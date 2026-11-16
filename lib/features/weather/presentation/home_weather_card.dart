@@ -162,6 +162,7 @@ final class _HomeWeatherCardState extends ConsumerState<HomeWeatherCard>
             children: [
               Expanded(
                 child: TextButton.icon(
+                  key: const Key('home-weather-request'),
                   style: TextButton.styleFrom(
                     alignment: Alignment.centerLeft,
                     padding: EdgeInsets.zero,
@@ -171,6 +172,8 @@ final class _HomeWeatherCardState extends ConsumerState<HomeWeatherCard>
                   label: Text(
                     state.busy
                         ? context.tr('Getting current weather…', '正在获取天气…')
+                        : state.failure != null
+                        ? context.tr('Retry weather', '重试天气')
                         : context.tr('Add today’s weather', "添加今日天气"),
                   ),
                 ),
@@ -179,11 +182,20 @@ final class _HomeWeatherCardState extends ConsumerState<HomeWeatherCard>
             ],
           ),
         if (state.weather == null)
-          Text(
-            state.automatic
-                ? context.tr('Approximate location · auto on', "大致位置 · 自动获取已开启")
-                : context.tr('Optional · approximate location', "可选 · 大致位置"),
-            style: Theme.of(context).textTheme.bodySmall,
+          Semantics(
+            key: const Key('home-weather-status'),
+            liveRegion: state.failure != null,
+            child: Text(
+              state.failure != null
+                  ? '${state.automatic ? context.tr('Auto on', '自动获取已开启') : context.tr('Optional', '可选')} · ${homeWeatherFeedback(context, state.failure!)}'
+                  : state.automatic
+                  ? context.tr(
+                      'Approximate location · auto on',
+                      '大致位置 · 自动获取已开启',
+                    )
+                  : context.tr('Optional · approximate location', '可选 · 大致位置'),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ),
         if (state.weather case final weather?)
           WeatherCard(
@@ -196,17 +208,20 @@ final class _HomeWeatherCardState extends ConsumerState<HomeWeatherCard>
             actions: actions,
             openAttribution: widget.openAttribution,
           ),
-        if (state.failure case final failure?)
+        if (state.failure case final failure? when state.weather != null)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.only(top: 4),
             child: Semantics(
               liveRegion: true,
-              child: Text(weatherFeedback(context, failure)),
+              child: Text(
+                homeWeatherFeedback(context, failure),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ),
           ),
         if (state.busy)
           Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.symmetric(vertical: 4),
             child: LinearProgressIndicator(
               semanticsLabel: context.tr('Getting current weather', "正在获取当前天气"),
             ),
