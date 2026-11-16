@@ -35,3 +35,9 @@ Visual review found that the first centered loading design could leave a large-t
 Final command results, source/raster hashes and Android packaging evidence are recorded alongside this file. Overlapping test counts must not be added. No backend, dependency, service, real account data, remote publication or full-UAT claim is part of this UI increment. No phone was connected during these checks.
 
 Final source verification: **1,840 Flutter tests passed**, the separate captured-font targeted run passed **40 tests**, static analysis found **no issues**, and `git diff --check` passed. The [verification receipt](verification.json) includes 8 baseline card screens and 24 final screens/card rasters. Dependencies are unchanged.
+
+## Signed Android candidate
+
+[v75 packaging receipt](android-v75-candidate.json): source `7db5ae5be6e4225cac09131dd79190377bb25883`, package `com.enmori.app.group`, version `1.0.0-ui20261117` / 75. The release APK is `/home/miku/Downloads/ENMORI-ui-v75-release.apk`. Package/version, non-debuggable status and the existing group signing certificate were verified. The standard Flutter release build completed with exit 0 and did not change the dependency files.
+
+The candidate includes both 17 November UI increments and the v74 friend-profile fix. No phone was connected at the final packaging check; the APK has not been installed or physically accepted in this round.
