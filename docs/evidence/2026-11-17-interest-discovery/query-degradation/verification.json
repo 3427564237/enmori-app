@@ -1,0 +1,65 @@
+{
+  "backendSourceCommit": "f22b9ca",
+  "clientSourceCommit": "3022d5a7b03247a632beeddd04c1d0ba7d652b63",
+  "backend": {
+    "passed": 1994,
+    "failed": 0
+  },
+  "flutter": {
+    "passed": 1900,
+    "failed": 0
+  },
+  "emulator": {
+    "passed": 28,
+    "failed": 0
+  },
+  "analysis": "No issues",
+  "renderedPngCount": 16,
+  "logs": {
+    "backendFull": {
+      "path": "/tmp/enmori-query-degradation-full-backend.log",
+      "sha256": "d653321c21216eb52e3945663fcf94adeabf69df876e4a738d1f669e73e2835c"
+    },
+    "flutterFull": {
+      "path": "/tmp/enmori-query-degradation-full-flutter.log",
+      "sha256": "5689ae1b903d0d94f8ce48a38691490a9fc77af9ed81be7659964fc245974551"
+    },
+    "analysis": {
+      "path": "/tmp/enmori-query-degradation-analysis.log",
+      "sha256": "4b5825aed9c1dbb5fc72b2e4309cdd1f1099a0d01b87e81c81fc9ed19ea05e7a"
+    },
+    "emulator": {
+      "path": "/tmp/enmori-query-degradation-emulator.log",
+      "sha256": "257f899b41f69b9ce2954b324dfd596889de12d831cfbed15374b3d94bdbf4c3"
+    },
+    "backendAfterScheduling": {
+      "path": "/tmp/enmori-default-first-full-backend.log",
+      "sha256": "e1e3e9d87e89e4e1b7675a413f529b9a91b0ee30c423d870b89368a30bc9f189"
+    }
+  },
+  "independentReview": "Coverage validation now precedes all cache publication; rejected first/next pages cannot expose their rows. Reproduced independently and fixed.",
+  "physicalAcceptance": false,
+  "defaultFirstBackend": {
+    "sourceCommit": "65876ba",
+    "passed": 1996,
+    "failed": 0,
+    "focusedPassed": 58
+  },
+  "cloudSourceGate": {
+    "passed": true,
+    "elapsedMs": 147020,
+    "requiredDefaultRecords": 50,
+    "settledTasks": 15,
+    "completedTasks": 13,
+    "failedTasks": 2,
+    "coverageComplete": false,
+    "rawRecords": 161,
+    "uniqueRecords": 157,
+    "futurePublicRecords": 71,
+    "realSourceControlledRequesterMatches": {
+      "Food": 1,
+      "Dance": 3,
+      "Music": 2
+    }
+  }
+}

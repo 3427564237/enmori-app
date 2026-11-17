@@ -1,0 +1,29 @@
+{
+  "targetVersion": 77,
+  "pythonOfflineChecks": 35,
+  "nodeOfflineChecks": 22,
+  "files": {
+    "control_base.py": "4bfc58956485e29af14bb37914379227950f052bcb624b3afa8c4a5732b9ff1f",
+    "upgrade.py": "e95b08d5a68ef56585cc8dd3131b2b380d0f79416ac2571f789bf1f83454e48c",
+    "remote_worker.py": "564dc77830e47f24b2245899565daed7595f3fa367fc5c15d43453dddf87bd64",
+    "owner_config.mjs": "67a9816cc456ff7b4a88323c6c4aa8d391400627cf356650414c78bb710fc14e",
+    "drain_proof.py": "cb402420f8299f5c9d90247db83687ca5b1c4f029ff4dbf302a14a14937d0d47",
+    "rollback.py": "f754cd21971d70cd5232de8b4746aa87ae446c4ff659d611d3248b2cd1c3855c",
+    "upgrade_checks.py": "5aba72c9156128e97706e2c9fb296074e79fdd54ecb6b4864a2e102883f070d8",
+    "rollback_checks.py": "11a52c9f8fc0e2c1d77f65204e5048aac3d5e4514d6b983dd14336953b3e3c97",
+    "restart-baseline.test.mjs": "d013ae850546d8ac02cb96805ddd0c2bd9c3752cd64732311c6a1df9cbcd8898",
+    "rollback-owner.test.mjs": "2ac5afd7aa5173eba51e0e44940663848813e338e49b1375e1f6155c08afc494"
+  },
+  "baselinePackage": "2026111511215971.zip",
+  "baselinePackageSha256": "11a06e77848a74ddc8c1faa3221302fe2f93c5c9631264239f827dae2a187604",
+  "aiPreflight": {
+    "readOnly": true,
+    "grantWellFormed": true,
+    "grantCurrent": true,
+    "ownerBaseline": "expired",
+    "existingOperatorSupportsExpiredSameServiceBaseline": true,
+    "productWrites": 0,
+    "modelCalls": 0
+  },
+  "activation": "not yet performed; cloud gate pending"
+}

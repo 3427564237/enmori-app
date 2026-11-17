@@ -1,0 +1,23 @@
+{
+  "recordedAtUtc": "2026-11-17T02:15:13.529642+00:00",
+  "sourceCommit": "3022d5a7b03247a632beeddd04c1d0ba7d652b63",
+  "apkPath": "/home/miku/Downloads/ENMORI-discovery-v77-release.apk",
+  "sha256": "8001b84bacc80cb82fec572efacdd3b9bd78968dd2634cb2be70872b8cb8230e",
+  "bytes": 70805480,
+  "versionCode": 77,
+  "versionName": "1.0.0-discovery20261117",
+  "package": "com.enmori.app.group",
+  "debuggable": false,
+  "signerCertificateSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+  "signatureVerified": true,
+  "companionEnabled": true,
+  "existingReleaseConfigurationReused": true,
+  "backendHostUnchanged": true,
+  "buildExitCode": 0,
+  "buildLog": "/home/miku/.local/state/enmori-interest-discovery-20261117/build-apk-v77.log",
+  "buildLogSha256": "8e2521f20d27ddc0fced1274e13befe13db397b912c99af9e212dfc3f09fd544",
+  "dependenciesUnchanged": true,
+  "installed": false,
+  "phoneAcceptance": false,
+  "backendReleaseRecordedSeparately": true
+}

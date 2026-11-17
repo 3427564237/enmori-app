@@ -1,0 +1,1602 @@
+{
+  "startedAtUtc": "20261117T022201Z",
+  "probeSha256": "ef1d568baf2dd0874384a7f432cda3934c926bf68cf5a994ce679add6308752d",
+  "events": [
+    {
+      "stage": "mounted-code-verification",
+      "ok": true,
+      "mountedSourceCommit": "a447689781b8b389c972009380a25c63f39fd5d7",
+      "manifestSha256": "adc7a7852aa0ad43cd567587e10ab3121bf60ec250efbcf851149580dc88b2ca",
+      "helperCount": 35
+    },
+    {
+      "stage": "public-acquisition",
+      "started": true,
+      "atUtc": "2026-11-17T02:22:47.782Z",
+      "requiredTasks": 15,
+      "maxRawRecords": 190
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 9,
+      "method": "launch",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 2112,
+      "method": "launch",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 3108,
+      "pageIndex": 0,
+      "taskIndex": null,
+      "method": "waitForResponse",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 3193,
+      "pageIndex": 0,
+      "taskIndex": 0,
+      "method": "goto",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 6040,
+      "pageIndex": 0,
+      "taskIndex": 0,
+      "method": "goto",
+      "phase": "complete",
+      "status": 200
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 9409,
+      "pageIndex": 0,
+      "method": "searchResponse",
+      "status": 201,
+      "taskIndex": 0,
+      "requestTaskIndex": 0,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 9493,
+      "pageIndex": 0,
+      "method": "responsePredicate",
+      "accepted": true,
+      "taskIndex": 0,
+      "requestTaskIndex": 0,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 9494,
+      "pageIndex": 0,
+      "taskIndex": 0,
+      "method": "waitForResponse",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 9494,
+      "pageIndex": 0,
+      "taskIndex": 0,
+      "method": "waitForFunction",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 9775,
+      "pageIndex": 0,
+      "method": "searchResponse",
+      "status": 201,
+      "taskIndex": 0,
+      "requestTaskIndex": 0,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 10732,
+      "pageIndex": 0,
+      "taskIndex": 0,
+      "method": "waitForFunction",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 11554,
+      "pageIndex": 0,
+      "method": "searchResponse",
+      "status": 201,
+      "taskIndex": 0,
+      "requestTaskIndex": 0,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 11556,
+      "pageIndex": 0,
+      "taskIndex": 0,
+      "method": "waitForResponse",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 15969,
+      "pageIndex": 0,
+      "method": "searchResponse",
+      "status": 201,
+      "taskIndex": 0,
+      "requestTaskIndex": 0,
+      "keywordMatches": true,
+      "skip": 10,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 16127,
+      "pageIndex": 0,
+      "method": "responsePredicate",
+      "accepted": true,
+      "taskIndex": 0,
+      "requestTaskIndex": 0,
+      "keywordMatches": true,
+      "skip": 10,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 16128,
+      "pageIndex": 0,
+      "taskIndex": 0,
+      "method": "waitForResponse",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 16128,
+      "pageIndex": 0,
+      "taskIndex": 0,
+      "method": "waitForFunction",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 16467,
+      "pageIndex": 0,
+      "taskIndex": 0,
+      "method": "waitForFunction",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 16596,
+      "pageIndex": 0,
+      "taskIndex": 0,
+      "method": "waitForResponse",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 18907,
+      "pageIndex": 0,
+      "method": "searchResponse",
+      "status": 201,
+      "taskIndex": 0,
+      "requestTaskIndex": 0,
+      "keywordMatches": true,
+      "skip": 20,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 18946,
+      "pageIndex": 0,
+      "method": "responsePredicate",
+      "accepted": true,
+      "taskIndex": 0,
+      "requestTaskIndex": 0,
+      "keywordMatches": true,
+      "skip": 20,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 18954,
+      "pageIndex": 0,
+      "taskIndex": 0,
+      "method": "waitForResponse",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 18954,
+      "pageIndex": 0,
+      "taskIndex": 0,
+      "method": "waitForFunction",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 19267,
+      "pageIndex": 0,
+      "taskIndex": 0,
+      "method": "waitForFunction",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 19318,
+      "pageIndex": 0,
+      "taskIndex": 0,
+      "method": "waitForResponse",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 22347,
+      "pageIndex": 0,
+      "method": "searchResponse",
+      "status": 201,
+      "taskIndex": 0,
+      "requestTaskIndex": 0,
+      "keywordMatches": true,
+      "skip": 30,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 22397,
+      "pageIndex": 0,
+      "method": "responsePredicate",
+      "accepted": true,
+      "taskIndex": 0,
+      "requestTaskIndex": 0,
+      "keywordMatches": true,
+      "skip": 30,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 22397,
+      "pageIndex": 0,
+      "taskIndex": 0,
+      "method": "waitForResponse",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 22397,
+      "pageIndex": 0,
+      "taskIndex": 0,
+      "method": "waitForFunction",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 22720,
+      "pageIndex": 0,
+      "taskIndex": 0,
+      "method": "waitForFunction",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 22844,
+      "pageIndex": 0,
+      "taskIndex": 0,
+      "method": "waitForResponse",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 25824,
+      "pageIndex": 0,
+      "method": "searchResponse",
+      "status": 201,
+      "taskIndex": 0,
+      "requestTaskIndex": 0,
+      "keywordMatches": true,
+      "skip": 40,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 25854,
+      "pageIndex": 0,
+      "method": "responsePredicate",
+      "accepted": true,
+      "taskIndex": 0,
+      "requestTaskIndex": 0,
+      "keywordMatches": true,
+      "skip": 40,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 25854,
+      "pageIndex": 0,
+      "taskIndex": 0,
+      "method": "waitForResponse",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 25854,
+      "pageIndex": 0,
+      "taskIndex": 0,
+      "method": "waitForFunction",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 26095,
+      "pageIndex": 0,
+      "taskIndex": 0,
+      "method": "waitForFunction",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 26863,
+      "pageIndex": 1,
+      "taskIndex": null,
+      "method": "waitForResponse",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 26889,
+      "pageIndex": 1,
+      "taskIndex": 1,
+      "method": "goto",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 26890,
+      "pageIndex": 2,
+      "taskIndex": null,
+      "method": "waitForResponse",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 26909,
+      "pageIndex": 2,
+      "taskIndex": 2,
+      "method": "goto",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 26910,
+      "pageIndex": 3,
+      "taskIndex": null,
+      "method": "waitForResponse",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 26920,
+      "pageIndex": 3,
+      "taskIndex": 3,
+      "method": "goto",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 30972,
+      "pageIndex": 1,
+      "taskIndex": 1,
+      "method": "goto",
+      "phase": "complete",
+      "status": 200
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 31798,
+      "pageIndex": 3,
+      "taskIndex": 3,
+      "method": "goto",
+      "phase": "complete",
+      "status": 200
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 32060,
+      "pageIndex": 2,
+      "taskIndex": 2,
+      "method": "goto",
+      "phase": "complete",
+      "status": 200
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 39196,
+      "pageIndex": 1,
+      "method": "searchResponse",
+      "status": 201,
+      "taskIndex": 1,
+      "requestTaskIndex": 1,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 39414,
+      "pageIndex": 1,
+      "method": "responsePredicate",
+      "accepted": true,
+      "taskIndex": 1,
+      "requestTaskIndex": 1,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 39414,
+      "pageIndex": 1,
+      "taskIndex": 1,
+      "method": "waitForResponse",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 39414,
+      "pageIndex": 1,
+      "taskIndex": 1,
+      "method": "waitForFunction",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 39981,
+      "pageIndex": 2,
+      "method": "searchResponse",
+      "status": 201,
+      "taskIndex": 2,
+      "requestTaskIndex": 2,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 41648,
+      "pageIndex": 1,
+      "taskIndex": 1,
+      "method": "waitForFunction",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 41783,
+      "pageIndex": 3,
+      "method": "searchResponse",
+      "status": 201,
+      "taskIndex": 3,
+      "requestTaskIndex": 3,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 42353,
+      "pageIndex": 2,
+      "method": "responsePredicate",
+      "accepted": true,
+      "taskIndex": 2,
+      "requestTaskIndex": 2,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 42353,
+      "pageIndex": 2,
+      "taskIndex": 2,
+      "method": "waitForResponse",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 42354,
+      "pageIndex": 2,
+      "taskIndex": 2,
+      "method": "waitForFunction",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 42354,
+      "pageIndex": 1,
+      "taskIndex": 1,
+      "method": "waitForResponse",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 42421,
+      "pageIndex": 1,
+      "taskIndex": 4,
+      "method": "goto",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 43702,
+      "pageIndex": 3,
+      "method": "responsePredicate",
+      "accepted": true,
+      "taskIndex": 3,
+      "requestTaskIndex": 3,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 43703,
+      "pageIndex": 3,
+      "taskIndex": 3,
+      "method": "waitForResponse",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 43703,
+      "pageIndex": 3,
+      "taskIndex": 3,
+      "method": "waitForFunction",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 44845,
+      "pageIndex": 3,
+      "taskIndex": 3,
+      "method": "waitForFunction",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 45100,
+      "pageIndex": 2,
+      "taskIndex": 2,
+      "method": "waitForFunction",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 45214,
+      "pageIndex": 3,
+      "taskIndex": 3,
+      "method": "waitForResponse",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 45234,
+      "pageIndex": 3,
+      "taskIndex": 5,
+      "method": "goto",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 45454,
+      "pageIndex": 2,
+      "taskIndex": 2,
+      "method": "waitForResponse",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 45465,
+      "pageIndex": 2,
+      "taskIndex": 6,
+      "method": "goto",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 45476,
+      "pageIndex": 1,
+      "taskIndex": 4,
+      "method": "goto",
+      "phase": "complete",
+      "status": 200
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 48338,
+      "pageIndex": 3,
+      "taskIndex": 5,
+      "method": "goto",
+      "phase": "complete",
+      "status": 200
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 48764,
+      "pageIndex": 2,
+      "taskIndex": 6,
+      "method": "goto",
+      "phase": "complete",
+      "status": 200
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 54968,
+      "pageIndex": 1,
+      "method": "searchResponse",
+      "status": 201,
+      "taskIndex": 4,
+      "requestTaskIndex": 4,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 55292,
+      "pageIndex": 1,
+      "method": "responsePredicate",
+      "accepted": true,
+      "taskIndex": 4,
+      "requestTaskIndex": 4,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 55292,
+      "pageIndex": 1,
+      "taskIndex": 4,
+      "method": "waitForResponse",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 55292,
+      "pageIndex": 1,
+      "taskIndex": 4,
+      "method": "waitForFunction",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 56260,
+      "pageIndex": 3,
+      "method": "searchResponse",
+      "status": 201,
+      "taskIndex": 5,
+      "requestTaskIndex": 5,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 56317,
+      "pageIndex": 2,
+      "method": "searchResponse",
+      "status": 201,
+      "taskIndex": 6,
+      "requestTaskIndex": 6,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 56825,
+      "pageIndex": 1,
+      "taskIndex": 4,
+      "method": "waitForFunction",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 57446,
+      "pageIndex": 1,
+      "taskIndex": 4,
+      "method": "waitForResponse",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 57464,
+      "pageIndex": 1,
+      "taskIndex": 7,
+      "method": "goto",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 57854,
+      "pageIndex": 2,
+      "method": "responsePredicate",
+      "accepted": true,
+      "taskIndex": 6,
+      "requestTaskIndex": 6,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 57854,
+      "pageIndex": 2,
+      "taskIndex": 6,
+      "method": "waitForResponse",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 57854,
+      "pageIndex": 2,
+      "taskIndex": 6,
+      "method": "waitForFunction",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 58159,
+      "pageIndex": 3,
+      "method": "responsePredicate",
+      "accepted": true,
+      "taskIndex": 5,
+      "requestTaskIndex": 5,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 58159,
+      "pageIndex": 3,
+      "taskIndex": 5,
+      "method": "waitForResponse",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 58159,
+      "pageIndex": 3,
+      "taskIndex": 5,
+      "method": "waitForFunction",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 59448,
+      "pageIndex": 3,
+      "taskIndex": 5,
+      "method": "waitForFunction",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 59650,
+      "pageIndex": 2,
+      "taskIndex": 6,
+      "method": "waitForFunction",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 59700,
+      "pageIndex": 3,
+      "taskIndex": 5,
+      "method": "waitForResponse",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 59728,
+      "pageIndex": 3,
+      "taskIndex": 8,
+      "method": "goto",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 59854,
+      "pageIndex": 2,
+      "taskIndex": 6,
+      "method": "waitForResponse",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 59862,
+      "pageIndex": 2,
+      "taskIndex": 9,
+      "method": "goto",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 60160,
+      "pageIndex": 1,
+      "taskIndex": 7,
+      "method": "goto",
+      "phase": "complete",
+      "status": 200
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 63416,
+      "pageIndex": 2,
+      "taskIndex": 9,
+      "method": "goto",
+      "phase": "complete",
+      "status": 200
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 63782,
+      "pageIndex": 3,
+      "taskIndex": 8,
+      "method": "goto",
+      "phase": "complete",
+      "status": 200
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 67560,
+      "pageIndex": 1,
+      "method": "searchResponse",
+      "status": 201,
+      "taskIndex": 7,
+      "requestTaskIndex": 7,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 67825,
+      "pageIndex": 1,
+      "method": "responsePredicate",
+      "accepted": true,
+      "taskIndex": 7,
+      "requestTaskIndex": 7,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 67852,
+      "pageIndex": 1,
+      "taskIndex": 7,
+      "method": "waitForResponse",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 67852,
+      "pageIndex": 1,
+      "taskIndex": 7,
+      "method": "waitForFunction",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 69150,
+      "pageIndex": 2,
+      "method": "searchResponse",
+      "status": 201,
+      "taskIndex": 9,
+      "requestTaskIndex": 9,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 69600,
+      "pageIndex": 2,
+      "method": "responsePredicate",
+      "accepted": true,
+      "taskIndex": 9,
+      "requestTaskIndex": 9,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 69600,
+      "pageIndex": 2,
+      "taskIndex": 9,
+      "method": "waitForResponse",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 69600,
+      "pageIndex": 2,
+      "taskIndex": 9,
+      "method": "waitForFunction",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 69719,
+      "pageIndex": 1,
+      "taskIndex": 7,
+      "method": "waitForFunction",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 69868,
+      "pageIndex": 3,
+      "method": "searchResponse",
+      "status": 201,
+      "taskIndex": 8,
+      "requestTaskIndex": 8,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 69955,
+      "pageIndex": 1,
+      "taskIndex": 7,
+      "method": "waitForResponse",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 69956,
+      "pageIndex": 1,
+      "taskIndex": 10,
+      "method": "goto",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 70942,
+      "pageIndex": 2,
+      "taskIndex": 9,
+      "method": "waitForFunction",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 71625,
+      "pageIndex": 3,
+      "method": "responsePredicate",
+      "accepted": true,
+      "taskIndex": 8,
+      "requestTaskIndex": 8,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 71625,
+      "pageIndex": 3,
+      "taskIndex": 8,
+      "method": "waitForResponse",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 71625,
+      "pageIndex": 3,
+      "taskIndex": 8,
+      "method": "waitForFunction",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 71935,
+      "pageIndex": 2,
+      "taskIndex": 9,
+      "method": "waitForResponse",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 71954,
+      "pageIndex": 2,
+      "taskIndex": 11,
+      "method": "goto",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 72668,
+      "pageIndex": 1,
+      "taskIndex": 10,
+      "method": "goto",
+      "phase": "complete",
+      "status": 200
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 73102,
+      "pageIndex": 3,
+      "taskIndex": 8,
+      "method": "waitForFunction",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 73927,
+      "pageIndex": 3,
+      "taskIndex": 8,
+      "method": "waitForResponse",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 73976,
+      "pageIndex": 3,
+      "taskIndex": 12,
+      "method": "goto",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 76750,
+      "pageIndex": 2,
+      "taskIndex": 11,
+      "method": "goto",
+      "phase": "complete",
+      "status": 200
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 79953,
+      "pageIndex": 1,
+      "method": "searchResponse",
+      "status": 201,
+      "taskIndex": 10,
+      "requestTaskIndex": 0,
+      "keywordMatches": false,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 79953,
+      "pageIndex": 1,
+      "method": "responsePredicate",
+      "accepted": false,
+      "taskIndex": 10,
+      "requestTaskIndex": 0,
+      "keywordMatches": false,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 80053,
+      "pageIndex": 3,
+      "taskIndex": 12,
+      "method": "goto",
+      "phase": "complete",
+      "status": 200
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 84479,
+      "pageIndex": 2,
+      "method": "searchResponse",
+      "status": 201,
+      "taskIndex": 11,
+      "requestTaskIndex": 11,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 84718,
+      "pageIndex": 2,
+      "method": "searchResponse",
+      "status": 201,
+      "taskIndex": 11,
+      "requestTaskIndex": 11,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 85164,
+      "pageIndex": 2,
+      "method": "responsePredicate",
+      "accepted": true,
+      "taskIndex": 11,
+      "requestTaskIndex": 11,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 85165,
+      "pageIndex": 2,
+      "taskIndex": 11,
+      "method": "waitForResponse",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 85191,
+      "pageIndex": 2,
+      "taskIndex": 11,
+      "method": "waitForFunction",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 85447,
+      "pageIndex": 2,
+      "method": "responsePredicate",
+      "accepted": true,
+      "taskIndex": 11,
+      "requestTaskIndex": 11,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 85740,
+      "pageIndex": 3,
+      "method": "searchResponse",
+      "status": 201,
+      "taskIndex": 12,
+      "requestTaskIndex": 12,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 85796,
+      "pageIndex": 2,
+      "taskIndex": 11,
+      "method": "waitForFunction",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 85929,
+      "pageIndex": 1,
+      "method": "searchResponse",
+      "status": 201,
+      "taskIndex": 10,
+      "requestTaskIndex": 10,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 86139,
+      "pageIndex": 2,
+      "taskIndex": 11,
+      "method": "waitForResponse",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 86140,
+      "pageIndex": 2,
+      "taskIndex": 13,
+      "method": "goto",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 86220,
+      "pageIndex": 1,
+      "method": "responsePredicate",
+      "accepted": true,
+      "taskIndex": 10,
+      "requestTaskIndex": 10,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 86299,
+      "pageIndex": 1,
+      "taskIndex": 10,
+      "method": "waitForResponse",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 86299,
+      "pageIndex": 1,
+      "taskIndex": 10,
+      "method": "waitForFunction",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 86430,
+      "pageIndex": 3,
+      "method": "responsePredicate",
+      "accepted": true,
+      "taskIndex": 12,
+      "requestTaskIndex": 12,
+      "keywordMatches": true,
+      "skip": 0,
+      "take": 10
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 86431,
+      "pageIndex": 3,
+      "taskIndex": 12,
+      "method": "waitForResponse",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 86431,
+      "pageIndex": 3,
+      "taskIndex": 12,
+      "method": "waitForFunction",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 87004,
+      "pageIndex": 1,
+      "taskIndex": 10,
+      "method": "waitForFunction",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 87045,
+      "pageIndex": 3,
+      "taskIndex": 12,
+      "method": "waitForFunction",
+      "phase": "complete"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 87374,
+      "pageIndex": 1,
+      "taskIndex": 10,
+      "method": "waitForResponse",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 87376,
+      "pageIndex": 1,
+      "taskIndex": 14,
+      "method": "goto",
+      "phase": "started"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 87978,
+      "pageIndex": 2,
+      "taskIndex": 13,
+      "method": "goto",
+      "phase": "complete",
+      "status": 200
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 88186,
+      "pageIndex": 1,
+      "taskIndex": 14,
+      "method": "goto",
+      "phase": "complete",
+      "status": 403
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 88274,
+      "pageIndex": 1,
+      "method": "requestFailed",
+      "resourceType": "document",
+      "taskIndex": 14
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 88315,
+      "pageIndex": 1,
+      "taskIndex": 14,
+      "method": "waitForResponse",
+      "phase": "failed",
+      "errorCategory": "Error"
+    },
+    {
+      "stage": "candidate-browser-stage",
+      "elapsedMs": 146240,
+      "pageIndex": 2,
+      "taskIndex": 13,
+      "method": "waitForResponse",
+      "phase": "failed",
+      "errorCategory": "TimeoutError"
+    },
+    {
+      "stage": "acquisition-diagnostics",
+      "outcome": "partial",
+      "elapsedMs": 147020,
+      "completedTasks": 13,
+      "failedTasks": 2,
+      "settledTasks": 15,
+      "cancelledTasks": 0,
+      "unstartedTasks": 0,
+      "rawRecords": 161,
+      "uniqueRecords": 157,
+      "tasks": [
+        {
+          "index": 0,
+          "status": "complete",
+          "records": 50,
+          "elapsedMs": 23113
+        },
+        {
+          "index": 1,
+          "status": "complete",
+          "records": 10,
+          "elapsedMs": 15492
+        },
+        {
+          "index": 2,
+          "status": "complete",
+          "records": 10,
+          "elapsedMs": 18564
+        },
+        {
+          "index": 3,
+          "status": "complete",
+          "records": 10,
+          "elapsedMs": 18303
+        },
+        {
+          "index": 4,
+          "status": "complete",
+          "records": 10,
+          "elapsedMs": 15092
+        },
+        {
+          "index": 5,
+          "status": "complete",
+          "records": 10,
+          "elapsedMs": 14487
+        },
+        {
+          "index": 6,
+          "status": "complete",
+          "records": 7,
+          "elapsedMs": 14400
+        },
+        {
+          "index": 7,
+          "status": "complete",
+          "records": 5,
+          "elapsedMs": 12509
+        },
+        {
+          "index": 8,
+          "status": "complete",
+          "records": 10,
+          "elapsedMs": 14226
+        },
+        {
+          "index": 9,
+          "status": "complete",
+          "records": 10,
+          "elapsedMs": 12081
+        },
+        {
+          "index": 10,
+          "status": "complete",
+          "records": 9,
+          "elapsedMs": 17420
+        },
+        {
+          "index": 11,
+          "status": "complete",
+          "records": 10,
+          "elapsedMs": 14204
+        },
+        {
+          "index": 12,
+          "status": "complete",
+          "records": 10,
+          "elapsedMs": 13792
+        },
+        {
+          "index": 13,
+          "status": "failed",
+          "records": 0,
+          "elapsedMs": 60101
+        },
+        {
+          "index": 14,
+          "status": "failed",
+          "records": 0,
+          "elapsedMs": 822
+        }
+      ]
+    },
+    {
+      "stage": "candidate-pipeline-result",
+      "ok": true,
+      "atUtc": "2026-11-17T02:25:15.696Z",
+      "asOf": "2026-11-17T02:22:47.782Z",
+      "elapsedMs": 147914,
+      "catalogueRecords": 157,
+      "sourceStatus": [
+        {
+          "provider": "onepa",
+          "available": true
+        }
+      ],
+      "sourceCoverage": [
+        {
+          "provider": "onepa",
+          "complete": false
+        }
+      ],
+      "projectedFuturePublicRecords": 71,
+      "validRecommendationCandidateCount": 23,
+      "projectedInterestCounts": {
+        "Books": 0,
+        "Travel": 2,
+        "Films": 3,
+        "Fitness": 8,
+        "Dance": 3,
+        "Food": 1,
+        "Photography": 1,
+        "Technology": 0,
+        "Outdoors": 1,
+        "Volunteering": 1,
+        "Art": 1,
+        "Gaming": 0,
+        "Community": 0,
+        "Music": 2
+      },
+      "eligibleInterestCounts": {
+        "Books": 0,
+        "Travel": 2,
+        "Films": 3,
+        "Fitness": 8,
+        "Dance": 3,
+        "Food": 1,
+        "Photography": 1,
+        "Technology": 0,
+        "Outdoors": 1,
+        "Volunteering": 1,
+        "Art": 1,
+        "Gaming": 0,
+        "Community": 0,
+        "Music": 2
+      },
+      "supplementarySourceReads": 0,
+      "injectedCatalogueReads": 1,
+      "foodDancePositive": true,
+      "sourceStageOnly": true,
+      "rankingUsesSyntheticAllInterestSelection": true,
+      "liveAccountRead": false
+    },
+    {
+      "stage": "controlled-fixture-application",
+      "ok": true,
+      "fixtureResults": {
+        "Food": {
+          "selectedInterestCount": 1,
+          "adapterEligibleMatchedCount": 1,
+          "allCount": 1,
+          "matchedCount": 1,
+          "homeCount": 1,
+          "homeMatchesAllPrefix": true,
+          "sourceStatusPreserved": true,
+          "sourceCoveragePreserved": true,
+          "transportAllStatus": 200,
+          "transportHomeStatus": 200,
+          "inMemoryTransactions": 5,
+          "inMemoryReads": 385
+        },
+        "Dance": {
+          "selectedInterestCount": 1,
+          "adapterEligibleMatchedCount": 3,
+          "allCount": 3,
+          "matchedCount": 3,
+          "homeCount": 2,
+          "homeMatchesAllPrefix": true,
+          "sourceStatusPreserved": true,
+          "sourceCoveragePreserved": true,
+          "transportAllStatus": 200,
+          "transportHomeStatus": 200,
+          "inMemoryTransactions": 5,
+          "inMemoryReads": 385
+        },
+        "Music": {
+          "selectedInterestCount": 1,
+          "adapterEligibleMatchedCount": 2,
+          "allCount": 2,
+          "matchedCount": 2,
+          "homeCount": 2,
+          "homeMatchesAllPrefix": true,
+          "sourceStatusPreserved": true,
+          "sourceCoveragePreserved": true,
+          "transportAllStatus": 200,
+          "transportHomeStatus": 200,
+          "inMemoryTransactions": 5,
+          "inMemoryReads": 385
+        }
+      },
+      "foodDancePositive": true,
+      "realSocialAuthority": true,
+      "realPersonalizationAdapter": true,
+      "realRecommendationApplication": true,
+      "realTransportSerialization": true,
+      "syntheticRequesterAndFirestore": true,
+      "maxSelectedInterestsPerRequester": 1,
+      "sourceCoverage": [
+        {
+          "provider": "onepa",
+          "complete": false
+        }
+      ],
+      "realAccountRead": false,
+      "firestoreWrites": 0,
+      "additionalSourceReads": 0,
+      "modelCalls": 0,
+      "networkListeners": 0
+    },
+    {
+      "stage": "probe-watchdog",
+      "phase": "complete",
+      "code": 0,
+      "signal": null,
+      "deadlineHit": false,
+      "observedOwnedProcesses": 18,
+      "ownedRunningRemaining": 0,
+      "stderrBytes": 0
+    }
+  ],
+  "sshCompleted": true,
+  "mutations": {
+    "service": false,
+    "settings": false,
+    "packageSelector": false,
+    "users": false,
+    "model": false,
+    "notifications": false
+  }
+}
