@@ -41,7 +41,8 @@ export function createControlledEventBrowse(options: {
     ...(options.source?.status?{status:()=>options.source!.status!()}:{}),
     ...(projection ? {recommendationSnapshot: (asOf:string,signal:AbortSignal)=>read(signal,async(value,current)=>{
       const snapshot=await value.recommendationSnapshot!(asOf,current),admitted=epoch;
-      return {items:snapshot.items,current:()=>enabled&&options.running()&&admitted===epoch&&snapshot.current()};
+      return {items:snapshot.items,...(snapshot.sourceStatus===undefined?{}:{sourceStatus:snapshot.sourceStatus}),
+        current:()=>enabled&&options.running()&&admitted===epoch&&snapshot.current()};
     })} : {}),
     ...(options.source?.event?{event:(id:string,asOf:string,signal:AbortSignal)=>read(signal,(value,current)=>value.event!(id,asOf,current))}:{}),
     ...(options.source?.batch?{batch:(asOf:string,page:number,signal:AbortSignal)=>read(signal,(value,current)=>value.batch!(asOf,page,current))}:{}),

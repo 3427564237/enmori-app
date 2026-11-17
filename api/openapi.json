@@ -18400,6 +18400,23 @@
               "event_recommendation_v3"
             ]
           },
+          "sourceStatus": {
+            "type": "array",
+            "maxItems": 2,
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["provider", "available"],
+              "properties": {
+                "provider": {
+                  "type": "string",
+                  "enum": ["ticketmaster", "onepa"]
+                },
+                "available": { "type": "boolean" }
+              }
+            }
+          },
           "items": {
             "type": "array",
             "items": {

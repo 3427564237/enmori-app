@@ -1,14 +1,28 @@
-import type { BrowseOccurrence, BrowseSource } from "../ports/event-browse.js";
+import type { BrowseOccurrence, BrowseSource, EventSourceStatus } from "../ports/event-browse.js";
 import { dependencyUnavailable } from "../../shared/ports/dependency-failure.js";
 import { parseBrowseInstant } from "../domain/browse-values.js";
 import { sourceEventId } from '../domain/source-event-id.js';
 import { Temporal } from '@js-temporal/polyfill';
 const cacheWindow = 300_000_000_000n;
-type SourceSnapshot = { at: bigint; from?: bigint; items: readonly BrowseOccurrence[]; candidates?: readonly BrowseOccurrence[] };
+type SourceSnapshot = { at: bigint; from?: bigint; items: readonly BrowseOccurrence[]; candidates?: readonly BrowseOccurrence[]; sourceStatus?: readonly EventSourceStatus[] };
 // Coverage can precede freshness for out-of-order concurrent request instants.
 // Every consumer still applies its own exact future-time filter.
 const covers = (snapshot: SourceSnapshot, now: bigint) =>
   now >= (snapshot.from ?? snapshot.at) && now - snapshot.at < cacheWindow;
+
+function freezeSourceStatus(value: unknown): readonly EventSourceStatus[] | undefined {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value) || value.length > 2) throw dependencyUnavailable;
+  const providers = new Set<string>();
+  return Object.freeze(value.map(row => {
+    if (!row || typeof row !== 'object' || Array.isArray(row) ||
+        Object.keys(row).length !== 2 ||
+        (row.provider !== 'ticketmaster' && row.provider !== 'onepa') ||
+        typeof row.available !== 'boolean' || providers.has(row.provider)) throw dependencyUnavailable;
+    providers.add(row.provider);
+    return Object.freeze({provider: row.provider as EventSourceStatus['provider'], available: row.available});
+  }));
+}
 
 /** A waiter owns its deadline, not the shared work it joins. Always observe
  * the underlying promise, even when a source ignores cancellation. */
@@ -62,7 +76,7 @@ export class ControlledSourceProjection implements BrowseSource {
             // A later-page reread replaces its visible data. Retire the previous
             // complete ranking snapshot instead of mixing old scores/new titles.
             if(cached.candidates) {
-              const {candidates:_,...firstPage}=cached;
+              const {candidates:_,sourceStatus:__,...firstPage}=cached;
               this.snapshot=firstPage;
             }
           }
@@ -132,11 +146,23 @@ export class ControlledSourceProjection implements BrowseSource {
         const work=(async()=>{
           const pages: (readonly BrowseOccurrence[])[]=[];
           const unique=new Map<string,BrowseOccurrence>();
+          let sourceStatus: readonly EventSourceStatus[] | undefined;
           for(let page=0;page<50;page++){
             if(epoch!==this.epoch||bounded.aborted)throw dependencyUnavailable;
             const result=this.source.batch ? await withinBudget(this.source.batch(sourceAsOf,page,bounded),bounded)
               : {items:await withinBudget(this.source.firstBatch(sourceAsOf,bounded),bounded)};
             if(epoch!==this.epoch||bounded.aborted)throw dependencyUnavailable;
+            const pageStatus=freezeSourceStatus('sourceStatus' in result ? result.sourceStatus : undefined);
+            if(page===0)sourceStatus=pageStatus;
+            else if(sourceStatus && pageStatus) {
+              // Losing a previously healthy provider on a later page cannot
+              // turn an incomplete candidate prefix into a successful ranking.
+              if(sourceStatus.some(prior=>prior.available && pageStatus.some(next=>next.provider===prior.provider&&!next.available)))throw dependencyUnavailable;
+              sourceStatus=Object.freeze(sourceStatus.flatMap(prior=>{
+                const next=pageStatus.find(row=>row.provider===prior.provider);
+                return next ? [Object.freeze({provider:prior.provider,available:prior.available&&next.available})] : [];
+              }));
+            } else sourceStatus=undefined;
             const items=this.freezePage(result.items); pages.push(items);
             for(const item of items){
               const prior=unique.get(item.browseId);
@@ -148,7 +174,7 @@ export class ControlledSourceProjection implements BrowseSource {
           }
           const items=pages[0]??[];
           const candidates=Object.freeze([...unique.values()]);
-          this.snapshot={at:now,from,items,candidates};
+          this.snapshot={at:now,from,items,candidates,...(sourceStatus===undefined?{}:{sourceStatus})};
           pages.forEach((rows,page)=>{if(page>0)this.observedPages.set(page,rows);});
           return items;
         })();
@@ -160,6 +186,7 @@ export class ControlledSourceProjection implements BrowseSource {
       if(!snapshot?.candidates||bounded.aborted)throw dependencyUnavailable;
       const captured=snapshot,candidates=snapshot.candidates;
       return {items:candidates.filter(row=>parseBrowseInstant(row.startAt)!>now),
+        ...(captured.sourceStatus===undefined?{}:{sourceStatus:captured.sourceStatus}),
         current:()=>!signal.aborted&&this.snapshot===captured&&!this.pending};
     } finally {
       clearTimeout(timer);

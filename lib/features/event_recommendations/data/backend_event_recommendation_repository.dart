@@ -46,6 +46,28 @@ final class BackendEventRecommendationRepository
     }
 
     final v2 = formulaVersion != _formulaVersion;
+    final sourceStatus = <String, bool>{};
+    if (value.containsKey('sourceStatus')) {
+      final rows = value['sourceStatus'];
+      if (formulaVersion != 'event_recommendation_v3' ||
+          rows is! List ||
+          rows.length > 2) {
+        return _invalidResponse();
+      }
+      for (final row in rows) {
+        if (row is! Map<String, dynamic> || row.length != 2) {
+          return _invalidResponse();
+        }
+        final provider = row['provider'], available = row['available'];
+        if (provider is! String ||
+            !const ['ticketmaster', 'onepa'].contains(provider) ||
+            available is! bool ||
+            sourceStatus.containsKey(provider)) {
+          return _invalidResponse();
+        }
+        sourceStatus[provider] = available;
+      }
+    }
     final parsedItems = <EventRecommendation>[];
     final ids = <String>{};
     for (final item in items) {
@@ -176,6 +198,7 @@ final class BackendEventRecommendationRepository
         asOf: asOf,
         formulaVersion: formulaVersion,
         items: parsedItems,
+        sourceStatus: Map.unmodifiable(sourceStatus),
       ),
     );
   }

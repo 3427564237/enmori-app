@@ -15,6 +15,8 @@ import 'event_batches_controller.dart';
 import '../domain/event_time_filter.dart';
 import 'event_card.dart';
 
+enum EventsDestination { forYou, browse }
+
 /// Explicit next source batches, with display-only categories and stable dedupe.
 final class ParticipationEventsPage extends ConsumerStatefulWidget {
   const ParticipationEventsPage({
@@ -22,12 +24,14 @@ final class ParticipationEventsPage extends ConsumerStatefulWidget {
     this.onOpenPlans,
     this.onOpenRecent,
     this.recommendationsBuilder,
+    this.initialDestination = EventsDestination.forYou,
     super.key,
   });
   final ValueChanged<String> onSelect;
   final VoidCallback? onOpenPlans;
   final VoidCallback? onOpenRecent;
   final Widget Function(BuildContext, VoidCallback)? recommendationsBuilder;
+  final EventsDestination initialDestination;
   @override
   ConsumerState<ParticipationEventsPage> createState() =>
       _ParticipationEventsPageState();
@@ -35,7 +39,8 @@ final class ParticipationEventsPage extends ConsumerStatefulWidget {
 
 final class _ParticipationEventsPageState
     extends ConsumerState<ParticipationEventsPage>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
+  late final TabController _tabs;
   String? _category;
   EventTimeFilter _timeFilter = EventTimeFilter.all;
   int _timeSort = 0;
@@ -50,7 +55,14 @@ final class _ParticipationEventsPageState
   @override
   void initState() {
     super.initState();
-    _showRecommendations = widget.recommendationsBuilder != null;
+    _showRecommendations =
+        widget.recommendationsBuilder != null &&
+        widget.initialDestination == EventsDestination.forYou;
+    _tabs = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: _showRecommendations ? 0 : 1,
+    );
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && !_showRecommendations) {
@@ -59,9 +71,31 @@ final class _ParticipationEventsPageState
     });
   }
 
+  @override
+  void didUpdateWidget(ParticipationEventsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialDestination != oldWidget.initialDestination ||
+        (widget.recommendationsBuilder == null) !=
+            (oldWidget.recommendationsBuilder == null)) {
+      _showRecommendations =
+          widget.recommendationsBuilder != null &&
+          widget.initialDestination == EventsDestination.forYou;
+      _tabs.index = _showRecommendations ? 0 : 1;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted &&
+            !_showRecommendations &&
+            !ref.read(eventBatchesProvider.notifier).hasFreshBatch) {
+          unawaited(_reload());
+        }
+      });
+    }
+  }
+
   void _selectDestination(bool recommendations) {
     FocusManager.instance.primaryFocus?.unfocus();
+    if (recommendations && _searching) _stopSearch();
     setState(() => _showRecommendations = recommendations);
+    _tabs.animateTo(recommendations ? 0 : 1);
     final controller = ref.read(eventBatchesProvider.notifier);
     if (!recommendations && !controller.hasFreshBatch) {
       unawaited(controller.load());
@@ -85,6 +119,7 @@ final class _ParticipationEventsPageState
     _searchGeneration++;
     _finishRefreshWait();
     _search.dispose();
+    _tabs.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -144,6 +179,7 @@ final class _ParticipationEventsPageState
         bottom: widget.recommendationsBuilder == null
             ? null
             : TabBar(
+                controller: _tabs,
                 onTap: (index) => _selectDestination(index == 0),
                 tabs: [
                   Tab(text: context.tr('For you', '为你推荐')),
@@ -151,6 +187,13 @@ final class _ParticipationEventsPageState
                 ],
               ),
         actions: [
+          if (widget.onOpenPlans != null)
+            IconButton(
+              key: const Key('events-my-plans'),
+              tooltip: context.tr('My plans', '我的活动计划'),
+              onPressed: widget.onOpenPlans,
+              icon: const Icon(Icons.event_note_outlined),
+            ),
           if (widget.onOpenRecent != null)
             IconButton(
               key: const Key('events-recent'),
@@ -169,7 +212,6 @@ final class _ParticipationEventsPageState
       body: _showRecommendations && widget.recommendationsBuilder != null
           ? Builder(
               builder: (context) => widget.recommendationsBuilder!(context, () {
-                DefaultTabController.of(context).animateTo(1);
                 _selectDestination(false);
               }),
             )
@@ -243,12 +285,6 @@ final class _ParticipationEventsPageState
                           ),
                           label: Text(context.tr('Filters and sort', '筛选与排序')),
                         ),
-                        if (widget.onOpenPlans != null)
-                          TextButton.icon(
-                            onPressed: widget.onOpenPlans,
-                            icon: const Icon(Icons.event_note_outlined),
-                            label: Text(context.tr('My plans', '我的活动计划')),
-                          ),
                       ],
                     ),
                     Text(
@@ -266,8 +302,15 @@ final class _ParticipationEventsPageState
                               key: Key('events-time-${filter.name}'),
                               label: Text(_timeLabel(context, filter)),
                               selected: _timeFilter == filter,
-                              onSelected: (_) =>
-                                  setState(() => _timeFilter = filter),
+                              onSelected: state.busy && !_searching
+                                  ? null
+                                  : (_) {
+                                      if (_searching) _stopSearch();
+                                      setState(() => _timeFilter = filter);
+                                      if (filter != EventTimeFilter.all) {
+                                        unawaited(_searchAvailable());
+                                      }
+                                    },
                             ),
                         ],
                       ),
@@ -346,6 +389,20 @@ final class _ParticipationEventsPageState
                         ),
                     ],
                     const SizedBox(height: 12),
+                    if (_query.isNotEmpty ||
+                        _category != null ||
+                        _timeFilter != EventTimeFilter.all)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          key: const Key('events-clear-filters'),
+                          onPressed: _clearFilters,
+                          icon: const Icon(Icons.filter_alt_off_outlined),
+                          label: Text(
+                            context.tr('Clear search and filters', '清除搜索与筛选'),
+                          ),
+                        ),
+                      ),
                     if ((state.busy || _searching) &&
                         (!state.loadingMore || _searching))
                       _EventLoadingStatus(
@@ -387,17 +444,28 @@ final class _ParticipationEventsPageState
                               _timeFilter != EventTimeFilter.all) &&
                           matching.isEmpty &&
                           !state.busy &&
-                          !_searching)
+                          !_searching &&
+                          !state.stopped &&
+                          state.failure == null)
                         Padding(
                           padding: EdgeInsets.symmetric(vertical: 16),
                           child: Text(
                             context.tr(
-                              'No matching events in the loaded selection. Clear search/filter, or search the remaining available events.',
-                              '当前已加载范围内没有匹配活动，可清除搜索／筛选，或搜索剩余可用活动。',
+                              value.nextCursor == null
+                                  ? 'No matching events in the available selection. Try clearing search or filters.'
+                                  : 'No matches in the loaded events yet. Continue searching the available events.',
+                              value.nextCursor == null
+                                  ? '当前可用活动范围内没有匹配结果，可以清除搜索或筛选。'
+                                  : '已加载活动中暂未找到匹配结果，可以继续搜索可用活动。',
                             ),
                           ),
                         ),
-                      if (items.isEmpty)
+                      if (items.isEmpty &&
+                          !state.busy &&
+                          !_searching &&
+                          !state.stopped &&
+                          state.failure == null &&
+                          value.nextCursor == null)
                         Text(
                           context.tr(
                             'No events in this available selection. Check again later.',
@@ -444,9 +512,23 @@ final class _ParticipationEventsPageState
                         ),
                       if (value.nextCursor != null)
                         TextButton(
-                          onPressed: state.busy ? null : controller.next,
+                          key: const Key('events-continue-search'),
+                          onPressed: state.busy || _searching
+                              ? null
+                              : (_query.trim().isNotEmpty ||
+                                    _category != null ||
+                                    _timeFilter != EventTimeFilter.all)
+                              ? _searchAvailable
+                              : controller.next,
                           child: Text(
-                            state.failure == null
+                            (_query.trim().isNotEmpty ||
+                                    _category != null ||
+                                    _timeFilter != EventTimeFilter.all)
+                                ? context.tr(
+                                    'Continue searching available events',
+                                    '继续搜索可用活动',
+                                  )
+                                : state.failure == null
                                 ? context.tr('Load more events', '加载更多活动')
                                 : context.tr(
                                     'Try loading more again',
@@ -454,7 +536,10 @@ final class _ParticipationEventsPageState
                                   ),
                           ),
                         )
-                      else
+                      else if (!state.busy &&
+                          !_searching &&
+                          !state.stopped &&
+                          state.failure == null)
                         Text(
                           context.tr(
                             'You’ve reached the end of the available events.',
@@ -516,10 +601,19 @@ final class _ParticipationEventsPageState
           unawaited(_reload());
         }
       },
-      child: widget.recommendationsBuilder == null
-          ? page
-          : DefaultTabController(length: 2, child: page),
+      child: page,
     );
+  }
+
+  void _clearFilters() {
+    if (_searching) _stopSearch();
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(() {
+      _search.clear();
+      _query = '';
+      _category = null;
+      _timeFilter = EventTimeFilter.all;
+    });
   }
 
   void _stopSearch() {
@@ -541,13 +635,16 @@ final class _ParticipationEventsPageState
         (ModalRoute.of(context)?.isCurrent == false)) {
       return;
     }
+    FocusManager.instance.primaryFocus?.unfocus();
     final generation = ++_searchGeneration;
     setState(() => _searching = true);
     await ref
         .read(eventBatchesProvider.notifier)
         .loadAvailablePages(
           shouldContinue: () =>
-              mounted && ModalRoute.of(context)?.isCurrent != false,
+              mounted &&
+              !_showRecommendations &&
+              ModalRoute.of(context)?.isCurrent != false,
         );
     if (mounted && generation == _searchGeneration) {
       setState(() => _searching = false);
@@ -567,7 +664,9 @@ final class _ParticipationEventsPageState
           !identical(session, ref.read(authSessionProvider))) {
         return;
       }
-      if (_query.trim().isNotEmpty || _category != null) {
+      if (_query.trim().isNotEmpty ||
+          _category != null ||
+          _timeFilter != EventTimeFilter.all) {
         await _searchAvailable();
       }
     }

@@ -25,6 +25,26 @@ test("v2 transport preserves a genuine social-only reason without inventing an i
     assert.equal(response.headers["cache-control"],"no-store");
   } finally {await app.close();}
 });
+test('source status is an optional v3-only projection, including successful empty results',async()=>{
+  const sourceStatus=[{provider:'ticketmaster' as const,available:true},{provider:'onepa' as const,available:false}];
+  for(const formulaVersion of ['event_recommendation_v1','event_recommendation_v2','event_recommendation_v3'] as const){
+    const app=await appFor(async()=>ok({...value,formulaVersion,items:[],sourceStatus}));
+    try{
+      for(const modern of [false,true]){
+        const response=await app.inject({url:'/v1/recommendations/events?view=home',headers:{...authHeaders,...(modern?{'x-enmori-contract-version':'3'}:{})}});
+        assert.equal(response.statusCode,200);
+        assert.deepEqual(response.json().sourceStatus,modern&&formulaVersion==='event_recommendation_v3'?sourceStatus:undefined);
+        assert.deepEqual(response.json().items,[]);
+      }
+    }finally{await app.close();}
+  }
+  const app=await appFor(async()=>ok({...value,formulaVersion:'event_recommendation_v3',items:[]}));
+  try{
+    const response=await app.inject({url:'/v1/recommendations/events?view=all',headers:{...authHeaders,'x-enmori-contract-version':'3'}});
+    assert.equal(response.statusCode,200);
+    assert.equal(Object.hasOwn(response.json(),'sourceStatus'),false);
+  }finally{await app.close();}
+});
 async function appFor(execute: Pick<RecommendEvents, "execute">["execute"] = async () => ok(value),
   identity: IdentityVerificationResult = { kind: "verified", principal: { firebaseUid: "verified-only" } }) {
   return buildApp({

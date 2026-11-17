@@ -57,7 +57,10 @@ test('actual Auth and Firestore compare-and-set race, independent readback and o
   const again=createIsolatedEventParticipation(options).repository,read=await again.read('shi-ep1-0',event);assert.ok(read.ok);if(read.ok)assert.deepEqual(read.value,stored);
   const other=(await app.inject({url,headers:headers(1)})).json().participation;assert.equal(other.revision,0);assert.equal(other.status,'none');
   const raw=(await db.doc(`event_participations/${participationKey('ep1-0',event)}`).get()).data()!;
-  assert.deepEqual(Object.keys(raw).sort(),['accountId','eventId','ignored','revision','status','updatedAt']);
+  // The 21 October P05 extension records the genuine selection timestamp only
+  // internally; it does not add a field to the public participation DTO.
+  assert.deepEqual(Object.keys(raw).sort(),['accountId','eventId','ignored','revision','selectedAt','status','updatedAt']);
+  assert.equal(raw.selectedAt,at);assert.equal(Object.hasOwn(stored,'selectedAt'),false);
 });
 test('actual expired-source cancellation and restore preserve tombstone across new Repository',async()=>{
   const before=await repository.read('shi-ep1-0',event);assert.ok(before.ok);if(!before.ok)return;

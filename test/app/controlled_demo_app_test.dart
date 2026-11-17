@@ -525,8 +525,8 @@ void main() {
         null,
         'synthetic.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
       ]);
-      await tester.ensureVisible(find.text('My plans'));
-      await tester.tap(find.text('My plans'));
+      expect(find.byTooltip('My plans').hitTestable(), findsOneWidget);
+      await tester.tap(find.byTooltip('My plans'));
       await tester.pumpAndSettle();
       expect(router.state.uri.path, AppRoutes.eventPlans);
       final coveredPlansCallback = tester

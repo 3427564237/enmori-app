@@ -38,8 +38,12 @@ Ties: start instant ascending, then stable Event identity ascending. Eligibility
 requires at least one positive approved signal. Home is the first two entries of
 the same complete order; See all/next groups do not reshuffle or repeat them.
 
-Interest matching uses explicit provider classifications, never event titles or
-descriptions. Music retains its configured catalogue ID and provider segment ID.
+Ticketmaster interest matching uses explicit provider classifications, never
+event titles or descriptions. Under the [17 November interest-discovery amendment](../docs/decisions/2026-11-17-li-interest-discovery-uiux.md),
+onePA alone also uses the approved finite title phrases, normalization and word
+boundaries in that decision. No description scan, fuzzy inference or new phrase
+is implied. Music retains its configured catalogue ID; Ticketmaster uses its
+exact segment ID, while onePA may supply its explicit Music concept.
 Other current catalogue display names bind to the exact concept names in the
 coverage matrix. Deactivation/renaming/removal stops matching on the next read;
 no historical name alias is guessed. Region comparison uses NFC, trimmed and
@@ -61,6 +65,9 @@ The Dart adapter rejects duplicate events/reasons, inconsistent weights/counts,
 unknown reasons and missing V2 reasons. It still accepts existing V1 responses.
 Public payloads do not expose friend IDs, source records, raw profile fields or
 internal total scores. UI text renders only supplied reasons.
+
+The optional source availability projection belongs only to the v3 response;
+v1/v2 representations omit it, including when reranked from a v3 snapshot.
 
 ## Friend
 

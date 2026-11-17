@@ -55,11 +55,15 @@ final class EventRecommendationResponse {
     required this.asOf,
     required this.formulaVersion,
     required this.items,
+    this.sourceStatus = const {},
   });
 
   final DateTime asOf;
   final String formulaVersion;
   final List<EventRecommendation> items;
+
+  /// Missing providers have unknown availability for this exact response.
+  final Map<String, bool> sourceStatus;
 }
 
 abstract interface class EventRecommendationRepository {

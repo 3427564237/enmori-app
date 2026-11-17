@@ -143,6 +143,8 @@ final class HomeShellPage extends StatelessWidget {
             _HomeSection(
               child: EventRecommendationsSection(
                 onSeeAll: onSeeAllEvents,
+                onBrowseAll: onBrowseActivities,
+                onEditInterests: onEditInterests,
                 onContinueDiscovery: onContinueDiscovery,
                 onOpenEvent: onOpenEvent,
                 recommendationCardBuilder: recommendationCardBuilder,
@@ -217,6 +219,7 @@ final class HomeShellPage extends StatelessWidget {
                     heading: context.tr('Events for you', "为你推荐的活动"),
                     contextControls: recommendationControls,
                     onBrowseAll: onBrowseActivities,
+                    onEditInterests: onEditInterests,
                     onSeeAll: onSeeAllEvents,
                     onContinueDiscovery: onContinueDiscovery,
                     onOpenEvent: onOpenEvent,

@@ -26,6 +26,9 @@ final class InterestEditorPage extends ConsumerStatefulWidget {
 
 final class _InterestEditorPageState extends ConsumerState<InterestEditorPage> {
   late final InterestEditorController _controller;
+  final _search = TextEditingController();
+  final _scroll = ScrollController();
+  String _query = '';
   bool _allowLeave = false;
   bool _confirming = false;
   DialogRoute<bool>? _exitDialog;
@@ -39,6 +42,8 @@ final class _InterestEditorPageState extends ConsumerState<InterestEditorPage> {
 
   @override
   void dispose() {
+    _search.dispose();
+    _scroll.dispose();
     Future<void>.microtask(() => _controller.abandon(resetState: false));
     final dialog = _exitDialog;
     if (dialog != null) {
@@ -56,6 +61,8 @@ final class _InterestEditorPageState extends ConsumerState<InterestEditorPage> {
         final dialog = _exitDialog;
         _exitDialog = null;
         _allowLeave = false;
+        _search.clear();
+        _query = '';
         final observed = next.asData?.value;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (dialog != null) dialog.navigator?.removeRoute(dialog);
@@ -96,7 +103,12 @@ final class _InterestEditorPageState extends ConsumerState<InterestEditorPage> {
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 640),
-              child: _body(state),
+              child: Column(
+                children: [
+                  Expanded(child: _body(state)),
+                  if (state.hasLoaded) _saveBar(state),
+                ],
+              ),
             ),
           ),
         ),
@@ -123,10 +135,39 @@ final class _InterestEditorPageState extends ConsumerState<InterestEditorPage> {
 
     final saving = state.phase == InterestEditorPhase.saving;
     final conflict = state.phase == InterestEditorPhase.conflict;
+    final query = _query.trim().toLowerCase();
+    final visible = state.options.where(
+      (option) => option.displayName.toLowerCase().contains(query),
+    );
+    final selected = state.options.where((option) => option.isSelected);
     return ListView(
       key: const Key('route-interests'),
+      controller: _scroll,
       padding: const EdgeInsets.all(16),
       children: [
+        if (conflict)
+          _FailurePanel(
+            key: const Key('interest-conflict'),
+            message: context.tr(
+              'Your interests changed. Reload them before saving again.',
+              '兴趣已发生变化，请重新加载后再保存。',
+            ),
+            actionLabel: context.tr('Reload interests', '重新加载兴趣'),
+            onAction: _load,
+          )
+        else if (state.phase == InterestEditorPhase.failed)
+          _FailurePanel(
+            key: const Key('interest-save-failure'),
+            message: _failureCopy(state.failure?.kind),
+            actionLabel:
+                state.failure?.kind == AppFailureKind.interestSelectionInvalid
+                ? context.tr('Reload interests', '重新加载兴趣')
+                : context.tr('Retry save', '重新保存'),
+            onAction:
+                state.failure?.kind == AppFailureKind.interestSelectionInvalid
+                ? _load
+                : _save,
+          ),
         if (widget.setupStepCount case final step?) ...[
           Text(
             context.tr(
@@ -171,21 +212,77 @@ final class _InterestEditorPageState extends ConsumerState<InterestEditorPage> {
         const SizedBox(height: 8),
         Text(
           context.tr(
-            '${state.selectedCount} of 10 selected',
-            '已选 ${state.selectedCount} 项，最多 10 项',
-          ),
-        ),
-        Text(
-          context.tr(
             '${state.options.where((option) => option.lifecycleState == InterestLifecycleState.active).length} available interests',
             '共有 ${state.options.where((option) => option.lifecycleState == InterestLifecycleState.active).length} 项可选兴趣',
+          ),
+        ),
+        if (selected.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Text(
+            context.tr('Selected interests', '已选兴趣'),
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          LayoutBuilder(
+            builder: (context, constraints) => Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                for (final option in selected)
+                  InputChip(
+                    key: Key('interest-selected-${option.interestTagId}'),
+                    label: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: (constraints.maxWidth - 96).clamp(0, 500),
+                      ),
+                      child: Text(option.displayName, softWrap: true),
+                    ),
+                    tooltip: option.displayName,
+                    deleteButtonTooltipMessage: context.tr(
+                      'Remove ${option.displayName}',
+                      '移除${option.displayName}',
+                    ),
+                    onDeleted: saving || conflict
+                        ? null
+                        : () => _controller.toggle(option.interestTagId),
+                  ),
+              ],
+            ),
+          ),
+        ],
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            key: const Key('interest-clear'),
+            onPressed: saving || conflict ? null : _controller.clear,
+            child: Text(context.tr('Clear selection', '清空选择')),
+          ),
+        ),
+        TextField(
+          key: const Key('interest-search'),
+          controller: _search,
+          onChanged: (value) => setState(() => _query = value),
+          decoration: InputDecoration(
+            labelText: context.tr('Find an interest', '查找兴趣'),
+            prefixIcon: const Icon(Icons.search),
+            suffixIcon: _query.isEmpty
+                ? null
+                : IconButton(
+                    tooltip: context.tr('Clear search', '清除搜索'),
+                    onPressed: () => setState(() {
+                      _search.clear();
+                      _query = '';
+                    }),
+                    icon: const Icon(Icons.close),
+                  ),
           ),
         ),
         const SizedBox(height: 16),
         if (state.options.isEmpty)
           Text(context.tr('No interests are available right now.', "目前没有可选兴趣。"))
+        else if (visible.isEmpty)
+          Text(context.tr('No interests match your search.', '没有符合搜索的兴趣。'))
         else
-          for (final option in state.options)
+          for (final option in visible)
             CheckboxListTile(
               key: Key('interest-option-${option.interestTagId}'),
               value: option.isSelected,
@@ -208,62 +305,48 @@ final class _InterestEditorPageState extends ConsumerState<InterestEditorPage> {
                   : null,
               controlAffinity: ListTileControlAffinity.leading,
             ),
-        if (state.validationMessage case final message?) ...[
-          const SizedBox(height: 12),
-          Text(
-            context.tr(message, '最多选择 10 项兴趣。'),
-            style: TextStyle(color: Theme.of(context).colorScheme.error),
-          ),
-        ],
-        if (conflict) ...[
-          const SizedBox(height: 16),
-          _FailurePanel(
-            key: const Key('interest-conflict'),
-            message: context.tr(
-              'Your interests changed. Reload them before saving again.',
-              "兴趣已发生变化，请重新加载后再保存。",
-            ),
-            actionLabel: context.tr('Reload interests', "重新加载兴趣"),
-            onAction: _load,
-          ),
-        ] else if (state.phase == InterestEditorPhase.failed) ...[
-          const SizedBox(height: 16),
-          _FailurePanel(
-            key: const Key('interest-save-failure'),
-            message: _failureCopy(state.failure?.kind),
-            actionLabel:
-                state.failure?.kind == AppFailureKind.interestSelectionInvalid
-                ? context.tr('Reload interests', "重新加载兴趣")
-                : context.tr('Retry save', "重新保存"),
-            onAction:
-                state.failure?.kind == AppFailureKind.interestSelectionInvalid
-                ? _load
-                : _save,
-          ),
-        ] else if (state.phase == InterestEditorPhase.saved) ...[
-          const SizedBox(height: 16),
-          Semantics(
-            liveRegion: true,
-            child: Text(
-              context.tr('Interests saved.', "兴趣已保存。"),
-              key: Key('interest-save-success'),
-            ),
-          ),
-        ],
-        const SizedBox(height: 20),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
+      ],
+    );
+  }
+
+  Widget _saveBar(InterestEditorState state) {
+    final saving = state.phase == InterestEditorPhase.saving;
+    final conflict = state.phase == InterestEditorPhase.conflict;
+    return Material(
+      key: const Key('interest-save-bar'),
+      color: Theme.of(context).colorScheme.surface,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            OutlinedButton(
-              key: const Key('interest-clear'),
-              onPressed: saving || conflict
-                  ? null
-                  : () => ref
-                        .read(interestEditorControllerProvider.notifier)
-                        .clear(),
-              child: Text(context.tr('Clear selection', "清空选择")),
+            Semantics(
+              liveRegion: true,
+              child: Text(
+                context.tr(
+                  '${state.selectedCount} of 10 selected',
+                  '已选 ${state.selectedCount} 项，最多 10 项',
+                ),
+              ),
             ),
+            if (state.validationMessage case final message?)
+              Semantics(
+                liveRegion: true,
+                child: Text(
+                  context.tr(message, '最多选择 10 项兴趣。'),
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ),
+            if (state.phase == InterestEditorPhase.saved)
+              Semantics(
+                liveRegion: true,
+                child: Text(
+                  context.tr('Interests saved.', "兴趣已保存。"),
+                  key: Key('interest-save-success'),
+                ),
+              ),
+            const SizedBox(height: 8),
             FilledButton.icon(
               key: const Key('interest-save'),
               onPressed: saving || conflict ? null : _save,
@@ -287,7 +370,7 @@ final class _InterestEditorPageState extends ConsumerState<InterestEditorPage> {
               ),
           ],
         ),
-      ],
+      ),
     );
   }
 
@@ -365,8 +448,17 @@ final class _InterestEditorPageState extends ConsumerState<InterestEditorPage> {
     ref.read(interestEditorControllerProvider.notifier).load();
   }
 
-  void _save() {
-    ref.read(interestEditorControllerProvider.notifier).save();
+  Future<void> _save() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    await _controller.save();
+    if (!mounted) return;
+    final phase = ref.read(interestEditorControllerProvider).phase;
+    if (phase == InterestEditorPhase.failed ||
+        phase == InterestEditorPhase.conflict) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _scroll.hasClients) _scroll.jumpTo(0);
+      });
+    }
   }
 
   String _failureCopy(AppFailureKind? kind) => switch (kind) {

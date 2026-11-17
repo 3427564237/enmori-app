@@ -1,9 +1,11 @@
 import 'package:enmori/app/home_shell_page.dart';
 import 'package:enmori/app/providers.dart';
 import 'package:enmori/app/router/app_router.dart';
+import 'package:enmori/app/router/activity_routes.dart';
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/auth/auth_providers.dart';
 import 'package:enmori/features/auth/domain/auth_repository.dart';
+import 'package:enmori/features/event_browse/event_browse_providers.dart';
 import 'package:enmori/features/event_recommendations/domain/event_recommendation_repository.dart';
 import 'package:enmori/features/event_recommendations/event_recommendations_providers.dart';
 import 'package:enmori/features/event_recommendations/presentation/event_recommendations_controller.dart';
@@ -14,8 +16,192 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fakes.dart';
+import 'event_batches_test.dart' as browse;
+import 'event_plans_test.dart' show Opener;
 
 void main() {
+  testWidgets('empty recommendations can edit interests with browse disabled', (
+    tester,
+  ) async {
+    final recommendations = FakeEventRecommendationRepository()
+      ..allResult = Success(
+        EventRecommendationResponse(
+          asOf: DateTime.utc(2026, 11, 17),
+          formulaVersion: 'event_recommendation_v3',
+          items: const [],
+        ),
+      );
+    final container = ProviderContainer(
+      overrides: [
+        routerGateProvider.overrideWithValue(RouterGateState.authenticated),
+        authSessionProvider.overrideWithValue(
+          const AsyncData(AuthSessionAuthenticated(subject: 'member-a')),
+        ),
+        currentAuthSubjectProvider.overrideWithValue('member-a'),
+        activityBrowseEnabledProvider.overrideWithValue(false),
+        eventRecommendationRepositoryProvider.overrideWithValue(
+          recommendations,
+        ),
+        interestRepositoryProvider.overrideWithValue(FakeInterestRepository()),
+      ],
+    );
+    addTearDown(container.dispose);
+    final router = container.read(appRouterProvider);
+    router.go(AppRoutes.eventRecommendations);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final edit = find.byKey(const Key('event-recommendations-edit-interests'));
+    await tester.ensureVisible(edit);
+    await tester.pumpAndSettle();
+    await tester.tap(edit);
+    await tester.pumpAndSettle();
+    expect(router.state.uri.path, AppRoutes.interests);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final hasItems in [false, true]) {
+    testWidgets(
+      'provider failure stays visible with items=$hasItems and clears on refresh',
+      (tester) async {
+        final repository = FakeEventRecommendationRepository()
+          ..allResult = Success(
+            EventRecommendationResponse(
+              asOf: DateTime.utc(2026, 11, 17),
+              formulaVersion: 'event_recommendation_v3',
+              items: hasItems ? testEventRecommendations().items : const [],
+              sourceStatus: const {'ticketmaster': true, 'onepa': false},
+            ),
+          );
+        await _pump(tester, const EventRecommendationsPage(), repository);
+        expect(
+          find.text(
+            'onePA is temporarily unavailable. Results only include sources that could be loaded.',
+          ),
+          findsOneWidget,
+        );
+        if (hasItems) expect(find.text('Third-ranked event'), findsOneWidget);
+        repository.allResult = Success(testEventRecommendations());
+        final refresh = find.byKey(const Key('event-recommendations-refresh'));
+        await tester.ensureVisible(refresh);
+        await tester.pumpAndSettle();
+        expect(refresh.hitTestable(), findsOneWidget);
+        await tester.tap(refresh);
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const Key('event-recommendations-source-unavailable')),
+          findsNothing,
+        );
+      },
+    );
+  }
+
+  for (final origin in [AppRoutes.home, AppRoutes.eventRecommendations]) {
+    testWidgets(
+      'Browse action from $origin reaches Browse directly and returns to origin',
+      (tester) async {
+        final catalogue = browse.Repo();
+        final empty = EventRecommendationResponse(
+          asOf: DateTime.utc(2026, 11, 17),
+          formulaVersion: 'event_recommendation_v3',
+          items: const [],
+        );
+        final recommendations = FakeEventRecommendationRepository()
+          ..homeResult = Success(empty)
+          ..allResult = Success(empty);
+        final container = ProviderContainer(
+          overrides: [
+            routerGateProvider.overrideWithValue(RouterGateState.authenticated),
+            authSessionProvider.overrideWithValue(
+              const AsyncData(AuthSessionAuthenticated(subject: 'member-a')),
+            ),
+            currentAuthSubjectProvider.overrideWithValue('member-a'),
+            isolatedSlicesEnabledProvider.overrideWithValue(true),
+            activityBrowseEnabledProvider.overrideWithValue(true),
+            eventParticipationEnabledProvider.overrideWithValue(true),
+            externalActivityOpenerProvider.overrideWithValue(Opener()),
+            activityRepositoryProvider.overrideWithValue(catalogue),
+            eventRecommendationRepositoryProvider.overrideWithValue(
+              recommendations,
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
+        final router = container.read(appRouterProvider);
+        router.go(origin);
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp.router(routerConfig: router),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final action = find.byKey(
+          Key(
+            origin == AppRoutes.home
+                ? 'home-browse-activities'
+                : 'event-recommendations-browse-empty',
+          ),
+        );
+        await tester.ensureVisible(action);
+        await tester.tap(action);
+        await tester.pumpAndSettle();
+        expect(router.state.uri.queryParameters['tab'], 'browse');
+        expect(find.byKey(const Key('events-search')), findsOneWidget);
+        expect(find.text(eventEmptyTitle), findsNothing);
+        expect(catalogue.first, 1);
+        router.pop();
+        await tester.pumpAndSettle();
+        expect(router.state.uri.path, origin);
+        expect(recommendations.views.length, 2);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  testWidgets('empty Home offers editing interests beside its browse entry', (
+    tester,
+  ) async {
+    var edited = 0;
+    final repository = FakeEventRecommendationRepository()
+      ..homeResult = Success(
+        EventRecommendationResponse(
+          asOf: DateTime.utc(2026, 11, 17),
+          formulaVersion: 'event_recommendation_v3',
+          items: const [],
+        ),
+      );
+    await _pump(
+      tester,
+      HomeShellPage(
+        socialStyle: true,
+        onStartCheckIn: () {},
+        onSeeAllEvents: () {},
+        onOpenEvent: (_) {},
+        onBrowseActivities: () {},
+        onEditInterests: () => edited++,
+      ),
+      repository,
+    );
+    final edit = find.byKey(const Key('event-recommendations-edit-interests'));
+    await tester.scrollUntilVisible(
+      edit,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(edit);
+    expect(edited, 1);
+    expect(
+      find.text(
+        'No recommendations in the currently available activity range.',
+      ),
+      findsOneWidget,
+    );
+  });
   testWidgets(
     'Home names the catalogue and personalized list destinations distinctly at 320px',
     (tester) async {
@@ -306,30 +492,31 @@ void main() {
     expect(repository.views, [EventRecommendationView.all]);
   });
 
-  testWidgets('successful empty recommendation uses exact Q16 copy', (
-    tester,
-  ) async {
-    final repository = FakeEventRecommendationRepository()
-      ..homeResult = Success(
-        EventRecommendationResponse(
-          asOf: DateTime.utc(2026, 9, 15),
-          formulaVersion: 'event_recommendation_v1',
-          items: const [],
-        ),
+  testWidgets(
+    'successful empty recommendation uses approved bounded-scope copy',
+    (tester) async {
+      final repository = FakeEventRecommendationRepository()
+        ..homeResult = Success(
+          EventRecommendationResponse(
+            asOf: DateTime.utc(2026, 9, 15),
+            formulaVersion: 'event_recommendation_v1',
+            items: const [],
+          ),
+        );
+      await _pump(
+        tester,
+        HomeShellPage(onStartCheckIn: () {}, onSeeAllEvents: () {}),
+        repository,
       );
-    await _pump(
-      tester,
-      HomeShellPage(onStartCheckIn: () {}, onSeeAllEvents: () {}),
-      repository,
-    );
 
-    expect(
-      find.byKey(const Key('event-recommendations-empty')),
-      findsOneWidget,
-    );
-    expect(find.text(eventEmptyTitle), findsOneWidget);
-    expect(find.text(eventEmptyBody), findsOneWidget);
-  });
+      expect(
+        find.byKey(const Key('event-recommendations-empty')),
+        findsOneWidget,
+      );
+      expect(find.text(eventEmptyTitle), findsOneWidget);
+      expect(find.text(eventEmptyBody), findsOneWidget);
+    },
+  );
 
   testWidgets('request failure exposes a stable retry action', (tester) async {
     final repository = FakeEventRecommendationRepository()

@@ -34,6 +34,21 @@ class FakeRepository implements EventRecommendationRepository {
   }
 }
 
+test('only v3 results carry a copied source snapshot status',async()=>{
+  for(const formulaVersion of [undefined,'event_recommendation_v2','event_recommendation_v3'] as const){
+    const repository=new FakeRepository();
+    const sourceStatus=[{provider:'ticketmaster' as const,available:true},{provider:'onepa' as const,available:false}];
+    repository.result={kind:'ready',sources:{...sources(),...(formulaVersion?{formulaVersion}:{}),sourceStatus}};
+    const useCase=new RecommendEvents(repository,clock);
+    const result=await useCase.execute({principal,view:'home'});assert.ok(result.ok);
+    assert.deepEqual(result.value.sourceStatus,formulaVersion==='event_recommendation_v3'?sourceStatus:undefined);
+    sourceStatus[1]!.available=true;
+    if(formulaVersion==='event_recommendation_v3')assert.equal(result.value.sourceStatus?.[1]?.available,false);
+    const legacy=await useCase.execute({principal,view:'all',legacyClient:true});assert.ok(legacy.ok);
+    assert.equal(legacy.value.sourceStatus,undefined);
+  }
+});
+
 test("passes only verified identity and one captured server asOf to the read Port", async () => {
   const repository = new FakeRepository();
   let captures = 0;

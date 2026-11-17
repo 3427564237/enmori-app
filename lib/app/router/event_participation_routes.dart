@@ -30,6 +30,9 @@ List<GoRoute> eventParticipationRoutes({
     name: 'root-events',
     builder: (context, state) {
       final page = ParticipationEventsPage(
+        initialDestination: state.uri.queryParameters['tab'] == 'browse'
+            ? EventsDestination.browse
+            : EventsDestination.forYou,
         recommendationsBuilder: recommendationsBuilder,
         onOpenRecent: () {
           if (!_atCurrentRoute(context, listPath, current)) return;

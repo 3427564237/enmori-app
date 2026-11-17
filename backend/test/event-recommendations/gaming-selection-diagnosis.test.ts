@@ -45,6 +45,33 @@ function fixture(visibleFriends = 0) {
   return { store, rows, app, read: () => app.execute({principal: {firebaseUid: 'owner'}, view: 'all'}) };
 }
 
+test('onePA Music concept uses the configured active Music identity and preserves frozen source status',async()=>{
+  const f=fixture();
+  const onepa={...f.rows[1]!,browseId:browseId('PA-Event-karaoke','pa')!,interestConcepts:['Music'],content:undefined};
+  const {content:_,...row}=onepa;
+  const status=Object.freeze([{provider:'ticketmaster' as const,available:false},{provider:'onepa' as const,available:true}]);
+  const reader=new FirestorePersonalizedEvents(f.store,firestoreSocialAuthority,
+    {read:async()=>({interestedEventIds:[],goingEventIds:[]})},'music');
+  await f.store.runTransaction(async tx=>tx.set('account_interests/owner',{interestTagIds:['music'],revision:2}));
+  const read=()=>reader.read('owner',instant,{items:[row],sourceStatus:status,current:()=>true});
+  const result=await read();assert.equal(result.kind,'ready');
+  if(result.kind==='ready'){
+    assert.equal(result.sources.sourceStatus,status);
+    assert.deepEqual(result.sources.events[0]!.scoring.interestTagIds,['music']);
+  }
+  for(const data of [{displayName:'Music',lifecycleState:'inactive'},{displayName:'Renamed',lifecycleState:'active'}]){
+    await f.store.runTransaction(async tx=>tx.set('interest_tags/music',{...data,revision:2}));
+    const changed=await read();assert.equal(changed.kind,'ready');
+    if(changed.kind==='ready')assert.deepEqual(changed.sources.events[0]!.scoring.interestTagIds,[]);
+  }
+  await f.store.runTransaction(async tx=>{
+    tx.set('interest_tags/other-music',{displayName:'Music',lifecycleState:'active',revision:1});
+    tx.set('account_interests/owner',{interestTagIds:['other-music'],revision:3});
+  });
+  const wrongIdentity=await read();assert.equal(wrongIdentity.kind,'ready');
+  if(wrongIdentity.kind==='ready')assert.deepEqual(wrongIdentity.sources.events[0]!.scoring.interestTagIds,[]);
+});
+
 test('Gaming-only selection is read freshly and changes the interest ranking and reasons', async () => {
   const f = fixture();
   const gaming = await f.read(); assert.ok(gaming.ok);

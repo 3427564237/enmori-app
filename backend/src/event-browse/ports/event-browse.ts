@@ -7,7 +7,8 @@ export interface BrowseItem extends EventPresentation { readonly browseId:string
 export interface BrowseDetail extends BrowseItem { readonly externalSourceUrl:string; readonly locationLabel?:string; readonly categoryLabel?:string; readonly shortDescription?:string; readonly coverImageUrl?:string }
 /** Internal source metadata; never serialized into public browse DTOs. */
 export interface BrowseOccurrence extends BrowseDetail { readonly musicSegment?: true; readonly venueAddress?: VenueAddress; readonly interestConcepts?: readonly string[]; readonly regionNames?: readonly string[] }
-export interface RecommendationSnapshot { readonly items: readonly BrowseOccurrence[]; current(): boolean }
+export interface EventSourceStatus { readonly provider: "ticketmaster" | "onepa"; readonly available: boolean }
+export interface RecommendationSnapshot { readonly items: readonly BrowseOccurrence[]; readonly sourceStatus?: readonly EventSourceStatus[]; current(): boolean }
 export interface BrowseBatch { readonly asOf:string; readonly scope:"ticketmaster_sg_first_batch_v1"|"singapore_events_v2"; readonly sourceStatus?:readonly {provider:string;available:boolean}[]; readonly items:readonly BrowseItem[]; readonly nextCursor?:string }
 /** Completed-owner check; caller identity is verified by Transport, not JSON. */
 export interface BrowseAccountGate { verify(principal:AuthPrincipal):Promise<Result<void,AppFailure>> }

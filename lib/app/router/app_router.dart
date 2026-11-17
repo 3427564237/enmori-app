@@ -297,6 +297,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           recommendationsBuilder: (context, browse) => EventRecommendationsPage(
             embedded: true,
             onBrowseAll: browse,
+            onEditInterests: () {
+              if (context.mounted && canNavigateActivity()) {
+                context.push<bool>(AppRoutes.interests);
+              }
+            },
             recommendationCardBuilder: (context, event, onOpen) =>
                 ConnectedRecommendationCard(event: event, onOpen: onOpen),
             onOpenEvent: (id) {
@@ -656,7 +661,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           onBrowseActivities: activitiesEnabled
               ? () {
                   if (context.mounted && canNavigateActivity()) {
-                    context.push<void>(AppRoutes.activities);
+                    context.push<void>('${AppRoutes.activities}?tab=browse');
                   }
                 }
               : null,
@@ -891,7 +896,23 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.eventRecommendations,
         builder: (context, state) => EventRecommendationsPage(
-          onBrowseAll: () => context.push<void>(AppRoutes.activities),
+          onBrowseAll: () {
+            if (context.mounted && canNavigateActivity()) {
+              context.push<void>('${AppRoutes.activities}?tab=browse');
+            }
+          },
+          onEditInterests: () {
+            if (context.mounted &&
+                ref.mounted &&
+                ref.read(routerGateProvider) == RouterGateState.authenticated &&
+                (routeSession == null ||
+                    identical(
+                      ref.read(authSessionProvider).asData?.value,
+                      routeSession,
+                    ))) {
+              context.push<bool>(AppRoutes.interests);
+            }
+          },
           initialEventIndex: state.uri.queryParameters['from'] == '2' ? 2 : 0,
           recommendationCardBuilder: participationEnabled
               ? (context, event, onOpen) =>

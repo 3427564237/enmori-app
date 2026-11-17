@@ -10,6 +10,7 @@ import {
 } from "./public-event-pages.js";
 import { locateArea } from "../../recommendation-profile/infrastructure/region-geometry.js";
 import type { OnePaListItem } from "./onepa-public-catalogue.js";
+import { classifyOnePaTitle } from "../domain/onepa-interest-classification.js";
 /** onePA xp timestamps are wall-clock fields; xp.Timezone=8.0 supplies the zone.
  * Verified against rendered page times. Do not parse misleading +00:00 as UTC. */
 export function onePaInstant(value: unknown): string | undefined {
@@ -39,7 +40,7 @@ export function projectOnePa(
     if (
       !p.Active ||
       xp.Private !== 0 ||
-      xp.Published !== 1 ||
+      (xp.Published !== 1 && xp.Published !== true) ||
       xp.InvitationOnly !== 0 ||
       xp.UsePassword !== 0 ||
       xp.ProductType !== "Event" ||
@@ -112,6 +113,7 @@ export function projectOnePa(
     return {
       browseId: id,
       title,
+      interestConcepts: classifyOnePaTitle(title),
       startAt,
       externalSourceUrl: url,
       ...(endAt && endAt > startAt ? { endAt } : {}),
@@ -219,7 +221,7 @@ export class OnePaBrowseSource implements BrowseSource {
       if (
         signal.aborted ||
         !this.enabled() ||
-        items.length > 50 ||
+        items.length > 190 ||
         new Set(items.map((x) => x.url)).size !== items.length ||
         items.some(
           (x) =>

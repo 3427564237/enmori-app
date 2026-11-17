@@ -15,6 +15,7 @@ import { sourceEventId } from '../src/event-browse/domain/source-event-id.js';
 import { friendPairKey } from '../src/friends/infrastructure/firestore-friend-repository.js';
 import { socialEventSource } from '../src/bootstrap/social-event-source.js';
 import { sha256 } from '../src/shared/infrastructure/firebase/firestore-records.js';
+import { emptyRecommendationProfile } from '../src/recommendation-profile/domain/recommendation-profile.js';
 
 const env=requireControlledEmulatorEnvironment(process.env);
 assert.equal(env.projectId,'demo-enmori-rmvp01a-r10');
@@ -67,6 +68,17 @@ test('SDK current identity, real transaction readback, permission/ignore and rec
   // Separate Friend v2 read uses the real SDK's discoverable account query.
   await db.doc('accounts/owner').update({optionalProcessingConsent:'accepted'});
   await db.doc(`friend_pairs/${friendPairKey('owner','target_1')}`).set({accountIds:['owner','target_1'],friendship:false,blockedByAccountIds:[],pending:null});
-  const friends=await new FirestoreFriendRecommendations(gateway,clock,firestoreSocialAuthority,events,true).recommend('owner','all');
+  const friendReader=new FirestoreFriendRecommendations(gateway,clock,firestoreSocialAuthority,events,true);
+  const defaultOff=await friendReader.recommend('owner','all');
+  assert.ok(defaultOff.ok&&defaultOff.value.ownState==='disabled'&&defaultOff.value.suggestions.length===0);
+  // The 28 October discovery contract requires both explicit discovery and the
+  // specific matching grant; legacy public profiles cannot imply either grant.
+  for(const id of ['owner','target_1'])await db.doc(`accounts/${id}`).update({
+    recommendationProfile:{...emptyRecommendationProfile,discoverable:true,matchAffiliation:true,revision:1},
+  });
+  const friends=await friendReader.recommend('owner','all');
   assert.ok(friends.ok&&friends.value.suggestions[0]?.reason.includes('Same shared school'));
+  await db.doc('accounts/target_1').update({'recommendationProfile.matchAffiliation':false,'recommendationProfile.revision':2});
+  const withdrawn=await friendReader.recommend('owner','all');
+  assert.ok(withdrawn.ok&&withdrawn.value.suggestions.length===0);
 });

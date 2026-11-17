@@ -21,7 +21,8 @@ typedef RecommendationCardBuilder = Widget Function(
 );
 
 const eventEmptyTitle = 'No event recommendations right now';
-const eventEmptyBody = 'Update your interests or check again later.';
+const eventEmptyBody =
+    'No recommendations in the currently available activity range.';
 
 final class EventRecommendationsSection extends ConsumerStatefulWidget {
   const EventRecommendationsSection({
@@ -29,6 +30,7 @@ final class EventRecommendationsSection extends ConsumerStatefulWidget {
     this.heading,
     this.contextControls,
     this.onBrowseAll,
+    this.onEditInterests,
     this.onContinueDiscovery,
     this.onOpenEvent,
     this.recommendationCardBuilder,
@@ -40,6 +42,7 @@ final class EventRecommendationsSection extends ConsumerStatefulWidget {
   final String? heading;
   final Widget? contextControls;
   final VoidCallback? onBrowseAll;
+  final VoidCallback? onEditInterests;
   final VoidCallback? onContinueDiscovery;
   final void Function(String)? onOpenEvent;
   final RecommendationCardBuilder? recommendationCardBuilder;
@@ -139,6 +142,7 @@ final class _EventRecommendationsSectionState
         heading: widget.heading,
         contextControls: widget.contextControls,
         onBrowseAll: widget.onBrowseAll,
+        onEditInterests: widget.onEditInterests,
         onContinueDiscovery: widget.onContinueDiscovery,
         onOpenEvent: widget.onOpenEvent,
         recommendationCardBuilder: widget.recommendationCardBuilder,
@@ -156,6 +160,7 @@ final class EventRecommendationsPage extends ConsumerStatefulWidget {
     this.initialEventIndex = 0,
     this.embedded = false,
     this.onBrowseAll,
+    this.onEditInterests,
     super.key,
   }) : assert(initialEventIndex >= 0);
   final void Function(String)? onOpenEvent;
@@ -164,6 +169,7 @@ final class EventRecommendationsPage extends ConsumerStatefulWidget {
   final int initialEventIndex;
   final bool embedded;
   final VoidCallback? onBrowseAll;
+  final VoidCallback? onEditInterests;
 
   @override
   ConsumerState<EventRecommendationsPage> createState() =>
@@ -320,12 +326,6 @@ final class _EventRecommendationsPageState
           key: const Key('route-event-recommendations'),
           padding: const EdgeInsets.all(24),
           children: [
-            if (!widget.embedded)
-              Text(
-                context.tr('Event recommendations', '活动推荐'),
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-            if (!widget.embedded) const SizedBox(height: 16),
             _RecommendationContent(
               state: state,
               onRetry: _load,
@@ -334,6 +334,7 @@ final class _EventRecommendationsPageState
               syntheticPreview: widget.syntheticPreview,
               eventKeys: _eventKeys,
               onBrowseAll: widget.onBrowseAll,
+              onEditInterests: widget.onEditInterests,
             ),
           ],
         ),
@@ -375,6 +376,7 @@ final class _RecommendationContent extends StatefulWidget {
     this.heading,
     this.contextControls,
     this.onBrowseAll,
+    this.onEditInterests,
     this.onContinueDiscovery,
     this.onOpenEvent,
     this.recommendationCardBuilder,
@@ -390,6 +392,7 @@ final class _RecommendationContent extends StatefulWidget {
   final String? heading;
   final Widget? contextControls;
   final VoidCallback? onBrowseAll;
+  final VoidCallback? onEditInterests;
   final VoidCallback? onContinueDiscovery;
   final Map<String, GlobalKey> eventKeys;
   final bool syntheticPreview;
@@ -443,6 +446,7 @@ final class _RecommendationContentState extends State<_RecommendationContent> {
     final onSeeAll = widget.onSeeAll;
     final contextControls = widget.contextControls;
     final onBrowseAll = widget.onBrowseAll;
+    final onEditInterests = widget.onEditInterests;
     final onContinueDiscovery = widget.onContinueDiscovery;
     final onOpenEvent = widget.onOpenEvent;
     final recommendationCardBuilder = widget.recommendationCardBuilder;
@@ -503,7 +507,10 @@ final class _RecommendationContentState extends State<_RecommendationContent> {
                       padding: EdgeInsets.only(top: 8),
                       child: LinearProgressIndicator(),
                     ),
-                  if (!inlineHeader && action != null) action,
+                  if (action != null &&
+                      (!inlineHeader ||
+                          key == const Key('event-recommendations-empty')))
+                    action,
                 ],
               ),
             ),
@@ -562,24 +569,36 @@ final class _RecommendationContentState extends State<_RecommendationContent> {
             ? status(
                 key: const Key('event-recommendations-empty'),
                 title: context.tr(eventEmptyTitle, '暂时没有活动推荐'),
-                body: context.tr(eventEmptyBody, '可以更新兴趣或稍后再查看。'),
+                body: context.tr(eventEmptyBody, '当前可用活动范围内暂无推荐。'),
                 icon: Icons.event_busy_outlined,
-                action: onBrowseAll != null
-                    ? OutlinedButton.icon(
+                action: Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    if (onEditInterests != null)
+                      OutlinedButton.icon(
+                        key: const Key('event-recommendations-edit-interests'),
+                        onPressed: onEditInterests,
+                        icon: const Icon(Icons.interests_outlined),
+                        label: Text(context.tr('Edit interests', '编辑兴趣')),
+                      ),
+                    if (onBrowseAll != null && !inlineHeader)
+                      OutlinedButton.icon(
                         key: const Key('event-recommendations-browse-empty'),
                         onPressed: onBrowseAll,
                         icon: const Icon(Icons.explore_outlined),
                         label: Text(context.tr('Browse activities', '浏览活动')),
-                      )
-                    : onSeeAll == null
-                    ? null
-                    : OutlinedButton(
+                      ),
+                    if (onBrowseAll == null && onSeeAll != null)
+                      OutlinedButton(
                         key: const Key('event-recommendations-see-all-empty'),
                         onPressed: onSeeAll,
                         child: Text(
                           context.tr('All recommendations', '查看全部推荐'),
                         ),
                       ),
+                  ],
+                ),
               )
             : _RecommendationList(
                 items: home ? value.items.take(2).toList() : value.items,
@@ -651,7 +670,17 @@ final class _RecommendationContentState extends State<_RecommendationContent> {
           enabled:
               recommendationCardBuilder == null &&
               state is AsyncData<EventRecommendationResponse>,
-          child: SizedBox(key: _contentKey, child: content),
+          child: SizedBox(
+            key: _contentKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (state is AsyncData<EventRecommendationResponse>)
+                  _SourceAvailabilityNotice(status: state.value.sourceStatus),
+                content,
+              ],
+            ),
+          ),
         ),
         if (state is AsyncData<EventRecommendationResponse> &&
             !inlineHeader) ...[
@@ -688,6 +717,44 @@ final class _RecommendationContentState extends State<_RecommendationContent> {
     return context.tr(
       'This service is temporarily unavailable. Try again.',
       '服务暂不可用，请重试。',
+    );
+  }
+}
+
+class _SourceAvailabilityNotice extends StatelessWidget {
+  const _SourceAvailabilityNotice({required this.status});
+  final Map<String, bool> status;
+
+  @override
+  Widget build(BuildContext context) {
+    final unavailable = [
+      if (status['onepa'] == false) 'onePA',
+      if (status['ticketmaster'] == false) 'Ticketmaster',
+    ];
+    if (unavailable.isEmpty) return const SizedBox.shrink();
+    final names = unavailable.join(', ');
+    return Padding(
+      key: const Key('event-recommendations-source-unavailable'),
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Semantics(
+        liveRegion: true,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.info_outline, size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                context.tr(
+                  '$names is temporarily unavailable. Results only include sources that could be loaded.',
+                  '$names 暂时无法读取。当前结果仅包含成功读取的活动来源。',
+                ),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -55,7 +55,8 @@ export class FirestorePersonalizedEvents {
         const own=await this.authority.viewer(tx,uid);
         const profile=parseRecommendationProfile(own.data.recommendationProfile);if(!profile)throw Error('Invalid recommendation profile');
         const selectedArea=area(activityAreaCode??profile.homeAreaCode);
-        const empty: EventRecommendationReadResult={kind:'ready',sources:{formulaVersion:'event_recommendation_v3',selectedInterestTagIds:[],interestTags:[],events:[]}};
+        const sourceStatus=snapshot.sourceStatus===undefined?{}:{sourceStatus:snapshot.sourceStatus};
+        const empty: EventRecommendationReadResult={kind:'ready',sources:{formulaVersion:'event_recommendation_v3',...sourceStatus,selectedInterestTagIds:[],interestTags:[],events:[]}};
         if(own.data.optionalProcessingConsent!=='accepted')return empty;
         const raw=await tx.get(`account_interests/${own.id}`);
         const selected=raw===undefined?[]:parseSelectedInterests(raw);
@@ -103,7 +104,7 @@ export class FirestorePersonalizedEvents {
             const startInstant=parseEventInstant(row.startAt);
             if(startInstant===undefined)throw Error('Invalid source instant');
             const matched=interestTags.filter(tag=>tag.displayName==='Music'
-              ? tag.interestTagId===this.musicInterestTagId&&row.musicSegment===true
+              ? tag.interestTagId===this.musicInterestTagId&&(row.musicSegment===true||(row.browseId.startsWith('pa_')&&row.interestConcepts?.includes('Music')))
               : row.interestConcepts?.includes(tag.displayName));
             return {scoring:{eventId,active:true,published:true,startInstant,
               interestTagIds:matched.map(tag=>tag.interestTagId),
@@ -119,7 +120,7 @@ export class FirestorePersonalizedEvents {
         }
         if(!snapshot.current())throw Error('Source generation invalidated');
         return {kind:'ready' as const,sources:{formulaVersion:'event_recommendation_v3' as const,
-          selectedInterestTagIds:selected,interestTags,events}};
+          ...sourceStatus,selectedInterestTagIds:selected,interestTags,events}};
       });
       return snapshot.current() ? result : {kind:'dependency_unavailable'};
     } catch(error) {

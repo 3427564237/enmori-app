@@ -264,14 +264,15 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       var plans = 0;
-      await _mount(tester, _Repo(), onOpenPlans: () => plans++);
+      final repo = _Repo();
+      await _mount(tester, repo, onOpenPlans: () => plans++);
       await tester.pumpAndSettle();
-      expect(find.text('My plans').hitTestable(), findsOneWidget);
+      expect(find.byTooltip('My plans').hitTestable(), findsOneWidget);
       expect(find.text('Garden walk').hitTestable(), findsOneWidget);
       expect(find.text('No cover provided by source.'), findsNothing);
       expect(find.text('onePA: unavailable'), findsOneWidget);
       expect(find.byType(DropdownButtonFormField<int>), findsNothing);
-      await tester.tap(find.text('My plans'));
+      await tester.tap(find.byTooltip('My plans'));
       expect(plans, 1);
       await tester.tap(find.text('Filters and sort'));
       await tester.pumpAndSettle();
@@ -286,9 +287,10 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.textContaining('No matching events in the loaded selection'),
+        find.textContaining('No matching events in the available selection'),
         findsOneWidget,
       );
+      expect(repo.nextReads, 1);
       await tester.ensureVisible(find.text('About these events'));
       await tester.tap(find.text('About these events'));
       await tester.pumpAndSettle();

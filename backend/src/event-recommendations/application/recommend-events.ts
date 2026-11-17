@@ -7,11 +7,13 @@ import type { Clock } from "../../shared/ports/clock.js";
 import type { AuthPrincipal } from "../../shared/ports/identity-verifier.js";
 import { EVENT_FORMULA_VERSION, rankEvents } from "../domain/rank-events.js";
 import type { EventRecommendationRepository } from "../ports/event-recommendation-repository.js";
+import type { EventSourceStatus } from "../../event-browse/ports/event-browse.js";
 
 /** Internal result only. Transport mapping remains a separate contract gate. */
 export interface EventRecommendations {
   readonly asOf: string;
   readonly formulaVersion: typeof EVENT_FORMULA_VERSION | "event_recommendation_v2" | "event_recommendation_v3";
+  readonly sourceStatus?: readonly EventSourceStatus[];
   readonly items: readonly (EventPresentation & {
     readonly reasons?: import("../domain/rank-events.js").RankedEvent["reasons"];
     readonly eventId: string;
@@ -74,6 +76,8 @@ export class RecommendEvents {
     return ok({
       asOf: instant.value,
       formulaVersion: sources.formulaVersion??EVENT_FORMULA_VERSION,
+      ...(sources.formulaVersion==='event_recommendation_v3' && sources.sourceStatus!==undefined
+        ? {sourceStatus:Object.freeze(sources.sourceStatus.map(({provider,available})=>Object.freeze({provider,available})))} : {}),
       items: selected.map((event) => {
         const display = presentation.get(event.eventId)!;
         return {
