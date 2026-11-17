@@ -163,7 +163,7 @@ test('new normative OpenAPI bodies and response schemas exactly match Transport'
 
 test('onePA cached catalogue does not fabricate a fresh successful provider observation',async()=>{
   let reads=0;
-  const onepa=new OnePaBrowseSource(()=>true,undefined,async()=>{reads++;return [];});
+  const onepa=new OnePaBrowseSource(()=>true,undefined,async()=>{reads++;return {items:[],complete:true};});
   const tm:BrowseSource={firstBatch:async()=>[],detail:async()=>undefined};
   const combined=new CombinedEventSource(tm,onepa),signal=new AbortController().signal;
   await combined.batch(new Date(now).toISOString(),0,signal);

@@ -1,7 +1,7 @@
 import type { EventPresentation } from "../../event-detail/domain/event-content.js";
 import type { EventScoringInput } from "../domain/rank-events.js";
 import type { DependencyUnavailable } from "../../shared/ports/dependency-failure.js";
-import type { EventSourceStatus } from "../../event-browse/ports/event-browse.js";
+import type { EventSourceStatus, EventSourceCoverage } from "../../event-browse/ports/event-browse.js";
 
 export interface InterestMatchingProjection {
   readonly interestTagId: string;
@@ -12,6 +12,7 @@ export interface InterestMatchingProjection {
 export interface EventRecommendationSources {
   readonly formulaVersion?: "event_recommendation_v2" | "event_recommendation_v3";
   readonly sourceStatus?: readonly EventSourceStatus[];
+  readonly sourceCoverage?: readonly EventSourceCoverage[];
   readonly selectedInterestTagIds: readonly string[];
   readonly interestTags: readonly InterestMatchingProjection[];
   readonly events: readonly {

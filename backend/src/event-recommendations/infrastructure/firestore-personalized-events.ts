@@ -55,7 +55,8 @@ export class FirestorePersonalizedEvents {
         const own=await this.authority.viewer(tx,uid);
         const profile=parseRecommendationProfile(own.data.recommendationProfile);if(!profile)throw Error('Invalid recommendation profile');
         const selectedArea=area(activityAreaCode??profile.homeAreaCode);
-        const sourceStatus=snapshot.sourceStatus===undefined?{}:{sourceStatus:snapshot.sourceStatus};
+        const sourceStatus={...(snapshot.sourceStatus===undefined?{}:{sourceStatus:snapshot.sourceStatus}),
+          ...(snapshot.sourceCoverage===undefined?{}:{sourceCoverage:snapshot.sourceCoverage})};
         const empty: EventRecommendationReadResult={kind:'ready',sources:{formulaVersion:'event_recommendation_v3',...sourceStatus,selectedInterestTagIds:[],interestTags:[],events:[]}};
         if(own.data.optionalProcessingConsent!=='accepted')return empty;
         const raw=await tx.get(`account_interests/${own.id}`);

@@ -1,4 +1,5 @@
-import type { BrowseSource, BrowseOccurrence } from "../ports/event-browse.js";
+import { freezeSourceCoverage } from "../domain/source-coverage.js";
+import type { BrowseSource, BrowseOccurrence, EventSourceCoverage } from "../ports/event-browse.js";
 /** Two independent providers. Partial source failure is explicit, never empty
  * success. Stable occurrence identity is preserved without cross-provider merge. */
 export class CombinedEventSource implements BrowseSource {
@@ -16,7 +17,7 @@ export class CombinedEventSource implements BrowseSource {
     { provider: "ticketmaster", available: true },
     { provider: "onepa", available: true },
   ];
-  private listings = new Map<string, { ends: Map<number, number>; unavailable: Set<number> }>();
+  private listings = new Map<string, { ends: Map<number, number>; unavailable: Set<number>; sourceCoverage?: readonly EventSourceCoverage[] }>();
   constructor(
     private readonly ticketmaster: BrowseSource,
     private readonly onepa: BrowseSource,
@@ -60,6 +61,7 @@ export class CombinedEventSource implements BrowseSource {
   async batch(asOf: string, page: number, signal: AbortSignal) {
     const sources = [this.ticketmaster, this.onepa];
     let listing = page === 0 ? undefined : this.listings.get(asOf);
+    const freshListing = !listing;
     if (!listing) {
       listing = { ends: new Map(), unavailable: new Set() };
       this.listings.set(asOf, listing);
@@ -93,6 +95,15 @@ export class CombinedEventSource implements BrowseSource {
           batch = await this.boundedBatch(signal, async providerSignal => s.batch
             ? s.batch(asOf, page, providerSignal)
             : { items: page === 0 ? await s.firstBatch(asOf, providerSignal) : [] });
+          if (i === 1) {
+            const coverage = freezeSourceCoverage('sourceCoverage' in batch ? batch.sourceCoverage : undefined,
+              [{provider:'onepa',available:true}]);
+            if (freshListing) {
+              if (coverage) current.sourceCoverage = coverage;
+              else delete current.sourceCoverage;
+            }
+            else if (current.sourceCoverage?.[0]?.complete !== coverage?.[0]?.complete) throw Error('Source coverage changed');
+          }
           observe(true);
         } catch (error) { observe(false); throw error; }
         if (!("nextPage" in batch) || batch.nextPage === undefined)
@@ -122,6 +133,8 @@ export class CombinedEventSource implements BrowseSource {
     return {
       items,
       sourceStatus: this.status(),
+      ...(results[1]?.status === 'fulfilled' && current.sourceCoverage
+        ? {sourceCoverage: current.sourceCoverage} : {}),
       ...(batches.some((b) => "nextPage" in b && b.nextPage !== undefined)
         ? { nextPage: page + 1 }
         : {}),

@@ -53,10 +53,12 @@ test('onePA Music concept uses the configured active Music identity and preserve
   const reader=new FirestorePersonalizedEvents(f.store,firestoreSocialAuthority,
     {read:async()=>({interestedEventIds:[],goingEventIds:[]})},'music');
   await f.store.runTransaction(async tx=>tx.set('account_interests/owner',{interestTagIds:['music'],revision:2}));
-  const read=()=>reader.read('owner',instant,{items:[row],sourceStatus:status,current:()=>true});
+  const coverage=Object.freeze([{provider:'onepa' as const,complete:false}]);
+  const read=()=>reader.read('owner',instant,{items:[row],sourceStatus:status,sourceCoverage:coverage,current:()=>true});
   const result=await read();assert.equal(result.kind,'ready');
   if(result.kind==='ready'){
     assert.equal(result.sources.sourceStatus,status);
+    assert.equal(result.sources.sourceCoverage,coverage);
     assert.deepEqual(result.sources.events[0]!.scoring.interestTagIds,['music']);
   }
   for(const data of [{displayName:'Music',lifecycleState:'inactive'},{displayName:'Renamed',lifecycleState:'active'}]){

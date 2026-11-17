@@ -9,7 +9,7 @@ import {
   permittedPublicPage,
 } from "./public-event-pages.js";
 import { locateArea } from "../../recommendation-profile/infrastructure/region-geometry.js";
-import type { OnePaListItem } from "./onepa-public-catalogue.js";
+import type { OnePaCatalogue, OnePaListItem } from "./onepa-public-catalogue.js";
 import { classifyOnePaTitle } from "../domain/onepa-interest-classification.js";
 /** onePA xp timestamps are wall-clock fields; xp.Timezone=8.0 supplies the zone.
  * Verified against rendered page times. Do not parse misleading +00:00 as UTC. */
@@ -187,10 +187,10 @@ export class OnePaBrowseSource implements BrowseSource {
     catch (error) { record(false); throw error; }
   }
   private catalogue:
-    | { until: number; items: readonly OnePaListItem[] }
+    | { until: number; value: OnePaCatalogue }
     | undefined;
   private cataloguePending:
-    | { signal: AbortSignal; work: Promise<readonly OnePaListItem[]> }
+    | { signal: AbortSignal; work: Promise<OnePaCatalogue> }
     | undefined;
   private index: { until: number; urls: string[] } | undefined;
   private rows = new Map<string, { until: number; row: BrowseOccurrence }>();
@@ -200,16 +200,16 @@ export class OnePaBrowseSource implements BrowseSource {
     private readonly read = publicText,
     private readonly readCatalogue?: (
       signal: AbortSignal,
-    ) => Promise<readonly OnePaListItem[]>,
+    ) => Promise<OnePaCatalogue>,
   ) {
     // Observe only dispatched public reads. Catalogue/index/row cache hits do
     // not refresh these timestamps or assert upstream availability.
     this.read = (url, signal) => this.observeRead(() => read(url, signal), signal);
     if (readCatalogue) this.readCatalogue = signal => this.observeRead(() => readCatalogue(signal), signal);
   }
-  private async list(signal: AbortSignal): Promise<readonly OnePaListItem[]> {
+  private async list(signal: AbortSignal): Promise<OnePaCatalogue> {
     if (this.catalogue && this.catalogue.until > Date.now())
-      return this.catalogue.items;
+      return this.catalogue.value;
     const pending = this.cataloguePending;
     if (pending) {
       // An aborted reader cannot publish a catalogue. Keep its cleanup fence
@@ -217,10 +217,13 @@ export class OnePaBrowseSource implements BrowseSource {
       if (pending.signal.aborted) throw Error("Source unavailable");
       return pending.work;
     }
-    const work = this.readCatalogue!(signal).then((items) => {
+    const work = this.readCatalogue!(signal).then((result) => {
+      const {items,complete}=result;
       if (
         signal.aborted ||
         !this.enabled() ||
+        typeof complete !== 'boolean' ||
+        !Array.isArray(items) ||
         items.length > 190 ||
         new Set(items.map((x) => x.url)).size !== items.length ||
         items.some(
@@ -231,8 +234,9 @@ export class OnePaBrowseSource implements BrowseSource {
         new Set(items.map((x) => (x.product as any)?.ID)).size !== items.length
       )
         throw Error("Source unavailable");
-      this.catalogue = { until: Date.now() + 300000, items };
-      return items;
+      const value=Object.freeze({items:Object.freeze([...items]),complete});
+      this.catalogue = { until: Date.now() + 300000, value };
+      return value;
     });
     const admitted = { signal, work };
     this.cataloguePending = admitted;
@@ -292,7 +296,7 @@ export class OnePaBrowseSource implements BrowseSource {
   async firstBatch(asOf: string, signal: AbortSignal) {
     return (await this.batch(asOf, 0, signal)).items;
   }
-  async batch(asOf: string, page: number, signal: AbortSignal) {
+  async batch(asOf: string, page: number, signal: AbortSignal): ReturnType<NonNullable<BrowseSource['batch']>> {
     if (
       !this.enabled() ||
       signal.aborted ||
@@ -302,7 +306,7 @@ export class OnePaBrowseSource implements BrowseSource {
     )
       throw Error("Source unavailable");
     if (this.readCatalogue) {
-      const rows = await this.list(signal);
+      const catalogue = await this.list(signal),rows=catalogue.items;
       if (signal.aborted || !this.enabled()) throw Error("Source unavailable");
       const items = rows.slice(page * 20, (page + 1) * 20).flatMap((item) => {
         const row = projectOnePaListItem(item, asOf);
@@ -310,6 +314,8 @@ export class OnePaBrowseSource implements BrowseSource {
       });
       return {
         items,
+        sourceStatus: Object.freeze([Object.freeze({provider:'onepa' as const,available:true})]),
+        sourceCoverage: Object.freeze([Object.freeze({provider:'onepa' as const,complete:catalogue.complete})]),
         ...((page + 1) * 20 < rows.length ? { nextPage: page + 1 } : {}),
       };
     }
@@ -334,7 +340,7 @@ export class OnePaBrowseSource implements BrowseSource {
   async detail(id: string, asOf: string, signal: AbortSignal) {
     if (!this.enabled() || signal.aborted) throw Error("Source unavailable");
     if (this.readCatalogue) await this.list(signal);
-    const known = this.catalogue?.items.find(
+    const known = this.catalogue?.value.items.find(
       (item) => browseId((item.product as any)?.ID, "pa") === id,
     );
     if (known) return this.load(known.url, asOf, signal);
@@ -349,7 +355,7 @@ export class OnePaBrowseSource implements BrowseSource {
   async event(id: string, asOf: string, signal: AbortSignal) {
     if (!this.enabled() || signal.aborted) throw Error("Source unavailable");
     if (this.readCatalogue) await this.list(signal);
-    const known = this.catalogue?.items.find((item) => {
+    const known = this.catalogue?.value.items.find((item) => {
       const browse = browseId((item.product as any)?.ID, "pa");
       return browse && sourceEventId(browse) === id;
     });

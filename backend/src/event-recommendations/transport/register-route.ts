@@ -37,6 +37,9 @@ export async function registerEventRecommendationRoute(app: FastifyInstance, dep
       asOf: result.value.asOf, formulaVersion: result.value.formulaVersion,
       ...(request.headers["x-enmori-contract-version"]==="3" && result.value.formulaVersion==="event_recommendation_v3" && result.value.sourceStatus!==undefined
         ? {sourceStatus:result.value.sourceStatus.map(({provider,available})=>({provider,available}))} : {}),
+      ...(request.headers["x-enmori-contract-version"]==="3" && result.value.formulaVersion==="event_recommendation_v3" &&
+        result.value.sourceStatus?.some(status=>status.provider==='onepa'&&status.available) && result.value.sourceCoverage!==undefined
+        ? {sourceCoverage:result.value.sourceCoverage.map(({provider,complete})=>({provider,complete}))} : {}),
       items: result.value.items.map((item) => ({
         ...eventPresentation(item), eventId: item.eventId, title: item.title, startAt: item.startAt, ...(item.endAt === undefined ? {} : { endAt: item.endAt }),
         matchedInterests: item.matchedInterests.map((tag) => ({

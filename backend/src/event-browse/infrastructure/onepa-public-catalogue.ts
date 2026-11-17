@@ -5,13 +5,21 @@ import { permittedBrowserResource, plain } from './public-event-pages.js';
 import { ONEPA_INTEREST_RULES } from '../domain/onepa-interest-classification.js';
 
 export interface OnePaListItem { readonly product: unknown; readonly url: string }
+export interface OnePaCatalogue { readonly items: readonly OnePaListItem[]; readonly complete: boolean }
+type TaskStatus = 'not_started'|'running'|'complete'|'failed'|'cancelled';
+interface TaskDiagnostic { index:number; status:TaskStatus; records:number; elapsedMs:number }
 export interface OnePaCatalogueDiagnostics {
-  readonly outcome: 'complete'|'unavailable';
+  readonly outcome: 'complete'|'partial'|'unavailable';
   readonly elapsedMs: number;
+  /** Successful groups only. Use settledTasks to count complete plus failed. */
   readonly completedTasks: number;
+  readonly failedTasks: number;
+  readonly settledTasks: number;
+  readonly cancelledTasks: number;
+  readonly unstartedTasks: number;
   readonly rawRecords: number;
   readonly uniqueRecords: number;
-  readonly tasks: readonly { readonly index: number; readonly records: number; readonly elapsedMs: number }[];
+  readonly tasks: readonly Readonly<TaskDiagnostic>[];
 }
 interface SearchGrid {
   readonly offset: number;
@@ -71,12 +79,13 @@ export function mergeOnePaCatalogue(batches: readonly (readonly OnePaListItem[])
 
 /** One anonymous browser, four pages, default five pages plus fourteen fixed
  * first-page searches. All work including launch shares one 180-second budget.
- * Nothing is published until every required task has completed successfully. */
+ * The default group is required. Supplemental groups may fail independently,
+ * but all groups must settle before the same deadline. No failed group is used. */
 export async function readOnePaCatalogue(
   signal: AbortSignal,
   launch: () => Promise<Browser> = () => chromium.launch({headless:false,args:['--start-minimized'],timeout:30000}),
   onDiagnostics?: (value: OnePaCatalogueDiagnostics) => void,
-): Promise<readonly OnePaListItem[]> {
+): Promise<OnePaCatalogue> {
   if(signal.aborted)throw unavailable();
   const started=performance.now();
   let browser:Browser|undefined,closing:Promise<void>|undefined,stopped=false;
@@ -99,7 +108,7 @@ export async function readOnePaCatalogue(
     void work.catch(()=>{});current();const value=await Promise.race([work,interrupted]);current();return value;
   };
   let outcome:OnePaCatalogueDiagnostics['outcome']='unavailable',rawRecords=0,uniqueRecords=0;
-  const taskStats:{index:number;records:number;elapsedMs:number}[]=[];
+  const taskStats:TaskDiagnostic[]=Array.from({length:15},(_,index)=>({index,status:'not_started',records:0,elapsedMs:0}));
   const running:Promise<unknown>[]=[];
   try {
     current();
@@ -116,7 +125,7 @@ export async function readOnePaCatalogue(
     const pages=await within(Promise.all(Array.from({length:4},()=>context.newPage())));
 
     const readTask=async(page:Page,query:string,taskIndex:number,maxPages:number):Promise<readonly OnePaListItem[]>=>{
-      const taskStarted=performance.now(),result:OnePaListItem[]=[],completed=new Map<number,SearchGrid>();
+      const result:OnePaListItem[]=[],completed=new Map<number,SearchGrid>();
       let total:number|undefined;
       const response=(offset:number)=>{
         const observed=new WeakMap<Response,SearchGrid>();
@@ -161,7 +170,8 @@ export async function readOnePaCatalogue(
           (renderedUrl.searchParams.get('events')??'')!==query||
           (renderedUrl.searchParams.get('page')??'1')!==String(index+1))throw changed();
         if(total!==undefined&&total!==grid.total_item)throw changed();total=grid.total_item;
-        rawRecords+=grid.content.length;if(rawRecords>190)throw changed();
+        rawRecords+=grid.content.length;taskStats[taskIndex]!.records+=grid.content.length;
+        if(rawRecords>190){stop(changed());throw changed();}
         const ids=grid.content.map(item=>item.id);
         if(ids.length){
           await within(page.waitForFunction((ids:string[])=>ids.every(id=>
@@ -179,29 +189,49 @@ export async function readOnePaCatalogue(
         completed.set(grid.offset,grid);current();
         if(grid.offset+grid.content.length>=grid.total_item)break;
       }
-      taskStats.push({index:taskIndex,records:result.length,elapsedMs:Math.round(performance.now()-taskStarted)});
       return result;
+    };
+    const recordedTask=async(page:Page,query:string,index:number,maxPages:number)=>{
+      const task=taskStats[index]!,started=performance.now();task.status='running';
+      try{const rows=await readTask(page,query,index,maxPages);current();task.status='complete';return rows;}
+      catch(error){task.status=stopped||signal.aborted?'cancelled':'failed';throw error;}
+      finally{task.elapsedMs=Math.round(performance.now()-started);}
     };
 
     const results:(readonly OnePaListItem[])[]=Array.from({length:15},()=>[]);
-    running.push(readTask(pages[0]!,'',0,5).then(rows=>{results[0]=rows;}));
+    running.push(recordedTask(pages[0]!,'',0,5).then(rows=>{results[0]=rows;}));
     let nextQuery=0;
-    for(const page of pages.slice(1))running.push((async()=>{
+    for(const initialPage of pages.slice(1))running.push((async()=>{
+      let page=initialPage;
       while(nextQuery<ONEPA_INTEREST_RULES.length){
         current();const index=nextQuery++,query=ONEPA_INTEREST_RULES[index]!.query;
-        results[index+1]=await readTask(page,query,index+1,1);
+        try{results[index+1]=await recordedTask(page,query,index+1,1);}
+        catch{
+          // Only a local supplemental failure may be isolated. Total deadline,
+          // external abort and a failed required group still cancel everything.
+          current();
+          // Close before replacing: old navigation/response waiters cannot leak
+          // into the next fixed query, and no more than four pages remain open.
+          await within(page.close());
+          if(nextQuery<ONEPA_INTEREST_RULES.length)page=await within(context.newPage());
+        }
       }
     })());
     await within(Promise.all(running));current();
-    const result=mergeOnePaCatalogue(results);uniqueRecords=result.length;
-    outcome='complete';return result;
+    if(taskStats[0]!.status!=='complete'||taskStats.some(task=>task.status!=='complete'&&task.status!=='failed'))throw unavailable();
+    const result=mergeOnePaCatalogue(results);current();uniqueRecords=result.length;
+    const complete=taskStats.every(task=>task.status==='complete');
+    outcome=complete?'complete':'partial';return Object.freeze({items:Object.freeze([...result]),complete});
   } catch(error) {
     stop(error);await Promise.allSettled(running);throw error;
   } finally {
     stopped=true;clearTimeout(timer);signal.removeEventListener('abort',abort);await close();
     // Optional operator counters contain no source content, account state,
     // tokens, URLs or provider response bodies.
-    try{onDiagnostics?.({outcome,elapsedMs:Math.round(performance.now()-started),completedTasks:taskStats.length,
-      rawRecords,uniqueRecords,tasks:taskStats.sort((a,b)=>a.index-b.index)});}catch{/* An observer cannot change the source result. */}
+    const completedTasks=taskStats.filter(task=>task.status==='complete').length,failedTasks=taskStats.filter(task=>task.status==='failed').length;
+    try{onDiagnostics?.({outcome,elapsedMs:Math.round(performance.now()-started),completedTasks,failedTasks,
+      settledTasks:completedTasks+failedTasks,cancelledTasks:taskStats.filter(task=>task.status==='cancelled').length,
+      unstartedTasks:taskStats.filter(task=>task.status==='not_started').length,
+      rawRecords,uniqueRecords,tasks:taskStats.map(task=>({...task}))});}catch{/* An observer cannot change the source result. */}
   }
 }

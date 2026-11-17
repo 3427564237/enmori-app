@@ -1,10 +1,11 @@
-import type { BrowseOccurrence, BrowseSource, EventSourceStatus } from "../ports/event-browse.js";
+import { freezeSourceCoverage } from "../domain/source-coverage.js";
+import type { BrowseOccurrence, BrowseSource, EventSourceStatus, EventSourceCoverage } from "../ports/event-browse.js";
 import { dependencyUnavailable } from "../../shared/ports/dependency-failure.js";
 import { parseBrowseInstant } from "../domain/browse-values.js";
 import { sourceEventId } from '../domain/source-event-id.js';
 import { Temporal } from '@js-temporal/polyfill';
 const cacheWindow = 300_000_000_000n;
-type SourceSnapshot = { at: bigint; from?: bigint; items: readonly BrowseOccurrence[]; candidates?: readonly BrowseOccurrence[]; sourceStatus?: readonly EventSourceStatus[] };
+type SourceSnapshot = { at: bigint; from?: bigint; items: readonly BrowseOccurrence[]; candidates?: readonly BrowseOccurrence[]; sourceStatus?: readonly EventSourceStatus[]; sourceCoverage?: readonly EventSourceCoverage[] };
 // Coverage can precede freshness for out-of-order concurrent request instants.
 // Every consumer still applies its own exact future-time filter.
 const covers = (snapshot: SourceSnapshot, now: bigint) =>
@@ -70,17 +71,19 @@ export class ControlledSourceProjection implements BrowseSource {
           const result=await source.batch!(asOf,page,signal);
           if(epoch!==this.epoch||cached!==this.snapshot||this.pending||this.pageReads.get(page)!==read||signal.aborted)throw dependencyUnavailable;
           const items=this.freezePage(result.items);
+          const {sourceCoverage:rawCoverage,...rest}=result;
+          const sourceCoverage=freezeSourceCoverage(rawCoverage,result.sourceStatus);
           // A cold cursor read cannot invent an initialized title projection.
           if(cached) {
             this.observedPages.set(page,items);
             // A later-page reread replaces its visible data. Retire the previous
             // complete ranking snapshot instead of mixing old scores/new titles.
             if(cached.candidates) {
-              const {candidates:_,sourceStatus:__,...firstPage}=cached;
+              const {candidates:_,sourceStatus:__,sourceCoverage:___,...firstPage}=cached;
               this.snapshot=firstPage;
             }
           }
-          return {...result,items};
+          return {...rest,items,...(sourceCoverage?{sourceCoverage}:{})};
         }finally{if(this.pageReads.get(page)===read)this.pageReads.delete(page);}
       }
       // Explicit first-page refresh replaces the one shared generation. Old
@@ -89,8 +92,10 @@ export class ControlledSourceProjection implements BrowseSource {
       const work=source.batch!(asOf,0,signal).then(result=>{
         if(epoch!==this.epoch||signal.aborted)throw dependencyUnavailable;
         const items=this.freezePage(result.items);
+        const {sourceCoverage:rawCoverage,...rest}=result;
+        const sourceCoverage=freezeSourceCoverage(rawCoverage,result.sourceStatus);
         this.snapshot={at:now,items};
-        return {...result,items};
+        return {...rest,items,...(sourceCoverage?{sourceCoverage}:{})};
       });
       const pending=work.then(result=>result.items);this.pending=pending;
       void pending.finally(()=>{if(this.pending===pending)this.pending=undefined;}).catch(()=>{});
@@ -147,12 +152,16 @@ export class ControlledSourceProjection implements BrowseSource {
           const pages: (readonly BrowseOccurrence[])[]=[];
           const unique=new Map<string,BrowseOccurrence>();
           let sourceStatus: readonly EventSourceStatus[] | undefined;
+          let sourceCoverage: readonly EventSourceCoverage[] | undefined;
           for(let page=0;page<50;page++){
             if(epoch!==this.epoch||bounded.aborted)throw dependencyUnavailable;
             const result=this.source.batch ? await withinBudget(this.source.batch(sourceAsOf,page,bounded),bounded)
               : {items:await withinBudget(this.source.firstBatch(sourceAsOf,bounded),bounded)};
             if(epoch!==this.epoch||bounded.aborted)throw dependencyUnavailable;
             const pageStatus=freezeSourceStatus('sourceStatus' in result ? result.sourceStatus : undefined);
+            const pageCoverage=freezeSourceCoverage('sourceCoverage' in result ? result.sourceCoverage : undefined,pageStatus);
+            if(page===0)sourceCoverage=pageCoverage;
+            else if(sourceCoverage?.[0]?.complete!==pageCoverage?.[0]?.complete)throw dependencyUnavailable;
             if(page===0)sourceStatus=pageStatus;
             else if(sourceStatus && pageStatus) {
               // Losing a previously healthy provider on a later page cannot
@@ -174,7 +183,7 @@ export class ControlledSourceProjection implements BrowseSource {
           }
           const items=pages[0]??[];
           const candidates=Object.freeze([...unique.values()]);
-          this.snapshot={at:now,from,items,candidates,...(sourceStatus===undefined?{}:{sourceStatus})};
+          this.snapshot={at:now,from,items,candidates,...(sourceStatus===undefined?{}:{sourceStatus}),...(sourceCoverage===undefined?{}:{sourceCoverage})};
           pages.forEach((rows,page)=>{if(page>0)this.observedPages.set(page,rows);});
           return items;
         })();
@@ -187,6 +196,7 @@ export class ControlledSourceProjection implements BrowseSource {
       const captured=snapshot,candidates=snapshot.candidates;
       return {items:candidates.filter(row=>parseBrowseInstant(row.startAt)!>now),
         ...(captured.sourceStatus===undefined?{}:{sourceStatus:captured.sourceStatus}),
+        ...(captured.sourceCoverage===undefined?{}:{sourceCoverage:captured.sourceCoverage}),
         current:()=>!signal.aborted&&this.snapshot===captured&&!this.pending};
     } finally {
       clearTimeout(timer);

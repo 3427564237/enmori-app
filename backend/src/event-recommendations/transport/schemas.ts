@@ -24,6 +24,8 @@ export const eventRecommendationsSchema = {
   properties: { asOf: utc, formulaVersion: { type: "string", enum: ["event_recommendation_v1","event_recommendation_v2","event_recommendation_v3"] },
     sourceStatus: {type:"array",maxItems:2,uniqueItems:true,items:{type:"object",additionalProperties:false,required:["provider","available"],
       properties:{provider:{type:"string",enum:["ticketmaster","onepa"]},available:{type:"boolean"}}}},
+    sourceCoverage: {type:"array",maxItems:1,uniqueItems:true,items:{type:"object",additionalProperties:false,required:["provider","complete"],
+      properties:{provider:{type:"string",enum:["onepa"]},complete:{type:"boolean"}}}},
     items: { type: "array", items: eventRecommendationItemSchema } },
 } as const;
 export const recommendEventsSchema = {

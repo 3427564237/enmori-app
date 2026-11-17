@@ -8,15 +8,16 @@ export interface BrowseDetail extends BrowseItem { readonly externalSourceUrl:st
 /** Internal source metadata; never serialized into public browse DTOs. */
 export interface BrowseOccurrence extends BrowseDetail { readonly musicSegment?: true; readonly venueAddress?: VenueAddress; readonly interestConcepts?: readonly string[]; readonly regionNames?: readonly string[] }
 export interface EventSourceStatus { readonly provider: "ticketmaster" | "onepa"; readonly available: boolean }
-export interface RecommendationSnapshot { readonly items: readonly BrowseOccurrence[]; readonly sourceStatus?: readonly EventSourceStatus[]; current(): boolean }
-export interface BrowseBatch { readonly asOf:string; readonly scope:"ticketmaster_sg_first_batch_v1"|"singapore_events_v2"; readonly sourceStatus?:readonly {provider:string;available:boolean}[]; readonly items:readonly BrowseItem[]; readonly nextCursor?:string }
+export interface EventSourceCoverage { readonly provider: "onepa"; readonly complete: boolean }
+export interface RecommendationSnapshot { readonly items: readonly BrowseOccurrence[]; readonly sourceStatus?: readonly EventSourceStatus[]; readonly sourceCoverage?: readonly EventSourceCoverage[]; current(): boolean }
+export interface BrowseBatch { readonly asOf:string; readonly scope:"ticketmaster_sg_first_batch_v1"|"singapore_events_v2"; readonly sourceStatus?:readonly {provider:string;available:boolean;coverageComplete?:boolean}[]; readonly items:readonly BrowseItem[]; readonly nextCursor?:string }
 /** Completed-owner check; caller identity is verified by Transport, not JSON. */
 export interface BrowseAccountGate { verify(principal:AuthPrincipal):Promise<Result<void,AppFailure>> }
 export interface BrowseSource {
   observations?(): readonly import("../../admin/ports/admin-repository.js").ServiceObservation[];
   status?():readonly {provider:string;available:boolean}[];
   recommendationSnapshot?(asOf:string,signal:AbortSignal):Promise<RecommendationSnapshot>;
-  batch?(asOf:string,page:number,signal:AbortSignal):Promise<{readonly items:readonly BrowseOccurrence[];readonly sourceStatus?:readonly {provider:string;available:boolean}[];readonly nextPage?:number}>;
+  batch?(asOf:string,page:number,signal:AbortSignal):Promise<{readonly items:readonly BrowseOccurrence[];readonly sourceStatus?:readonly {provider:string;available:boolean}[];readonly sourceCoverage?:readonly EventSourceCoverage[];readonly nextPage?:number}>;
   availableEvent?(eventId:string,asOf:string,signal:AbortSignal):Promise<boolean>;
   event?(eventId:string,asOf:string,signal:AbortSignal):Promise<BrowseOccurrence|undefined>;
   firstBatch(asOf:string,signal:AbortSignal):Promise<readonly BrowseOccurrence[]>;

@@ -1,3 +1,4 @@
+import { freezeSourceCoverage } from "../domain/source-coverage.js";
 import { eventPresentation,eventSummaryPresentation } from "../../event-detail/domain/event-content.js";
 import { appFailure,type AppFailure } from "../../shared/application/app-failure.js";
 import {ok,err,type Result} from "../../shared/domain/result.js";
@@ -22,7 +23,11 @@ export class EventBrowse {
       if(cursor!==undefined&&!this.source.batch)return err(appFailure('SERVICE_UNAVAILABLE'));
       const batch=this.position&&this.source.batch?await this.source.batch(asOf,decoded?.page??0,signal):{items:await this.source.firstBatch(asOf,signal)};
       if(signal.aborted)return err(appFailure("SERVICE_UNAVAILABLE"));
-      return ok({asOf,scope:this.source.status?"singapore_events_v2":"ticketmaster_sg_first_batch_v1",...(this.source.status?{sourceStatus:("sourceStatus" in batch?batch.sourceStatus:undefined)??this.source.status()}:{}),...(batch.nextPage===undefined?{}:{nextCursor:this.position!.encode(principal.firebaseUid,asOf,batch.nextPage)}),items:batch.items.map(row=>{const {browseId,title,startAt,endAt,locationLabel,categoryLabel}=row;return ({...eventSummaryPresentation(row),browseId,
+      const status=this.source.status?(("sourceStatus" in batch?batch.sourceStatus:undefined)??this.source.status()):undefined;
+      const coverage=freezeSourceCoverage('sourceCoverage' in batch?batch.sourceCoverage:undefined,'sourceStatus' in batch?batch.sourceStatus:undefined);
+      const sourceStatus=status?.map(({provider,available})=>({provider,available,
+        ...(provider==='onepa'&&available&&coverage?.[0] ? {coverageComplete:coverage[0].complete} : {})}));
+      return ok({asOf,scope:this.source.status?"singapore_events_v2":"ticketmaster_sg_first_batch_v1",...(sourceStatus?{sourceStatus}:{}),...(batch.nextPage===undefined?{}:{nextCursor:this.position!.encode(principal.firebaseUid,asOf,batch.nextPage)}),items:batch.items.map(row=>{const {browseId,title,startAt,endAt,locationLabel,categoryLabel}=row;return ({...eventSummaryPresentation(row),browseId,
         ...(this.includeStableEventId?{eventId:sourceEventId(browseId),...(locationLabel===undefined?{}:{locationLabel}),...(categoryLabel===undefined?{}:{categoryLabel})}:{}),
         title,startAt,...(endAt===undefined?{}:{endAt})});})});
     }catch{return err(appFailure("SERVICE_UNAVAILABLE"));}

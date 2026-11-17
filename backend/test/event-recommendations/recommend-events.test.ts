@@ -49,6 +49,22 @@ test('only v3 results carry a copied source snapshot status',async()=>{
   }
 });
 
+test('v3 coverage is frozen, unavailable coverage is rejected, and legacy representations omit it',async()=>{
+  const repository=new FakeRepository();
+  const sourceStatus=[{provider:'onepa' as const,available:true}],sourceCoverage=[{provider:'onepa' as const,complete:false}];
+  repository.result={kind:'ready',sources:{...sources(),formulaVersion:'event_recommendation_v3',sourceStatus,sourceCoverage}};
+  const app=new RecommendEvents(repository,clock);
+  const result=await app.execute({principal,view:'all'});assert.ok(result.ok);
+  assert.deepEqual(result.value.sourceCoverage,sourceCoverage);sourceCoverage[0]!.complete=true;
+  assert.equal(result.value.sourceCoverage?.[0]?.complete,false);
+  assert.equal(Object.isFrozen(result.value.sourceCoverage),true);
+  const legacy=await app.execute({principal,view:'all',legacyClient:true});assert.ok(legacy.ok);
+  assert.equal(legacy.value.sourceCoverage,undefined);
+  sourceStatus[0]!.available=false;
+  const invalid=await app.execute({principal,view:'all'});assert.equal(invalid.ok,false);
+  if(!invalid.ok)assert.equal(invalid.failure.code,'SERVICE_UNAVAILABLE');
+});
+
 test("passes only verified identity and one captured server asOf to the read Port", async () => {
   const repository = new FakeRepository();
   let captures = 0;

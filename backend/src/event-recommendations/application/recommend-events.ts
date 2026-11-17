@@ -1,3 +1,4 @@
+import { freezeSourceCoverage } from "../../event-browse/domain/source-coverage.js";
 import { eventSummaryPresentation } from "../../event-detail/domain/event-content.js";
 import type { EventPresentation } from "../../event-detail/domain/event-content.js";
 import { readAuthoritativeInstant } from "../../shared/application/authoritative-values.js";
@@ -7,13 +8,14 @@ import type { Clock } from "../../shared/ports/clock.js";
 import type { AuthPrincipal } from "../../shared/ports/identity-verifier.js";
 import { EVENT_FORMULA_VERSION, rankEvents } from "../domain/rank-events.js";
 import type { EventRecommendationRepository } from "../ports/event-recommendation-repository.js";
-import type { EventSourceStatus } from "../../event-browse/ports/event-browse.js";
+import type { EventSourceStatus, EventSourceCoverage } from "../../event-browse/ports/event-browse.js";
 
 /** Internal result only. Transport mapping remains a separate contract gate. */
 export interface EventRecommendations {
   readonly asOf: string;
   readonly formulaVersion: typeof EVENT_FORMULA_VERSION | "event_recommendation_v2" | "event_recommendation_v3";
   readonly sourceStatus?: readonly EventSourceStatus[];
+  readonly sourceCoverage?: readonly EventSourceCoverage[];
   readonly items: readonly (EventPresentation & {
     readonly reasons?: import("../domain/rank-events.js").RankedEvent["reasons"];
     readonly eventId: string;
@@ -60,6 +62,11 @@ export class RecommendEvents {
     const sources = legacy ? { ...read.sources, formulaVersion: 'event_recommendation_v2' as const,
       events: read.sources.events.filter(e => e.scoring.eventId.startsWith('tm_event_')).map(e => ({...e, scoring:{...e.scoring, sameRegion:!!e.scoring.sameArea || !!e.scoring.sameRegion}})),
     } : read.sources;
+    let sourceCoverage: readonly EventSourceCoverage[] | undefined;
+    try {
+      sourceCoverage = sources.formulaVersion === 'event_recommendation_v3'
+        ? freezeSourceCoverage(sources.sourceCoverage, sources.sourceStatus) : undefined;
+    } catch { return err(appFailure('SERVICE_UNAVAILABLE')); }
     const activeTags = new Map(sources.interestTags
       .filter((tag) => tag.lifecycleState === "active")
       .map((tag) => [tag.interestTagId, tag]));
@@ -78,6 +85,7 @@ export class RecommendEvents {
       formulaVersion: sources.formulaVersion??EVENT_FORMULA_VERSION,
       ...(sources.formulaVersion==='event_recommendation_v3' && sources.sourceStatus!==undefined
         ? {sourceStatus:Object.freeze(sources.sourceStatus.map(({provider,available})=>Object.freeze({provider,available})))} : {}),
+      ...(sourceCoverage===undefined?{}:{sourceCoverage}),
       items: selected.map((event) => {
         const display = presentation.get(event.eventId)!;
         return {

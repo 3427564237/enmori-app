@@ -3749,6 +3749,9 @@
                           },
                           "available": {
                             "type": "boolean"
+                          },
+                          "coverageComplete": {
+                            "type": "boolean"
                           }
                         }
                       }
@@ -18421,6 +18424,30 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/EventRecommendationItem"
+            }
+          },
+          "sourceCoverage": {
+            "type": "array",
+            "maxItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "provider",
+                "complete"
+              ],
+              "properties": {
+                "provider": {
+                  "type": "string",
+                  "enum": [
+                    "onepa"
+                  ]
+                },
+                "complete": {
+                  "type": "boolean"
+                }
+              }
             }
           }
         }

@@ -426,7 +426,7 @@ test("onePA lists reuse public summaries without individual detail fan-out, then
     },
     async () => {
       lists++;
-      return [{ product, url }];
+      return {items:[{ product, url }],complete:true};
     },
   );
   const [first, second] = await Promise.all([
@@ -469,7 +469,7 @@ test("onePA public-list input stays bounded, rejects duplicate identities and do
       async () => {
         throw Error("no detail read");
       },
-      async () => list,
+      async () => ({items:list,complete:true}),
     );
     await assert.rejects(source.firstBatch(asOf, new AbortController().signal));
   }
@@ -485,12 +485,12 @@ test("onePA public-list input stays bounded, rejects duplicate identities and do
 
 test("onePA follow-up lists fail promptly while an aborted catalogue reader cleans up", async () => {
   const product = payload().props.pageProps.page.layout.sitecore.route.fields.currentProduct.value;
-  const closing = Promise.withResolvers<readonly { product: unknown; url: string }[]>();
+  const closing = Promise.withResolvers<{items:readonly { product: unknown; url: string }[];complete:boolean}>();
   let reads = 0;
   const source = new OnePaBrowseSource(
     () => true,
     async () => { throw Error("no detail read"); },
-    async () => ++reads === 1 ? closing.promise : [{ product, url }],
+    async () => ++reads === 1 ? closing.promise : {items:[{ product, url }],complete:true},
   );
   const owner = new AbortController();
   const first = assert.rejects(source.firstBatch(asOf, owner.signal));
@@ -500,7 +500,7 @@ test("onePA follow-up lists fail promptly while an aborted catalogue reader clea
     assert.equal(await Promise.race([followUp.then(() => "rejected"), setImmediate("waiting")]), "rejected");
     assert.equal(reads, 1);
   } finally {
-    closing.resolve([{ product, url }]);
+    closing.resolve({items:[{ product, url }],complete:true});
     await Promise.all([first, followUp]);
   }
   const recovered = await source.firstBatch(asOf, new AbortController().signal);

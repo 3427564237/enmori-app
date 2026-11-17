@@ -45,6 +45,18 @@ test('source status is an optional v3-only projection, including successful empt
     assert.equal(Object.hasOwn(response.json(),'sourceStatus'),false);
   }finally{await app.close();}
 });
+test('v3 coverage is optional top-level metadata and never expands strict sourceStatus rows',async()=>{
+  for(const complete of [false,true])for(const formulaVersion of ['event_recommendation_v1','event_recommendation_v2','event_recommendation_v3'] as const){
+    const sourceStatus=[{provider:'onepa' as const,available:true}],sourceCoverage=[{provider:'onepa' as const,complete}];
+    const app=await appFor(async()=>ok({...value,formulaVersion,items:[],sourceStatus,sourceCoverage}));
+    try{for(const modern of [false,true]){
+      const response=await app.inject({url:'/v1/recommendations/events?view=home',headers:{...authHeaders,...(modern?{'x-enmori-contract-version':'3'}:{})}});
+      assert.equal(response.statusCode,200);
+      assert.deepEqual(response.json().sourceCoverage,modern&&formulaVersion==='event_recommendation_v3'?sourceCoverage:undefined);
+      if(response.json().sourceStatus)assert.deepEqual(Object.keys(response.json().sourceStatus[0]).sort(),['provider','available'].sort());
+    }}finally{await app.close();}
+  }
+});
 async function appFor(execute: Pick<RecommendEvents, "execute">["execute"] = async () => ok(value),
   identity: IdentityVerificationResult = { kind: "verified", principal: { firebaseUid: "verified-only" } }) {
   return buildApp({

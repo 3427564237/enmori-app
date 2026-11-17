@@ -66,8 +66,9 @@ unknown reasons and missing V2 reasons. It still accepts existing V1 responses.
 Public payloads do not expose friend IDs, source records, raw profile fields or
 internal total scores. UI text renders only supplied reasons.
 
-The optional source availability projection belongs only to the v3 response;
-v1/v2 representations omit it, including when reranked from a v3 snapshot.
+The optional source availability and coverage projections belong only to the v3 response;
+v1/v2 representations omit both, including when reranked from a v3 snapshot.
+The [17 November supplemental-query amendment](../docs/decisions/2026-11-17-li-supplemental-query-degradation.md) permits completed onePA default/supplemental groups after every task settles within the unchanged source budget. It does not relax complete traversal of the admitted candidate set, required-default/global-timeout failure, generation fences, ranking or privacy.
 
 ## Friend
 
