@@ -1,0 +1,245 @@
+{
+  "schemaVersion": "interest_discovery_v77_deployment_receipt_v1",
+  "status": "deployed_and_http_verified",
+  "sourceCommit": "9905e2650b806e6a55438eedf8cc82cf3d8279ca",
+  "package": {
+    "name": "2026111702281277.zip",
+    "sha256": "5e80cf8050a95fa90fe92769d47e9c6d03e897da7004c4ed5d62507e2bf96180",
+    "demoVersion": 77
+  },
+  "apk": {
+    "path": "/home/miku/Downloads/ENMORI-discovery-v77-release.apk",
+    "sha256": "8001b84bacc80cb82fec572efacdd3b9bd78968dd2634cb2be70872b8cb8230e",
+    "versionCode": 77,
+    "physicalDeviceAccepted": false
+  },
+  "stopEvidence": {
+    "evidenceKind": "arm-current-instances-and-site-stop-v2",
+    "atUtc": "2026-11-17T03:03:50.076983+00:00",
+    "proofSha256": "d7b0dcf9ecdfc08256fac3ade1c778ddc8eab5f56bc334d9fc24fafeb8df1f56",
+    "currentInstanceCount": 1,
+    "completeIdenticalStoppedInventories": true,
+    "currentWorkersHavePostIntentSiteStopCompletion": true,
+    "individualContainerTerminationsObserved": false,
+    "publicHttpStopped": true,
+    "localServiceStopped": true,
+    "offlineChecksPassed": 32,
+    "independentReview": "passed",
+    "verifierSha256": "6d20677090526a153734dddc37b08dcc0aa16e213d2336ff549df6b4444bdc0a",
+    "testsSha256": "909784dca97e6df672fc3f05e44e6432b5adad4c47196d535fc175f7351e163c"
+  },
+  "activation": {
+    "atUtc": "2026-11-17T03:05:07.351974+00:00",
+    "name": "2026111702281277.zip",
+    "sha256": "5e80cf8050a95fa90fe92769d47e9c6d03e897da7004c4ed5d62507e2bf96180"
+  },
+  "startup": {
+    "startSubmittedAtUtc": "2026-11-17T03:05:51.716678+00:00",
+    "events": [
+      {
+        "atUtc": "2026-11-17T03:07:59.7692949Z",
+        "phase": "configuration",
+        "nodeVersion": "24.19.0",
+        "selectedHost": true,
+        "identityEndpointPath": "/msi/token",
+        "cloudTestApp": "armed"
+      },
+      {
+        "atUtc": "2026-11-17T03:09:47.5826465Z",
+        "phase": "listening",
+        "firebaseRead": true,
+        "aiConfigured": true,
+        "aiAvailable": true
+      }
+    ],
+    "platformStartupProbePassed": true,
+    "startupProbeElapsedSeconds": 189.0470904
+  },
+  "mountedSource": {
+    "passed": true,
+    "verification": "actual_application_container_ssh_mounted_manifest",
+    "atUtc": "2026-11-17T03:10:49.292492+00:00",
+    "sourceCommit": "9905e2650b806e6a55438eedf8cc82cf3d8279ca",
+    "demoVersion": 77,
+    "manifestSha256": "1b5bffe0099c4a3d05f3ba47edf6f28bcfc7b14fbab26988f706f0ebf394d458"
+  },
+  "configPreserved": true,
+  "ownerAcquired": {
+    "confirmed": true,
+    "generation": 92,
+    "leaseVersion": 7258,
+    "normalRuntimeAcquisition": true,
+    "operatorSeedOrResetPerformed": false
+  },
+  "ownerRenewalObserved": {
+    "confirmed": true,
+    "generation": 92,
+    "leaseVersion": 7260
+  },
+  "moneyAndQuotaChecks": {
+    "renewalMoneyHashUnchanged": true,
+    "operatorModelCalls": 0,
+    "operatorProductWrites": 0,
+    "moneyAndAttemptsUnchangedFromPreStopBaseline": true,
+    "quotaRecoveryValidatedAgainstPreStopBaseline": true,
+    "renewalQuotaStateUnchanged": true
+  },
+  "authenticatedHttp": {
+    "atUtc": "2026-11-17T03:10:40.427Z",
+    "completedAtUtc": "2026-11-17T03:13:24.841Z",
+    "passed": true,
+    "reads": [
+      {
+        "path": "/v1/me/friends",
+        "status": 200,
+        "elapsedMs": 1288
+      },
+      {
+        "path": "/v1/me/friends/search?q=member",
+        "status": 200,
+        "elapsedMs": 1138
+      },
+      {
+        "path": "/v1/me/profile",
+        "status": 200,
+        "elapsedMs": 598
+      },
+      {
+        "path": "/v1/me/interests",
+        "status": 200,
+        "elapsedMs": 745
+      },
+      {
+        "path": "/v1/me/recommendation-profile",
+        "status": 200,
+        "elapsedMs": 721
+      },
+      {
+        "path": "/v1/recommendations/events?view=all",
+        "status": 200,
+        "elapsedMs": 157380
+      },
+      {
+        "path": "/v1/recommendations/events?view=home",
+        "status": 200,
+        "elapsedMs": 1331
+      },
+      {
+        "path": "/v1/admin/operations-status",
+        "status": 200,
+        "elapsedMs": 716
+      }
+    ],
+    "sourceStatus": [
+      {
+        "provider": "ticketmaster",
+        "available": true
+      },
+      {
+        "provider": "onepa",
+        "available": true
+      }
+    ],
+    "sourceCoverage": [
+      {
+        "provider": "onepa",
+        "complete": false
+      }
+    ],
+    "ranking": {
+      "itemCount": 0,
+      "interestMatches": 0,
+      "otherRelevant": 0,
+      "interestFirst": true,
+      "nonempty": false,
+      "homeMatchesAll": true
+    },
+    "existingDemoAccountActiveInterestCount": 0,
+    "services": [
+      {
+        "service": "backend",
+        "state": "ready",
+        "configured": true
+      },
+      {
+        "service": "firebase",
+        "state": "ready",
+        "configured": true
+      },
+      {
+        "service": "ai",
+        "state": "ready",
+        "configured": true
+      },
+      {
+        "service": "ticketmaster",
+        "state": "ready",
+        "configured": true
+      },
+      {
+        "service": "onepa",
+        "state": "ready",
+        "configured": true
+      }
+    ],
+    "browse": {
+      "passed": true,
+      "reads": [
+        {
+          "path": "/v1/event-browse",
+          "status": 200,
+          "elapsedMs": 2756
+        }
+      ],
+      "itemCount": 25,
+      "sourceStatus": [
+        {
+          "provider": "ticketmaster",
+          "available": true
+        },
+        {
+          "provider": "onepa",
+          "available": true,
+          "coverageComplete": false
+        }
+      ]
+    }
+  },
+  "existingAccountFieldsUnchanged": {
+    "profile": true,
+    "interests": true,
+    "recommendationProfile": true,
+    "method": "exact JSON hashes compared against pre-stop reads; actual values retained privately"
+  },
+  "sourceVerificationBeforeRelease": {
+    "probeDurationMs": 147020,
+    "requiredDefaultComplete": true,
+    "groupsComplete": 13,
+    "groupsFailed": 2,
+    "sameSnapshotControlledRequesterCounts": {
+      "Food": 1,
+      "Dance": 3,
+      "Music": 2
+    },
+    "actualUserAcceptance": false
+  },
+  "regression": {
+    "backendPassed": 1996,
+    "flutterPassed": 1900,
+    "emulatorPassed": 28,
+    "analysis": "no issues"
+  },
+  "evidenceLayersDistinct": true,
+  "limitations": [
+    "Physical phone not yet accepted.",
+    "Controlled single-interest source probe is not real-user eligibility evidence.",
+    "Incomplete onePA supplemental coverage must remain visible.",
+    "Existing demo account has zero active interests and returned zero recommendations; live HTTP Home equality is empty-case evidence, not nonempty ranking acceptance. Nonempty Food/Dance ranking comes from the separate same-snapshot real-source application probe."
+  ],
+  "atUtc": "2026-11-17T03:15:05.929555+00:00",
+  "historicalAttempt": {
+    "initialHttpCheckDuringStartup": "timeout before any response was captured; no activity query started",
+    "receiptSha256": "0acd613a4995df4b11c6aa42a39f113e3eddaba08a0e5a95bb5cc613e9ebca12",
+    "successfulCheckAfterListening": true
+  }
+}
