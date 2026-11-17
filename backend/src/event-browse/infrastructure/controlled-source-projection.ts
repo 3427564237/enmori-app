@@ -110,13 +110,19 @@ export class ControlledSourceProjection implements BrowseSource {
       if(epoch!==this.epoch||signal.aborted)throw dependencyUnavailable;return result;
     };
     if(source.event)this.event=async(id,asOf,signal)=>{
-      const epoch=this.epoch,pending=this.pending;
+      const admitted=this.epoch,pending=this.pending;
       if(signal.aborted)throw dependencyUnavailable;
       // Stable IDs obey the same pending replacement as ordinary browse Detail.
       // Do not start an independent old provider lookup in the new epoch.
       if(pending)await pending;
-      if(epoch!==this.epoch||signal.aborted)throw dependencyUnavailable;
-      const now=parseBrowseInstant(asOf),cached=this.snapshot;
+      if(admitted!==this.epoch||signal.aborted)throw dependencyUnavailable;
+      // An already-expired list cannot fence a new exact provider read. Retire
+      // it before admission, without fetching or publishing replacement rows.
+      // A snapshot still live here remains this read's in-flight expiry fence.
+      if(this.snapshot&&!this.live(this.snapshot)){
+        this.snapshot=undefined;this.epoch={};this.observedPages.clear();this.pageReads.clear();
+      }
+      const epoch=this.epoch,now=parseBrowseInstant(asOf),cached=this.snapshot;
       if(now!==undefined&&cached&&covers(cached,now)&&this.live(cached)){
         const found=cached.items.find(item=>sourceEventId(item.browseId)===id&&parseBrowseInstant(item.startAt)!>now);
         if(found&&!this.source.status)return found;
