@@ -2,6 +2,8 @@
 
 Authority: [17 November LI decision](../../decisions/2026-11-17-li-interest-discovery-uiux.md). Base: v75 `936176ddbaa8878022754f6cf8408775c5e93e02`; isolated branch `souma/uiux-interest-coverage-20261117`. Prior Home/Profile/card and friend-profile repairs are retained.
 
+The sections below preserve the first v76 handoff and its failed atomic source gate. LI subsequently approved [supplemental-query degradation and resumed release](../../decisions/2026-11-17-li-supplemental-query-degradation.md). Current implementation/validation for that follow-up is recorded separately; the earlier failure receipts and UI candidate remain historical evidence, not current acceptance claims.
+
 ## Delivered behavior
 
 - onePA: shared public manifest of default five pages plus fourteen fixed first-page queries, maximum 190 raw records, stable identity deduplication and a finite title vocabulary. One browser, four pages, one 180-second deadline; all fifteen tasks are required. A failed acquisition publishes no partial/stale onePA candidates. Ticketmaster stays independent.
