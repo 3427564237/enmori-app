@@ -1,0 +1,16 @@
+{
+  "atUtc": "2026-11-17T14:33:03.649583+00:00",
+  "device": "emulator-5556",
+  "qemuConfirmedBeforeActions": true,
+  "wifiEnabledBeforeClose": true,
+  "mobileDataEnabledBeforeClose": true,
+  "ownedUiDumpRemoved": true,
+  "enmoriForceStopped": true,
+  "ownedReadOnlyAvdClosed": true,
+  "explicitEmulatorNoLongerConnected": true,
+  "phoneOperated": false,
+  "accountDeletedOrReset": false,
+  "participationOrProfileMutationsIssued": false,
+  "aiGrantRenewed": false,
+  "modelCallsIssued": 0
+}

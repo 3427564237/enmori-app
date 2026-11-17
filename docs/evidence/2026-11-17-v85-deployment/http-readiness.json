@@ -1,0 +1,51 @@
+{
+  "checks": [
+    {
+      "atUtc": "2026-11-17T14:04:31.654604+00:00",
+      "errorType": "TimeoutError",
+      "elapsedMs": 7186
+    },
+    {
+      "atUtc": "2026-11-17T14:04:53.841299+00:00",
+      "errorType": "TimeoutError",
+      "elapsedMs": 7161
+    },
+    {
+      "atUtc": "2026-11-17T14:05:16.003440+00:00",
+      "errorType": "TimeoutError",
+      "elapsedMs": 7163
+    },
+    {
+      "atUtc": "2026-11-17T14:05:38.167264+00:00",
+      "errorType": "TimeoutError",
+      "elapsedMs": 7165
+    },
+    {
+      "atUtc": "2026-11-17T14:06:00.333487+00:00",
+      "errorType": "TimeoutError",
+      "elapsedMs": 7161
+    },
+    {
+      "atUtc": "2026-11-17T14:06:22.494866+00:00",
+      "errorType": "TimeoutError",
+      "elapsedMs": 7157
+    },
+    {
+      "atUtc": "2026-11-17T14:06:44.652336+00:00",
+      "errorType": "TimeoutError",
+      "elapsedMs": 7170
+    },
+    {
+      "atUtc": "2026-11-17T14:07:06.822443+00:00",
+      "errorType": "TimeoutError",
+      "elapsedMs": 7164
+    },
+    {
+      "atUtc": "2026-11-17T14:07:28.986859+00:00",
+      "status": 401,
+      "errorCode": "AUTH_REQUIRED",
+      "elapsedMs": 254
+    }
+  ],
+  "ready": true
+}

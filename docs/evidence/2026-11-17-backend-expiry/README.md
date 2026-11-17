@@ -1,5 +1,7 @@
 # ENMORI 后端过期快照修复：待部署确认
 
+后续记录：用户随后明确批准原包部署，已完成 [v85 部署及 v84 模拟器回归](../2026-11-17-v85-deployment/README.md)。下文保留部署前快照及原始限制，不代表当前部署状态；独立 onePA／启动问题未随部署关闭。
+
 2026-11-17，Asia/Singapore。**已完成最小修复、回归和候选包；未上传、未部署。AI 续期未操作，当前仍不满足定版条件。**
 
 依据：[本轮批准范围及模拟器许可](../../decisions/2026-11-17-li-expired-projection-repair.md)。保留 [v83 审查](../2026-11-17-stable-candidate/README.md)和 [v84 跟进](../2026-11-17-stable-followup/README.md)，本轮证据不覆盖或撤销其中未关闭项。

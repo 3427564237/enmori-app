@@ -1,0 +1,251 @@
+{
+  "evidenceKind": "operator-host authenticated HTTPS, existing dedicated test account",
+  "backendVersion": 85,
+  "modelCalls": 0,
+  "explicitProductMutationRequests": 0,
+  "sameIdentityAcrossBeforeAfter": true,
+  "physicalPhoneEvidence": false,
+  "sourcePhaseTraceAvailable": false,
+  "sharedConcurrentReadersFullyObservable": false,
+  "phases": {
+    "seed": {
+      "mode": "seed",
+      "startedAt": "2026-11-17T14:08:27.992Z",
+      "kind": "operator-host authenticated HTTP",
+      "modelCalls": 0,
+      "explicitProductMutationRequests": 0,
+      "reads": [
+        {
+          "label": "seed-onboarding",
+          "startedAt": "2026-11-17T14:08:28.363Z",
+          "startedUptime": 16738.4,
+          "status": 200,
+          "serverDate": "Tue, 17 Nov 2026 14:08:30 GMT",
+          "elapsedMs": 2306,
+          "bodySha256": "29c82ea89fedb3a0c8d176fccf2757a7044292e4a72adf241aa9f6a3f170b4cb",
+          "requestId": null,
+          "completedAt": "2026-11-17T14:08:30.671Z",
+          "completedUptime": 16740.7
+        },
+        {
+          "label": "seed-profile",
+          "startedAt": "2026-11-17T14:08:30.672Z",
+          "startedUptime": 16740.71,
+          "status": 200,
+          "serverDate": "Tue, 17 Nov 2026 14:08:31 GMT",
+          "elapsedMs": 875,
+          "bodySha256": "c8f26daff2c45d32014cc726b4dcec5009dc79c609bcba40bd5620934517d99a",
+          "requestId": null,
+          "completedAt": "2026-11-17T14:08:31.547Z",
+          "completedUptime": 16741.58
+        },
+        {
+          "label": "seed-browse",
+          "startedAt": "2026-11-17T14:08:31.547Z",
+          "startedUptime": 16741.58,
+          "status": 200,
+          "serverDate": "Tue, 17 Nov 2026 14:09:46 GMT",
+          "elapsedMs": 75173,
+          "bodySha256": "e7d5844995d4ab2dc628c227fa85ee6010c4bb634f3a719daaa2b351ea9eb60f",
+          "requestId": null,
+          "itemCount": 25,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": true,
+              "coverageComplete": false
+            }
+          ],
+          "completedAt": "2026-11-17T14:09:46.721Z",
+          "completedUptime": 16816.75
+        },
+        {
+          "label": "tm-stable-before",
+          "startedAt": "2026-11-17T14:09:46.721Z",
+          "startedUptime": 16816.76,
+          "status": 200,
+          "serverDate": "Tue, 17 Nov 2026 14:09:53 GMT",
+          "elapsedMs": 6980,
+          "bodySha256": "6a0bc4d30de87cf872c42c941c47d03576bbb2f4008cdde8cd369dac66d870ab",
+          "requestId": null,
+          "detailsStatus": "unavailable",
+          "completedAt": "2026-11-17T14:09:53.703Z",
+          "completedUptime": 16823.74
+        },
+        {
+          "label": "onepa-stable-before",
+          "startedAt": "2026-11-17T14:09:53.703Z",
+          "startedUptime": 16823.74,
+          "status": 503,
+          "serverDate": "Tue, 17 Nov 2026 14:10:07 GMT",
+          "elapsedMs": 14045,
+          "bodySha256": "12b42667d203c111694f1109d71e83767ddd940b94cdea379fca32d6dbe4e3af",
+          "errorCode": "SERVICE_UNAVAILABLE",
+          "requestId": "req-l",
+          "completedAt": "2026-11-17T14:10:07.749Z",
+          "completedUptime": 16837.78
+        }
+      ],
+      "identities": {
+        "tm": "24d47fd169ae56bbbc84b25678d1f54d612757a26e302c8c094f1d7b283456a1",
+        "onepa": "98de3ed4aa242fa756363440631630840a5c2934194c0f492b58bdb94096bd14"
+      },
+      "seedCompletedAt": "2026-11-17T14:09:46.721Z",
+      "onepaFetchedAt": "2026-11-17T14:09:45.306Z",
+      "notBeforeUptime": 17126.75,
+      "beforeDetailSucceeded": true,
+      "completedAt": "2026-11-17T14:10:07.750Z"
+    },
+    "after": {
+      "mode": "after",
+      "startedAt": "2026-11-17T14:14:56.763Z",
+      "kind": "operator-host authenticated HTTP",
+      "modelCalls": 0,
+      "explicitProductMutationRequests": 0,
+      "reads": [
+        {
+          "label": "tm-stable-after-1",
+          "startedAt": "2026-11-17T14:14:57.394Z",
+          "startedUptime": 17127.43,
+          "status": 200,
+          "serverDate": "Tue, 17 Nov 2026 14:15:03 GMT",
+          "elapsedMs": 6467,
+          "bodySha256": "af4743c609953239e868d8e1c86128d53d747aabcf1c35c047aae2debde1f93b",
+          "requestId": null,
+          "detailsStatus": "unavailable",
+          "completedAt": "2026-11-17T14:15:03.862Z",
+          "completedUptime": 17133.9
+        },
+        {
+          "label": "tm-stable-after-2",
+          "startedAt": "2026-11-17T14:15:03.863Z",
+          "startedUptime": 17133.9,
+          "status": 200,
+          "serverDate": "Tue, 17 Nov 2026 14:15:09 GMT",
+          "elapsedMs": 5731,
+          "bodySha256": "a3e8c32f4888a43e19b8ff68a22215b6acbc3cbef1b5f62b18e71fa8b85bb680",
+          "requestId": null,
+          "detailsStatus": "unavailable",
+          "completedAt": "2026-11-17T14:15:09.595Z",
+          "completedUptime": 17139.63
+        },
+        {
+          "label": "onepa-stable-after",
+          "startedAt": "2026-11-17T14:15:09.595Z",
+          "startedUptime": 17139.63,
+          "status": 503,
+          "serverDate": "Tue, 17 Nov 2026 14:15:10 GMT",
+          "elapsedMs": 649,
+          "bodySha256": "869558e7c7b6fc66e9601888df6cf4509c3e71f10e4a2671c43e3590cd07a92d",
+          "errorCode": "SERVICE_UNAVAILABLE",
+          "requestId": "req-p",
+          "completedAt": "2026-11-17T14:15:10.245Z",
+          "completedUptime": 17140.28
+        },
+        {
+          "label": "onepa-browse-after",
+          "startedAt": "2026-11-17T14:15:10.245Z",
+          "startedUptime": 17140.28,
+          "status": 503,
+          "serverDate": "Tue, 17 Nov 2026 14:15:10 GMT",
+          "elapsedMs": 570,
+          "bodySha256": "0f624683151ef7055d11c0320d99d65870a110c1fc498c8cd255fd949f3f9804",
+          "errorCode": "SERVICE_UNAVAILABLE",
+          "requestId": "req-q",
+          "completedAt": "2026-11-17T14:15:10.816Z",
+          "completedUptime": 17140.85
+        },
+        {
+          "label": "tm-browse-after",
+          "startedAt": "2026-11-17T14:15:10.816Z",
+          "startedUptime": 17140.85,
+          "status": 200,
+          "serverDate": "Tue, 17 Nov 2026 14:15:16 GMT",
+          "elapsedMs": 5852,
+          "bodySha256": "e502ef4decbe00453da461a1e1bc8628c553d80d30ca2e847317cd1788294bce",
+          "requestId": null,
+          "completedAt": "2026-11-17T14:15:16.668Z",
+          "completedUptime": 17146.7
+        },
+        {
+          "label": "after-onboarding",
+          "startedAt": "2026-11-17T14:15:16.668Z",
+          "startedUptime": 17146.7,
+          "status": 200,
+          "serverDate": "Tue, 17 Nov 2026 14:15:18 GMT",
+          "elapsedMs": 1525,
+          "bodySha256": "29c82ea89fedb3a0c8d176fccf2757a7044292e4a72adf241aa9f6a3f170b4cb",
+          "requestId": null,
+          "completedAt": "2026-11-17T14:15:18.193Z",
+          "completedUptime": 17148.23
+        },
+        {
+          "label": "after-profile",
+          "startedAt": "2026-11-17T14:15:18.194Z",
+          "startedUptime": 17148.23,
+          "status": 200,
+          "serverDate": "Tue, 17 Nov 2026 14:15:18 GMT",
+          "elapsedMs": 594,
+          "bodySha256": "c8f26daff2c45d32014cc726b4dcec5009dc79c609bcba40bd5620934517d99a",
+          "requestId": null,
+          "completedAt": "2026-11-17T14:15:18.788Z",
+          "completedUptime": 17148.82
+        }
+      ],
+      "elapsedSinceSeedMs": 310680,
+      "identities": {
+        "tm": "24d47fd169ae56bbbc84b25678d1f54d612757a26e302c8c094f1d7b283456a1",
+        "onepa": "98de3ed4aa242fa756363440631630840a5c2934194c0f492b58bdb94096bd14"
+      },
+      "completedAt": "2026-11-17T14:15:18.789Z"
+    },
+    "ops": {
+      "mode": "ops",
+      "startedAt": "2026-11-17T14:09:49.874Z",
+      "kind": "operator-host authenticated HTTP",
+      "modelCalls": 0,
+      "explicitProductMutationRequests": 0,
+      "reads": [
+        {
+          "label": "runtime-ops",
+          "startedAt": "2026-11-17T14:09:50.235Z",
+          "startedUptime": 16820.27,
+          "status": 200,
+          "serverDate": "Tue, 17 Nov 2026 14:09:51 GMT",
+          "elapsedMs": 823,
+          "bodySha256": "22a794cb5c12d36a450cdc5ad636b02da28bfc1098663e3a89b6c4a90162cb54",
+          "requestId": null,
+          "completedAt": "2026-11-17T14:09:51.059Z",
+          "completedUptime": 16821.09
+        }
+      ],
+      "completedAt": "2026-11-17T14:09:51.059Z"
+    },
+    "ops-after": {
+      "mode": "ops-after",
+      "startedAt": "2026-11-17T14:16:01.710Z",
+      "kind": "operator-host authenticated HTTP",
+      "modelCalls": 0,
+      "explicitProductMutationRequests": 0,
+      "reads": [
+        {
+          "label": "runtime-ops-after",
+          "startedAt": "2026-11-17T14:16:02.077Z",
+          "startedUptime": 17192.11,
+          "status": 200,
+          "serverDate": "Tue, 17 Nov 2026 14:16:02 GMT",
+          "elapsedMs": 798,
+          "bodySha256": "0e1852533a976c328dcc7cbd6319fd28a20cc5c7a6cfeb55e7a37d5fd9865141",
+          "requestId": null,
+          "completedAt": "2026-11-17T14:16:02.877Z",
+          "completedUptime": 17192.91
+        }
+      ],
+      "completedAt": "2026-11-17T14:16:02.878Z"
+    }
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "ops": {
+    "observedAt": "2026-11-17T14:09:51.019Z",
+    "services": [
+      {
+        "service": "backend",
+        "configured": true,
+        "state": "ready",
+        "lastObservedAt": "2026-11-17T14:09:51.019Z"
+      },
+      {
+        "service": "firebase",
+        "configured": true,
+        "state": "ready",
+        "lastObservedAt": "2026-11-17T14:09:51.019Z",
+        "lastSucceededAt": "2026-11-17T14:09:51.019Z"
+      },
+      {
+        "service": "ai",
+        "configured": true,
+        "state": "ready",
+        "lastObservedAt": "2026-11-17T14:09:51.019Z"
+      },
+      {
+        "service": "ticketmaster",
+        "configured": true,
+        "state": "ready",
+        "lastObservedAt": "2026-11-17T14:08:33.508Z",
+        "lastSucceededAt": "2026-11-17T14:08:33.508Z"
+      },
+      {
+        "service": "onepa",
+        "configured": true,
+        "state": "ready",
+        "lastObservedAt": "2026-11-17T14:09:45.306Z",
+        "lastSucceededAt": "2026-11-17T14:09:45.306Z"
+      }
+    ]
+  },
+  "ops-after": {
+    "observedAt": "2026-11-17T14:16:02.832Z",
+    "services": [
+      {
+        "service": "backend",
+        "configured": true,
+        "state": "ready",
+        "lastObservedAt": "2026-11-17T14:16:02.832Z"
+      },
+      {
+        "service": "firebase",
+        "configured": true,
+        "state": "ready",
+        "lastObservedAt": "2026-11-17T14:16:02.832Z",
+        "lastSucceededAt": "2026-11-17T14:16:02.832Z"
+      },
+      {
+        "service": "ai",
+        "configured": true,
+        "state": "ready",
+        "lastObservedAt": "2026-11-17T14:16:02.832Z"
+      },
+      {
+        "service": "ticketmaster",
+        "configured": true,
+        "state": "ready",
+        "lastObservedAt": "2026-11-17T14:14:59.262Z",
+        "lastSucceededAt": "2026-11-17T14:14:59.262Z"
+      },
+      {
+        "service": "onepa",
+        "configured": true,
+        "state": "unavailable",
+        "lastObservedAt": "2026-11-17T14:14:58.062Z",
+        "lastSucceededAt": "2026-11-17T14:09:45.306Z",
+        "reason": "dependency_unavailable"
+      }
+    ]
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "recordedAtUtc": "2026-11-17T14:13:07.010810+00:00",
+  "sourceCommit": "9fb0e7c9bfc27ca860da66c83e39d9f6245564f4",
+  "backendVersion": 85,
+  "packageName": "2026111713582385.zip",
+  "archiveSha256": "7b2ffcccbf6c129ccaa839de1fced57125e2c41e33a5f746dc444189fcbe4140",
+  "baselineName": "2026111704554378.zip",
+  "baselineSha256": "6005380c4e663bfaebfee898dc1fae56c66c0910b9b4485f0da7ea000070d230",
+  "uploadedArchiveEveryEntryVerified": true,
+  "entryCount": 8570,
+  "changedEntries": [
+    "backend/dist/src/event-browse/infrastructure/controlled-source-projection.js",
+    "backend/dist/src/event-browse/infrastructure/controlled-source-projection.js.map",
+    "deployment-manifest.json"
+  ],
+  "mountedManifest": {
+    "sourceCommit": "9fb0e7c9bfc27ca860da66c83e39d9f6245564f4",
+    "demoVersion": 85,
+    "manifestSha256": "b3a07766fb2cfbbc011683f0d1fd2b909ab609ab48b82aa8225912ba75bc4246"
+  },
+  "mountVerifiedAtUtc": "2026-11-17T14:07:58.616796+00:00",
+  "stopRequestedAtUtc": "2026-11-17T14:02:17.500615+00:00",
+  "startRequestedAtUtc": "2026-11-17T14:04:12.248873+00:00",
+  "httpReadyObservedAtUtc": "2026-11-17T14:07:28.986859+00:00",
+  "httpReadyObservation": {
+    "atUtc": "2026-11-17T14:07:28.986859+00:00",
+    "status": 401,
+    "errorCode": "AUTH_REQUIRED",
+    "elapsedMs": 254
+  },
+  "drain": {
+    "allContainersStopped": true,
+    "httpStopped": true,
+    "localStopped": true,
+    "evidenceKind": "arm-current-instances-and-site-stop-v2",
+    "currentInstanceCount": 1,
+    "individualContainerTerminationsObserved": false
+  },
+  "configurationFingerprintUnchanged": true,
+  "matchingServiceOwnerAcquired": true,
+  "serviceOwnerLeaseRenewalObserved": true,
+  "monetaryGrantAndCompleteAttemptHistoryPreserved": true,
+  "aiGrantRenewed": false,
+  "modelCallsIssuedByOperator": 0,
+  "publicDiagnosticsAdded": false,
+  "rollbackExecuted": false,
+  "physicalPhoneOperated": false,
+  "readinessDoesNotEqualAcceptance": true,
+  "finalReadOnlyCheck": {
+    "serviceState": "Running",
+    "sameSelector": true,
+    "serviceOwnerLeaseRenewalConfirmed": true,
+    "aiGrantRenewed": false,
+    "renewalPrivateReceiptSha256": "61c2e0354618b476ed26563caa5979e04f2061f87cfc82d4a3d7b9da0b5b2614",
+    "inspectPrivateReceiptSha256": "4f5ff3dc22e3d7ffcb08f77a3688e39e2aaa0e57e4313e7b2a00a51276aabd07"
+  }
+}

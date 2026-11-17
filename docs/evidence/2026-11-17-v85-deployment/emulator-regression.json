@@ -1,0 +1,253 @@
+{
+  "evidenceKind": "Android emulator; no physical-phone or real-user observation",
+  "apkVersion": 84,
+  "apkSha256": "b544dde5ba9060b5fb20ce822ec19a6f44e6e96c9c268e3664122afed0a581d0",
+  "backendVersion": 85,
+  "backendIdentityReceipt": "deployment-receipt.json",
+  "maintenanceRecovery": {
+    "atUtc": "2026-11-17T14:07:51.411265+00:00",
+    "scenario": "maintenance startup unavailable then explicit retry after API ready",
+    "kind": "Android emulator",
+    "version": 84,
+    "homeObserved": true,
+    "completedAtUtc": "2026-11-17T14:07:58.614674+00:00",
+    "appStoppedBeforeExpiryHttpWindow": true
+  },
+  "clientExpiry": {
+    "readyAtUtc": "2026-11-17T14:18:29.507746+00:00",
+    "expiredObservedAtUtc": "2026-11-17T14:23:42.116694+00:00",
+    "elapsedMonotonicSeconds": 312.61,
+    "observations": {
+      "emulator-detail-ready": {
+        "loading": false,
+        "selectedTitleVisible": true,
+        "unavailableExplanation": false,
+        "plansVisible": true,
+        "reloadEnabled": true,
+        "officialLinkEnabled": true
+      },
+      "emulator-detail-expired": {
+        "loading": false,
+        "selectedTitleVisible": false,
+        "unavailableExplanation": true,
+        "plansVisible": true,
+        "reloadEnabled": true,
+        "officialLinkEnabled": false
+      },
+      "emulator-detail-refresh-pending": {
+        "loading": true,
+        "selectedTitleVisible": false,
+        "unavailableExplanation": false,
+        "plansVisible": true,
+        "reloadEnabled": false,
+        "officialLinkEnabled": false
+      },
+      "emulator-detail-refreshed": {
+        "loading": false,
+        "selectedTitleVisible": true,
+        "unavailableExplanation": false,
+        "plansVisible": true,
+        "reloadEnabled": true,
+        "officialLinkEnabled": true
+      },
+      "emulator-detail-offline": {
+        "loading": true,
+        "selectedTitleVisible": false,
+        "unavailableExplanation": false,
+        "plansVisible": true,
+        "reloadEnabled": false,
+        "officialLinkEnabled": false
+      },
+      "emulator-detail-online-recovered": {
+        "loading": false,
+        "selectedTitleVisible": true,
+        "unavailableExplanation": false,
+        "plansVisible": true,
+        "reloadEnabled": true,
+        "officialLinkEnabled": true
+      }
+    },
+    "sameReadyAndRefreshedXml": true,
+    "preciseInFlightBoundaryTimingExercised": false
+  },
+  "firstOfflineAttempt": "Only pending loading captured, then content restored; not terminal-error/retry evidence",
+  "terminalOfflineThenExplicitReload": {
+    "startedAtUtc": "2026-11-17T14:32:05.211542+00:00",
+    "apkVersion": 84,
+    "backendVersion": 85,
+    "device": "emulator-5556",
+    "physicalPhoneOperated": false,
+    "productMutationActions": 0,
+    "observations": [
+      {
+        "label": "detail-terminal-before",
+        "atUtc": "2026-11-17T14:32:08.007433+00:00",
+        "loading": false,
+        "terminalUnavailable": false,
+        "sameSelectedTitleVisible": true,
+        "reloadEnabled": true,
+        "officialLinkEnabled": true,
+        "plansVisible": true
+      },
+      {
+        "label": "detail-terminal-offline",
+        "atUtc": "2026-11-17T14:32:14.145229+00:00",
+        "loading": false,
+        "terminalUnavailable": true,
+        "sameSelectedTitleVisible": false,
+        "reloadEnabled": true,
+        "officialLinkEnabled": false,
+        "plansVisible": true
+      },
+      {
+        "label": "detail-terminal-restored",
+        "atUtc": "2026-11-17T14:32:22.074100+00:00",
+        "loading": true,
+        "terminalUnavailable": false,
+        "sameSelectedTitleVisible": false,
+        "reloadEnabled": false,
+        "officialLinkEnabled": false,
+        "plansVisible": true
+      },
+      {
+        "label": "detail-terminal-restored",
+        "atUtc": "2026-11-17T14:32:25.616296+00:00",
+        "loading": true,
+        "terminalUnavailable": false,
+        "sameSelectedTitleVisible": false,
+        "reloadEnabled": false,
+        "officialLinkEnabled": false,
+        "plansVisible": true
+      },
+      {
+        "label": "detail-terminal-restored",
+        "atUtc": "2026-11-17T14:32:29.743960+00:00",
+        "loading": false,
+        "terminalUnavailable": false,
+        "sameSelectedTitleVisible": true,
+        "reloadEnabled": true,
+        "officialLinkEnabled": true,
+        "plansVisible": true
+      }
+    ],
+    "networkRestored": true,
+    "terminalErrorObservedBeforeNetworkRestore": true,
+    "passed": true,
+    "completedAtUtc": "2026-11-17T14:32:29.825286+00:00"
+  },
+  "startupCyclesAndBackReopen": {
+    "startedAtUtc": "2026-11-17T14:25:53.954137+00:00",
+    "device": "emulator-5556",
+    "apkVersion": 84,
+    "backendVersion": 85,
+    "observations": [
+      {
+        "label": "startup-offline-1",
+        "atUtc": "2026-11-17T14:25:58.803924+00:00",
+        "home": false,
+        "unavailable": true,
+        "opening": false,
+        "retry": true
+      },
+      {
+        "label": "startup-offline-retry-1",
+        "atUtc": "2026-11-17T14:26:01.546117+00:00",
+        "home": false,
+        "unavailable": true,
+        "opening": false,
+        "retry": true
+      },
+      {
+        "label": "startup-recovered-1",
+        "atUtc": "2026-11-17T14:26:09.002013+00:00",
+        "home": true,
+        "unavailable": false,
+        "opening": false,
+        "retry": false
+      },
+      {
+        "label": "startup-offline-2",
+        "atUtc": "2026-11-17T14:26:13.835536+00:00",
+        "home": false,
+        "unavailable": true,
+        "opening": false,
+        "retry": true
+      },
+      {
+        "label": "startup-offline-retry-2",
+        "atUtc": "2026-11-17T14:26:16.473356+00:00",
+        "home": false,
+        "unavailable": true,
+        "opening": false,
+        "retry": true
+      },
+      {
+        "label": "startup-recovered-2",
+        "atUtc": "2026-11-17T14:26:23.902420+00:00",
+        "home": true,
+        "unavailable": false,
+        "opening": false,
+        "retry": false
+      },
+      {
+        "label": "startup-back-reopened",
+        "atUtc": "2026-11-17T14:26:28.888982+00:00",
+        "home": false,
+        "unavailable": false,
+        "opening": true,
+        "retry": false
+      },
+      {
+        "label": "startup-back-reopened",
+        "atUtc": "2026-11-17T14:26:32.542981+00:00",
+        "home": true,
+        "unavailable": false,
+        "opening": false,
+        "retry": false
+      }
+    ],
+    "physicalPhoneOperated": false,
+    "networkRestored": true,
+    "pidBeforeBack": "5919",
+    "pidAfterReopen": "5919",
+    "passed": true,
+    "completedAtUtc": "2026-11-17T14:26:32.674716+00:00"
+  },
+  "laterCatalogueObservation": {
+    "atUtc": "2026-11-17T14:30:50.333334+00:00",
+    "onePaAvailable": true,
+    "incompleteInterestSearchWarningVisible": true,
+    "onePaDetailRecoveryProved": false
+  },
+  "cleanupReceipt": "emulator-cleanup.json",
+  "privateArtifactsSha256": {
+    "emulator-detail-ready.png": "3958a17704417c1f3242cb5e0ecf6c30da7d08f7d4fcd50e6318bd735a3d80cc",
+    "emulator-detail-ready.xml": "08376d8dbcdea646fc5a895054e4454ccb14db482836aa8e15072e1cb35d49cf",
+    "emulator-detail-expired.png": "ed7190d7256a169bcd2de8d017738d49370ce33c4f283a3470aed535bf38b1ae",
+    "emulator-detail-expired.xml": "eaa5efb734a99fe30acc71ed5ad3d2a015a3bcabdf4f70109726cf741c41a5ef",
+    "emulator-detail-refresh-pending.png": "6edb9c83b4033f87d85f2b7703661a16a41cc1b004f64aa8f794a6398d5565fa",
+    "emulator-detail-refresh-pending.xml": "d1b213b1fcb62ace1b9f47ab5254eb0d7843eb70355d11d5558c285e5805435c",
+    "emulator-detail-refreshed.png": "86f905f2c847c38c78a5fa4416c7367e98bea2562ddd1adfb58c9c54a5255238",
+    "emulator-detail-refreshed.xml": "08376d8dbcdea646fc5a895054e4454ccb14db482836aa8e15072e1cb35d49cf",
+    "emulator-detail-offline.png": "50c772e5a7b0fc09ab0a7254b7a4748012bdb92fc8b8fd72210ef8bef4804cd6",
+    "emulator-detail-offline.xml": "4228675511ca6cf446a49ae31c622989fc0e912574d3be6f1929feba574e41e7",
+    "emulator-detail-online-recovered.png": "c43c17c4f57358d12a9380e3c3ce5e974e681cd520bfb24aadf80bcd1d0ae1e2",
+    "emulator-detail-online-recovered.xml": "08376d8dbcdea646fc5a895054e4454ccb14db482836aa8e15072e1cb35d49cf",
+    "emulator-browse-finalcheck.png": "a2733673088f4b1f31da8ec4ae091dfdd0676460c48831e79e1d2268eb815b23",
+    "emulator-browse-finalcheck.xml": "fa54ebf39c9c15de1379245d4b84a7779368ccc51c2df315e1bf7fc557700517",
+    "detail-terminal-before.png": "fe175087d91eeede8d19eebc61daae634d9f3a90466f28f8c5cd070252d66de4",
+    "detail-terminal-before.xml": "08376d8dbcdea646fc5a895054e4454ccb14db482836aa8e15072e1cb35d49cf",
+    "detail-terminal-offline.png": "7d61108240acd841731f673e335b64d4a70f8320bdd3bf1e9ee34b464471f28f",
+    "detail-terminal-offline.xml": "985d948a2866368c152459857fdb364541542c9fce8e0e396da4922b0593b30d",
+    "detail-terminal-restored.png": "856423a30ed380514cadce349a3b11f429a7cba424b78a481607b92305d30200",
+    "detail-terminal-restored.xml": "08376d8dbcdea646fc5a895054e4454ccb14db482836aa8e15072e1cb35d49cf",
+    "detail-terminal-explicit-reload-immediate.png": "b6505160c43d410864f7d381b373753bdf6115dbd2601ddf897be382c64f467d",
+    "emulator-startup-regression.py": "165f850efc65419ef1ff7dc60e65fc7f15d43927fbc64d93e5d412956ef482a2",
+    "emulator-detail-terminal.py": "471407689629a3b001c12fdd6a1eaaa559e81ae430820b5a9f9b04e67c33d614",
+    "emulator-cleanup.json": "68b73cd1edc413e02cc9c6007f2b17b6c74ee2b6c6f9ff00dc0bc0ea3d02fb3a"
+  },
+  "productMutationActionsIssued": 0,
+  "physicalPhoneOperated": false,
+  "aiGrantRenewed": false,
+  "modelCallsIssuedByOperator": 0
+}

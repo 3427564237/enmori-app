@@ -1,0 +1,12 @@
+{
+  "atUtc": "2026-11-17T14:12:28.048108+00:00",
+  "device": "emulator-5556",
+  "kind": "Android emulator",
+  "api": "36",
+  "abi": "x86_64",
+  "apkVersion": 84,
+  "apkSha256": "b544dde5ba9060b5fb20ce822ec19a6f44e6e96c9c268e3664122afed0a581d0",
+  "readOnlyAvdSession": true,
+  "physicalPhoneOperated": false,
+  "appStillStoppedForHttpWindow": true
+}

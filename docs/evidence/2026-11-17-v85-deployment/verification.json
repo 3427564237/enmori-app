@@ -1,0 +1,61 @@
+{
+  "productionSourceChangedDuringDeployment": false,
+  "backendRegressionReused": "../2026-11-17-backend-expiry/verification.json",
+  "sourceCommit": "9fb0e7c9bfc27ca860da66c83e39d9f6245564f4",
+  "helperVerification": {
+    "stopGuardTests": 35,
+    "ownerHelperTests": 22,
+    "exactPackageLifecycleFixture": 1,
+    "exactPackageFixtureChecks": [
+      "absent candidate inspect",
+      "exact archive verification",
+      "wrong hash rejected",
+      "activate",
+      "replayed activation rejected",
+      "read-back",
+      "rollback",
+      "replayed rollback rejected",
+      "build mode rejected"
+    ]
+  },
+  "logs": {
+    "current-stop-tests.log": {
+      "privatePath": "/home/miku/.local/state/enmori-v85-deploy-20261117/current-stop-tests.log",
+      "sha256": "35f763aaab15b61f72ccaf56c9f201c32d3938548e9e613df77c85670eca7ce8"
+    },
+    "owner-helper-tests.log": {
+      "privatePath": "/home/miku/.local/state/enmori-v85-deploy-20261117/owner-helper-tests.log",
+      "sha256": "8abee58946637aa5f94b7b3830012c9690e9561aeeec7b25d6d79dd7f4c3d28d"
+    },
+    "exact-package-tests.log": {
+      "privatePath": "/home/miku/.local/state/enmori-v85-deploy-20261117/exact-package-tests.log",
+      "sha256": "dcc853f1f1a567e3035e6706549f2be1bdd27b0bb31d09b436821cbded6eff96"
+    },
+    "operator-preflight-local-failure.txt": {
+      "privatePath": "/home/miku/.local/state/enmori-v85-deploy-20261117/operator-preflight-local-failure.txt",
+      "sha256": "7fbb3bf61a6c9ea556d9252a02fa67a1116c379654b98610e058cddac7b6fe39"
+    },
+    "exact-package-tests-first-cross-device.log": {
+      "privatePath": "/home/miku/.local/state/enmori-v85-deploy-20261117/exact-package-tests-first-cross-device.log",
+      "sha256": "24fc5b4431203b2969cdcd8657ad0b0252b14b680b0c92453f4541d75da2f519"
+    }
+  },
+  "privateHelperSha256": {
+    "v85_operator.py": "630c1c6835a9deba11f3f0db5cf724915f7aa69526098e7ff5de84697f334f27",
+    "exact_package_remote.py": "dfd447f85b0a064b8e6ef88e65f1ef80b638f9de898839c890345a4253a6e755",
+    "control_base.py": "3f96d4b5e364930724d0623dc6276e1619f1355db64251a6fdb7dedff7889b8b",
+    "upgrade.py": "3377ddc5b2ce26ad522413d375d52d0b170788c6935e037cd38cf3f86b92b22e",
+    "rollback.py": "8534ba354d8dbd6ae501e7e4d178d1235a5bff1ed03d41ccd0a87479dfb7a3d1",
+    "owner_config.mjs": "8571e47d789ff5fafba67b27152efb94ab6e21638745d877b149ec1b0fbc03d6",
+    "verify_current_stop.py": "1464fb81122a59a6b9c55f62fc4c33ab4c6c386e53f2d0e84cf7b440898101f3",
+    "drain_proof.py": "cb402420f8299f5c9d90247db83687ca5b1c4f029ff4dbf302a14a14937d0d47",
+    "api-expiry.mjs": "14827484276a2b4063f68ea00df0b520445a5a9eb2b75d06dbb912ec16671cab"
+  },
+  "localSetupFailures": [
+    "Initial helper filename operator.py shadowed Python stdlib operator; renamed before remote execution",
+    "Initial local lifecycle fixture hard link crossed filesystems; moved fixture temp directory to same private filesystem"
+  ],
+  "postStartSshFirstAttempt": "not ready; failure retained before later mounted verification passed",
+  "aiGrantRenewed": false,
+  "phoneOperated": false
+}
