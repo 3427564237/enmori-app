@@ -486,14 +486,16 @@ test("onePA public-list input stays bounded, rejects duplicate identities and do
 test("onePA follow-up lists fail promptly while an aborted catalogue reader cleans up", async () => {
   const product = payload().props.pageProps.page.layout.sitecore.route.fields.currentProduct.value;
   const closing = Promise.withResolvers<{items:readonly { product: unknown; url: string }[];complete:boolean}>();
-  let reads = 0;
+  let reads = 0, elapsed = 0;
   const source = new OnePaBrowseSource(
     () => true,
     async () => { throw Error("no detail read"); },
     async () => ++reads === 1 ? closing.promise : {items:[{ product, url }],complete:true},
+    Date.now,()=>elapsed,
   );
   const owner = new AbortController();
   const first = assert.rejects(source.firstBatch(asOf, owner.signal));
+  await Promise.resolve(); // Establish an actually dispatched reader before aborting.
   owner.abort();
   const followUp = assert.rejects(source.firstBatch(asOf, new AbortController().signal));
   try {
@@ -503,6 +505,8 @@ test("onePA follow-up lists fail promptly while an aborted catalogue reader clea
     closing.resolve({items:[{ product, url }],complete:true});
     await Promise.all([first, followUp]);
   }
+  await assert.rejects(source.firstBatch(asOf,new AbortController().signal));
+  assert.equal(reads,1);elapsed=300000; // Failed cycles share the approved five-minute admission cap.
   const recovered = await source.firstBatch(asOf, new AbortController().signal);
   assert.equal(recovered[0]?.externalSourceUrl, url);
   assert.equal(reads, 2);

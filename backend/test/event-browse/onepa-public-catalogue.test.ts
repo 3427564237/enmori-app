@@ -292,7 +292,7 @@ test('the actual browse adapter serves all 190 unique records, reuses the comple
 test('partial catalogue rows and coverage share one five-minute cache generation without query retries',async t=>{
   t.mock.timers.enable({apis:['Date']});
   let reads=0,complete=false;
-  const source=new OnePaBrowseSource(()=>true,async()=>'',async()=>{reads++;return {items:Array.from({length:25},(_,i)=>item(10000000+i)),complete};});
+  const source=new OnePaBrowseSource(()=>true,async()=>'',async()=>{reads++;return {items:Array.from({length:25},(_,i)=>item(10000000+i)),complete};},()=>Date.now(),()=>Date.now());
   const signal=new AbortController().signal,asOf='2026-11-17T00:00:00.000Z';
   const first=await source.batch(asOf,0,signal);complete=true;
   const second=await source.batch(asOf,1,signal);

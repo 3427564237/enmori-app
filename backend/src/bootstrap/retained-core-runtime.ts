@@ -364,6 +364,9 @@ async function createControlledRuntime(
 }
 
 export async function closeControlledRuntime(runtime: ControlledRuntime): Promise<void> {
+  // Revoke public warmup immediately. AI drainage may retain its own monetary
+  // fence for longer; that must not authorize another scheduled source cycle.
+  runtime.eventBrowseControl.disable();
   await runtime.stopAi();
   await runtime.stopEvents();
   await runtime.app.close();

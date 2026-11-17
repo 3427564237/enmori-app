@@ -72,10 +72,13 @@ test('OpenAI arm is explicit, Japan-only, and never falls back to ordinary Setti
 });
 
 test('Azure lifecycle passes only the explicit arm, probes permissions, and sanitizes failures', async t => {
-  let reads = 0, listening = 0, closed = 0, enabled = false, denyRead = false, denyClose = false;
+  let reads = 0, listening = 0, warmed = 0, closed = 0, enabled = false, denyRead = false, denyClose = false;
   let credentialPath, expectedArm;
   const logs = [];
-  const runtime = {firebaseApp: {}, aiStatus: () => ({available: false}), eventBrowseControl: {enable() {enabled = true;}, observation: () => ({enabled})}, app: {async listen(options) {
+  const runtime = {firebaseApp: {}, aiStatus: () => ({available: false}), eventBrowseControl: {enable() {enabled = true;}, observation: () => ({enabled}), startWarmup() {
+    assert.equal(enabled,true);assert.equal(listening,warmed+1);warmed++;
+    return new Promise(()=>{}); // A cold source must not delay startAzureBackend.
+  }}, app: {async listen(options) {
     assert.equal(reads, 2); assert.equal(enabled, true); assert.deepEqual(options, {host: '0.0.0.0', port: 8080}); listening++;
   }}};
   t.mock.method(globalThis, 'fetch', async () => {throw Error('No external network permitted');});
@@ -129,11 +132,11 @@ test('Azure lifecycle passes only the explicit arm, probes permissions, and sani
     await close();
     assert.equal(existsSync(credentialPath), false); assert.equal(process.env.GOOGLE_APPLICATION_CREDENTIALS, undefined);
   }
-  assert.equal(listening, 3); assert.equal(closed, 3);
+  assert.equal(listening, 3); assert.equal(warmed, 3); assert.equal(closed, 3);
   denyClose = false;
   denyRead = true;
   await assert.rejects(startAzureBackend(armed), {message: 'AZURE_BACKEND_DEPENDENCY_FAILURE'});
-  assert.equal(listening, 3); assert.equal(closed, 4); assert.equal(existsSync(credentialPath), false);
+  assert.equal(listening, 3); assert.equal(warmed, 3); assert.equal(closed, 4); assert.equal(existsSync(credentialPath), false);
   assert(!logs.join('\n').includes(syntheticOpenAiKey));
   assert(!logs.join('\n').includes(arm.firebaseUid));
   assert.deepEqual(logs.map(line => JSON.parse(line)).filter(row => row.phase === 'listening').map(row => row.aiConfigured), [false, true, true]);

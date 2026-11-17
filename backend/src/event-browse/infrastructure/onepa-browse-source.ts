@@ -1,5 +1,5 @@
 import type { ServiceObservation } from '../../admin/ports/admin-repository.js';
-import type { BrowseSource, BrowseOccurrence } from "../ports/event-browse.js";
+import type { BrowseSource, BrowseOccurrence, SourceFreshness } from "../ports/event-browse.js";
 import { browseId, coverImageUrl } from "../domain/browse-values.js";
 import { sourceEventId } from "../domain/source-event-id.js";
 import {
@@ -130,6 +130,7 @@ export function projectOnePa(
 export function projectOnePaListItem(
   item: OnePaListItem,
   asOf: string,
+  acquiredAt?: string,
 ): BrowseOccurrence | undefined {
   const row = projectOnePa(
     {
@@ -165,6 +166,7 @@ export function projectOnePaListItem(
     ...(summary ? { shortDescription: excerpt(summary) } : {}),
     content: {
       ...content,
+      ...(acquiredAt ? {fetchedAt:acquiredAt} : {}),
       ...(minimum && Number(minimum[1]) <= 150
         ? { minimumAge: Number(minimum[1]) }
         : {}),
@@ -187,10 +189,11 @@ export class OnePaBrowseSource implements BrowseSource {
     catch (error) { record(false); throw error; }
   }
   private catalogue:
-    | { until: number; value: OnePaCatalogue }
+    | { until: number; value: OnePaCatalogue; freshness:SourceFreshness }
     | undefined;
+  private lastCatalogueStart: number | undefined;
   private cataloguePending:
-    | { signal: AbortSignal; work: Promise<OnePaCatalogue> }
+    | { signal: AbortSignal; work: Promise<{until:number;value:OnePaCatalogue;freshness:SourceFreshness}> }
     | undefined;
   private index: { until: number; urls: string[] } | undefined;
   private rows = new Map<string, { until: number; row: BrowseOccurrence }>();
@@ -201,15 +204,26 @@ export class OnePaBrowseSource implements BrowseSource {
     private readonly readCatalogue?: (
       signal: AbortSignal,
     ) => Promise<OnePaCatalogue>,
+    private readonly now: () => number = Date.now,
+    private readonly elapsed: () => number = () => performance.now(),
   ) {
     // Observe only dispatched public reads. Catalogue/index/row cache hits do
     // not refresh these timestamps or assert upstream availability.
     this.read = (url, signal) => this.observeRead(() => read(url, signal), signal);
     if (readCatalogue) this.readCatalogue = signal => this.observeRead(() => readCatalogue(signal), signal);
   }
-  private async list(signal: AbortSignal): Promise<OnePaCatalogue> {
-    if (this.catalogue && this.catalogue.until > Date.now())
-      return this.catalogue.value;
+  /** Same public catalogue only. A closed admission slot is skipped rather
+   * than retried; foreground misses report unavailable until the next slot. */
+  warmDelay():number { return this.lastCatalogueStart===undefined?0:Math.max(0,300000-(this.elapsed()-this.lastCatalogueStart)); }
+  async warm(signal:AbortSignal):Promise<void> {
+    if(!this.enabled()||signal.aborted||!this.readCatalogue)throw Error("Source unavailable");
+    if(!this.cataloguePending&&this.lastCatalogueStart!==undefined&&this.elapsed()-this.lastCatalogueStart<300000)return;
+    await this.list(signal,true);
+  }
+  private async list(signal: AbortSignal, refresh=false) {
+    if(!this.enabled()||signal.aborted||!this.readCatalogue)throw Error("Source unavailable");
+    if (!refresh && this.catalogue && this.catalogue.until > this.now())
+      return this.catalogue;
     const pending = this.cataloguePending;
     if (pending) {
       // An aborted reader cannot publish a catalogue. Keep its cleanup fence
@@ -217,7 +231,13 @@ export class OnePaBrowseSource implements BrowseSource {
       if (pending.signal.aborted) throw Error("Source unavailable");
       return pending.work;
     }
-    const work = this.readCatalogue!(signal).then((result) => {
+    const started=this.elapsed();
+    if(this.lastCatalogueStart!==undefined&&started-this.lastCatalogueStart<300000)throw Error("Source unavailable");
+    this.lastCatalogueStart=started;
+    const work = Promise.resolve().then(()=>{
+      if(signal.aborted||!this.enabled())throw Error("Source unavailable");
+      return this.readCatalogue!(signal);
+    }).then((result) => {
       const {items,complete}=result;
       if (
         signal.aborted ||
@@ -235,8 +255,10 @@ export class OnePaBrowseSource implements BrowseSource {
       )
         throw Error("Source unavailable");
       const value=Object.freeze({items:Object.freeze([...items]),complete});
-      this.catalogue = { until: Date.now() + 300000, value };
-      return value;
+      const acquiredAt=this.now(),until=acquiredAt+300000;
+      const freshness=Object.freeze({acquiredAt:new Date(acquiredAt).toISOString(),expiresAt:new Date(until).toISOString()});
+      this.catalogue = Object.freeze({until,value,freshness});
+      return this.catalogue;
     });
     const admitted = { signal, work };
     this.cataloguePending = admitted;
@@ -306,16 +328,17 @@ export class OnePaBrowseSource implements BrowseSource {
     )
       throw Error("Source unavailable");
     if (this.readCatalogue) {
-      const catalogue = await this.list(signal),rows=catalogue.items;
-      if (signal.aborted || !this.enabled()) throw Error("Source unavailable");
+      const cached = await this.list(signal),catalogue=cached.value,rows=catalogue.items;
+      if (signal.aborted || !this.enabled()||cached.until<=this.now()) throw Error("Source unavailable");
       const items = rows.slice(page * 20, (page + 1) * 20).flatMap((item) => {
-        const row = projectOnePaListItem(item, asOf);
+        const row = projectOnePaListItem(item, asOf, cached.freshness.acquiredAt);
         return row ? [row] : [];
       });
       return {
         items,
         sourceStatus: Object.freeze([Object.freeze({provider:'onepa' as const,available:true})]),
         sourceCoverage: Object.freeze([Object.freeze({provider:'onepa' as const,complete:catalogue.complete})]),
+        sourceFreshness: cached.freshness,
         ...((page + 1) * 20 < rows.length ? { nextPage: page + 1 } : {}),
       };
     }

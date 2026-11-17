@@ -170,6 +170,8 @@ export async function startAzureBackend(env = process.env) {
     runtime.eventBrowseControl.enable();
     phase = 'listen';
     await runtime.app.listen({host: '0.0.0.0', port: config.port});
+    // Only public onePA acquisition; ordinary routes do not wait for warmup.
+    runtime.eventBrowseControl.startWarmup();
     const aiConfigured = config.cloudTestApp !== undefined;
     console.log(JSON.stringify({phase: 'listening', firebaseRead: true, aiConfigured,
       ...(aiConfigured ? {aiAvailable: config.cloudTestApp !== null && runtime.aiStatus().available === true} : {})}));

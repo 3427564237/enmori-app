@@ -9,14 +9,50 @@ export function createControlledEventBrowse(options: {
   readonly projectionCache?: true;
   readonly running: () => boolean;
   readonly track: <T>(work: () => Promise<T>) => Promise<T>;
+  /** Testable process-owned timer; scheduling never enables the source. */
+  readonly warmSchedule?: (milliseconds:number,tick:()=>void)=>()=>void;
 }) {
   const projection = options.source && options.projectionCache ? new ControlledSourceProjection(options.source) : undefined;
   const selected = projection ?? options.source;
   let enabled = false, epoch = {};
   const pending = new Set<AbortController>();
+  let cancelWarmTimer:(()=>void)|undefined,warming:Promise<void>|undefined,warmStarted=false;
+  function startWarmup() {
+    if(!enabled||!options.running())throw unavailable();
+    if(warmStarted||!options.source?.warm)return;
+    warmStarted=true;
+    const admitted=epoch;
+    const current=()=>warmStarted&&enabled&&options.running()&&admitted===epoch;
+    const schedule=options.warmSchedule??((milliseconds:number,tick:()=>void)=>{
+      const timer=setTimeout(tick,milliseconds);timer.unref();return ()=>clearTimeout(timer);
+    });
+    const arm=()=>{
+      if(!current()||cancelWarmTimer)return;
+      const delay=options.source?.warmDelay?.()??300000;
+      if(!Number.isFinite(delay)||delay<0)return; // Invalid scheduling metadata cannot dispatch work.
+      cancelWarmTimer=schedule(delay,()=>{cancelWarmTimer=undefined;tick();});
+    };
+    const tick=()=>{
+      if(!current())return;
+      // Retain the original acquisition's cleanup fence. Once it settles, its
+      // finalizer schedules from the shared admission clock, not completion.
+      if(warming){
+        // A re-enabled epoch can be waiting on the prior epoch's aborted work.
+        // Its own wake-up survives the old epoch's finalizer, without polling.
+        void warming.then(arm);
+        return;
+      }
+      const work=read(new AbortController().signal,(_value,signal)=>options.source!.warm!(signal)).catch(()=>{});
+      warming=work;
+      arm(); // warm() synchronously admits/joins before its first await.
+      void work.finally(()=>{if(warming===work)warming=undefined;arm();});
+    };
+    tick();
+  }
   const unavailable = () => new Error("CONTROLLED_EVENT_BROWSE_UNAVAILABLE");
   function disable() {
     enabled = false; epoch = {}; projection?.clear();
+    warmStarted=false;cancelWarmTimer?.();cancelWarmTimer=undefined;
     for (const controller of pending) controller.abort();
     // Aborted I/O remains tracked until its original promise actually settles.
   }
@@ -51,7 +87,7 @@ export function createControlledEventBrowse(options: {
     firstBatch: (asOf, signal) => read(signal, (value, current) => value.firstBatch(asOf, current)),
     detail: (id, asOf, signal) => read(signal, (value, current) => value.detail(id, asOf, current)),
   };
-  return { source, enable, disable,
+  return { source, enable, disable, startWarmup, warmupSettled:()=>warming??Promise.resolve(),
     projectionReady: (asOf: string) => enabled && options.running() && projection?.ready(asOf) === true,
     peek: (id: string, asOf: string) => enabled && options.running() ? projection?.peek(id, asOf) : undefined,
     observation: () => ({ configured: options.source !== undefined, enabled: enabled && options.running(), pending: pending.size }),

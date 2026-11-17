@@ -55,3 +55,40 @@ test("already-aborted caller and closed process do not invoke source; absent Det
   assert.equal(await f.gate.source.detail("missing", "now", new AbortController().signal), undefined);
   f.stop(); await assert.rejects(read(f.gate)); assert.equal(calls, 1);
 });
+
+test('public warming starts only explicitly after enable, remains nonblocking and drains on disable',async()=>{
+  const held=Promise.withResolvers<void>();let calls=0,ordinary=0,active=0,cancelled=0,tick=()=>{},seen:AbortSignal|undefined;
+  const gate=createControlledEventBrowse({source:{firstBatch:async()=>{ordinary++;return[];},detail:async()=>undefined,
+    warm:async signal=>{calls++;seen=signal;await held.promise;}},running:()=>true,
+    track:async work=>{active++;try{return await work();}finally{active--;}},
+    warmSchedule:(ms,callback)=>{assert.equal(ms,300000);tick=callback;return()=>{cancelled++;};}});
+  assert.throws(()=>gate.startWarmup());assert.equal(calls,0);
+  gate.enable();assert.equal(calls,0);gate.startWarmup();assert.equal(calls,1);assert.equal(active,1);
+  gate.startWarmup();tick();assert.equal(calls,1);
+  assert.deepEqual(await gate.source.firstBatch('2026-11-17T00:00:00Z',new AbortController().signal),[]);assert.equal(ordinary,1);
+  gate.disable();assert.equal(seen?.aborted,true);assert.equal(cancelled,0);tick();assert.equal(calls,1);assert.equal(active,1);
+  held.resolve();await gate.warmupSettled();assert.equal(active,0);
+  tick();assert.equal(calls,1);
+});
+
+test('public warmup failure is contained and a later scheduled cycle can recover',async()=>{
+  let calls=0,tick=()=>{};
+  const gate=createControlledEventBrowse({source:{firstBatch:async()=>[],detail:async()=>undefined,
+    warm:async()=>{if(++calls===1)throw Error('Synthetic public source failure');}},running:()=>true,track:work=>work(),
+    warmSchedule:(_ms,callback)=>{tick=callback;return()=>{};}});
+  gate.enable();gate.startWarmup();await gate.warmupSettled();assert.equal(calls,1);
+  tick();await gate.warmupSettled();assert.equal(calls,2);gate.disable();
+});
+
+test('disable then re-enable while old warmup drains schedules the new epoch only after settlement',async()=>{
+  const held=Promise.withResolvers<void>();let calls=0,active=0,maxActive=0;
+  const timers:{tick:()=>void;cancelled:boolean}[]=[];
+  const gate=createControlledEventBrowse({source:{firstBatch:async()=>[],detail:async()=>undefined,warmDelay:()=>0,
+    warm:async()=>{calls++;active++;maxActive=Math.max(maxActive,active);try{if(calls===1)await held.promise;}finally{active--;}}},
+    running:()=>true,track:work=>work(),warmSchedule:(_ms,tick)=>{const timer={tick,cancelled:false};timers.push(timer);return()=>{timer.cancelled=true;};}});
+  gate.enable();gate.startWarmup();assert.equal(calls,1);gate.disable();assert.equal(timers[0]?.cancelled,true);
+  gate.enable();gate.startWarmup();assert.equal(calls,1);assert.equal(timers.length,1);
+  held.resolve();await gate.warmupSettled();await Promise.resolve();
+  assert.equal(timers.length,2);assert.equal(timers[1]?.cancelled,false);
+  timers[1]!.tick();await gate.warmupSettled();assert.equal(calls,2);assert.equal(maxActive,1);gate.disable();
+});

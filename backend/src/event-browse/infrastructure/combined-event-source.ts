@@ -1,5 +1,6 @@
+import { freezeSourceFreshness, sameSourceFreshness } from "../domain/source-freshness.js";
 import { freezeSourceCoverage } from "../domain/source-coverage.js";
-import type { BrowseSource, BrowseOccurrence, EventSourceCoverage } from "../ports/event-browse.js";
+import type { BrowseSource, BrowseOccurrence, EventSourceCoverage, SourceFreshness } from "../ports/event-browse.js";
 /** Two independent providers. Partial source failure is explicit, never empty
  * success. Stable occurrence identity is preserved without cross-provider merge. */
 export class CombinedEventSource implements BrowseSource {
@@ -17,12 +18,15 @@ export class CombinedEventSource implements BrowseSource {
     { provider: "ticketmaster", available: true },
     { provider: "onepa", available: true },
   ];
-  private listings = new Map<string, { ends: Map<number, number>; unavailable: Set<number>; sourceCoverage?: readonly EventSourceCoverage[] }>();
+  private listings = new Map<string, { ends: Map<number, number>; unavailable: Set<number>; sourceCoverage?: readonly EventSourceCoverage[]; sourceFreshness?:SourceFreshness }>();
   constructor(
     private readonly ticketmaster: BrowseSource,
     private readonly onepa: BrowseSource,
     private readonly batchTimeoutMs?: number,
   ) {}
+  /** Only onePA implements warming; Ticketmaster remains demand-driven. */
+  async warm(signal:AbortSignal):Promise<void> { await this.onepa.warm?.(signal); }
+  warmDelay():number { return this.onepa.warmDelay?.()??300000; }
   private async boundedBatch<T>(signal: AbortSignal, read: (signal: AbortSignal) => Promise<T>): Promise<T> {
     if (signal.aborted) throw Error("Source unavailable");
     if (this.batchTimeoutMs === undefined) return read(signal);
@@ -98,6 +102,9 @@ export class CombinedEventSource implements BrowseSource {
           if (i === 1) {
             const coverage = freezeSourceCoverage('sourceCoverage' in batch ? batch.sourceCoverage : undefined,
               [{provider:'onepa',available:true}]);
+            const freshness=freezeSourceFreshness('sourceFreshness' in batch?batch.sourceFreshness:undefined);
+            if(freshListing){if(freshness)current.sourceFreshness=freshness;else delete current.sourceFreshness;}
+            else if(!sameSourceFreshness(current.sourceFreshness,freshness))throw Error('Source freshness changed');
             if (freshListing) {
               if (coverage) current.sourceCoverage = coverage;
               else delete current.sourceCoverage;
@@ -135,6 +142,8 @@ export class CombinedEventSource implements BrowseSource {
       sourceStatus: this.status(),
       ...(results[1]?.status === 'fulfilled' && current.sourceCoverage
         ? {sourceCoverage: current.sourceCoverage} : {}),
+      ...(results[1]?.status === 'fulfilled' && current.sourceFreshness
+        ? {sourceFreshness: current.sourceFreshness} : {}),
       ...(batches.some((b) => "nextPage" in b && b.nextPage !== undefined)
         ? { nextPage: page + 1 }
         : {}),
