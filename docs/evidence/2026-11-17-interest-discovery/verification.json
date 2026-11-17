@@ -1,0 +1,69 @@
+{
+  "sourceCommit": "07d24c669dfd13ba53bae20e1228606056da904c",
+  "backend": {
+    "passed": 1974,
+    "failed": 0
+  },
+  "flutterFull": {
+    "passed": 1876,
+    "failed": 0
+  },
+  "flutterAnalysis": "No issues",
+  "emulator": {
+    "passed": 28,
+    "failed": 0,
+    "suites": 6
+  },
+  "recommendationUi": {
+    "passed": 21,
+    "failed": 0
+  },
+  "recommendationRender": {
+    "passed": 12,
+    "failed": 0
+  },
+  "renderedPngCount": 26,
+  "physicalDeviceAccepted": false,
+  "dependenciesChanged": false,
+  "logs": {
+    "backendFull": {
+      "path": "/tmp/enmori-interest-full-backend.log",
+      "sha256": "291ea259ed798583ed93e9a336378d2669b28498f9fafb1bc9bfe2a4cc4873b6"
+    },
+    "flutterFull": {
+      "path": "/tmp/enmori-interest-full-flutter-verified.log",
+      "sha256": "ab70624c34127f46d49302a4e35c2590ef4512e22686f47a5ca18011591ea7db"
+    },
+    "flutterAnalysis": {
+      "path": "/tmp/enmori-interest-analysis-final.log",
+      "sha256": "fed53ccca036026299aba4e1fecf758ccb72977cfffa258a94433acc0fd96fc9"
+    },
+    "emulator": {
+      "path": "/tmp/enmori-interest-emulator-final.log",
+      "sha256": "7c265b359f2a49dd43619cb00f9c741226e91094cee667c3d192975b68667bbd"
+    },
+    "recommendationUi": {
+      "path": "/tmp/enmori-interest-recommendation-ui-final.log",
+      "sha256": "27428926ffb1f34323f70d067c402084426fb1b32fcb01cbbba46d91d18a2eb6"
+    },
+    "recommendationRender": {
+      "path": "/tmp/enmori-interest-empty-render-final.log",
+      "sha256": "908a4aa0251bb2c15b0af4537b9fd19b296afd7726b20a660a40e1857c3a3785"
+    }
+  },
+  "verifiedSourceCommit": "a4b5242",
+  "earlierFailuresResolved": [
+    "Old My plans text finder and old loaded-range time-filter copy updated for approved behavior.",
+    "Existing OSM worker write race in test fixed by bounded readback of the intended stale metadata; production and dependency unchanged."
+  ],
+  "cloudReleaseGate": {
+    "passed": false,
+    "reason": "onePA Gaming/game HTTP 403; full acquisition atomically unavailable",
+    "completedTasks": 11,
+    "requiredTasks": 15,
+    "rawRecords": 141,
+    "elapsedMs": 80779,
+    "backendDeployed": false,
+    "realSourceApplicationAccepted": false
+  }
+}

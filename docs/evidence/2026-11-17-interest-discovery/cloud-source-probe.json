@@ -1,0 +1,255 @@
+{
+  "recordedAtUtc": "2026-11-17T01:50:35.928471+00:00",
+  "verification": "pre-switch Azure candidate public source, snapshot, controlled personalization and transport",
+  "releaseGatePassed": false,
+  "candidateHead": "a4b5242b402611c2fc7b2e653822e924b1908116",
+  "workingTreeCandidate": true,
+  "candidateSourceHashes": {
+    "backend/src/event-browse/domain/onepa-interest-classification.ts": "4a80864d5f02bb06bdbd9330f133ec756074f421683e751eb2b4ff557c4b400f",
+    "backend/src/event-browse/domain/source-event-id.ts": "96aaaa0684ed18c5e6438e22a97f0e2e4af9678617381bc89cb0ceb580d1775d",
+    "backend/src/event-browse/infrastructure/controlled-source-projection.ts": "c2515956fd6e1ae6d7a2f86ae39e0c5fa37fa7707166f1973dca85681dfdae63",
+    "backend/src/event-browse/infrastructure/onepa-browse-source.ts": "05962ff1592efa9e9f0f28c9806cf718a4726aeb193ec6e69673a349b0f646ee",
+    "backend/src/event-browse/infrastructure/onepa-public-catalogue.ts": "217eb42f173bc52546a512d9de872ac531d454454b695743a0e09cbf5f7a9c9c",
+    "backend/src/event-recommendations/application/recommend-events.ts": "6dbd5283bf168f461037f89919edb07bde8d5674e9f7c85a033d8f3d574f66d7",
+    "backend/src/event-recommendations/domain/rank-events.ts": "909c64c16e3d74dfcd1851ede27ebc1aa28d2e4655ad56fc2947d7ec1e1673b4",
+    "backend/src/event-recommendations/infrastructure/firestore-personalized-events.ts": "04d421b94b91a1a9d63ab6d97ad87d45df43fa88ece604881e6bc074dde4827e",
+    "backend/src/recommendation-profile/domain/recommendation-profile.ts": "7f79c35ba679d459761d268cbdaf99de972c6dd8e5b584bbd1a968bf61bcab99",
+    "backend/src/shared/infrastructure/firebase/firestore-records.ts": "bc0dc8798b4f56b587c591d19c4848504f061b1635776ddfd6fb328053138a8e",
+    "backend/src/event-recommendations/transport/register-route.ts": "ed268fcc8c4d58b8f5c6f3611a7486aac40b74c448baf0331e632eccbf805e34",
+    "backend/src/event-recommendations/transport/schemas.ts": "eb2ccebca130de336a93b2ef297c9cc965278d380b2115cef2b444580b235615",
+    "backend/src/friends/infrastructure/social-authority.ts": "ae8cda13707e86d757b3f87525730625ddf230ed46a34f5db17425b36285bb3e"
+  },
+  "candidateCompiledHashes": {
+    "event-browse/domain/onepa-interest-classification.js": "739d471b49066590ad5bc921c797cd660b9b4d3a4b85cd855f7fbb484b5beb25",
+    "event-browse/domain/source-event-id.js": "b0c88465c00850e62d5dae06891aa561d7468515a27958d9aef84c17bf0f5359",
+    "event-browse/infrastructure/controlled-source-projection.js": "0ed52e3a16de18f10e4cb39238f4473e6ac5a9ae38d603fce690fd98fbe5a8fc",
+    "event-browse/infrastructure/onepa-browse-source.js": "75b8e24b67c6e162ee8dc654475c539594bbf14257de2fea9e589a36c3ddb083",
+    "event-browse/infrastructure/onepa-public-catalogue.js": "faa5fdc4a62d76ced105ff1d2f8e198206daac30a03bb0fd442005c4e2699062",
+    "event-recommendations/application/recommend-events.js": "63e5883845be34674815bcc7b9e38e51eefde01e50635ab07216883cf15f410e",
+    "event-recommendations/domain/rank-events.js": "71c9142cb87a4d0c2a76f886711da459462a62ee1630656a6df94c9c54514d40",
+    "event-recommendations/infrastructure/firestore-personalized-events.js": "70b35f56867e18e19a25a142ba6fa7e6af816aca62c14bcfbfa1f90a17d197e2",
+    "recommendation-profile/domain/recommendation-profile.js": "a5d9658df6548f49e817eb7af71a591e1e1b65b9873d7748ad4f47dc4688eeeb",
+    "shared/infrastructure/firebase/firestore-records.js": "c0786a498605786b2297afc9270b7ebe0a5fe5ad3c85d473f481742d624b910b",
+    "event-recommendations/transport/register-route.js": "ee919f14a9362fbadc7976083935dfafcdbda741eebb7d2965ab959665b721ac",
+    "event-recommendations/transport/schemas.js": "2a723a5be0e3cf339fdf4f74289d2d7679d8b9ff5ddddc7d2a4b8987ae571a52",
+    "friends/infrastructure/social-authority.js": "77704e5f2cae311f2156c8877e4e6a7d905f9caa079bd73e63c89d48ee529e02"
+  },
+  "candidateImportRewriteHashes": {
+    "event-browse/domain/onepa-interest-classification.js": "739d471b49066590ad5bc921c797cd660b9b4d3a4b85cd855f7fbb484b5beb25",
+    "event-browse/domain/source-event-id.js": "45175a9e1db4821dbdf8474753b77731acdda3101b67960c8c929906c72b2691",
+    "event-browse/infrastructure/controlled-source-projection.js": "c429a71f2547e7b4d12ea3f0b87f2653e7c6f19c6e735fbbe41b1e1fc3d2fc44",
+    "event-browse/infrastructure/onepa-browse-source.js": "1aa0163b5c509de278ae365b697a48fd018fda96f657c4155f24738331db8a06",
+    "event-browse/infrastructure/onepa-public-catalogue.js": "c9861733d55dcd52f514b99c8359e85bf7c382f7fea3bb9e44533063dcb9cf39",
+    "event-recommendations/domain/rank-events.js": "71c9142cb87a4d0c2a76f886711da459462a62ee1630656a6df94c9c54514d40",
+    "event-recommendations/application/recommend-events.js": "0fb05d816b810ab89cac29969605a8421b3d196359b9e265f15ab44ffebad0d8",
+    "recommendation-profile/domain/recommendation-profile.js": "a27843f290de9980363ec1bbcd7098e0b3affaee05d0e24acd6d981a21b7be98",
+    "shared/infrastructure/firebase/firestore-records.js": "5e846c9c97003e076eee5df57c8685c1a35a2205f888c5dd87200aa7c0867862",
+    "event-recommendations/infrastructure/firestore-personalized-events.js": "7216c0b9f202535be39427ed25ef8dbd463640918151d1b77d9200ac05490ca0",
+    "event-recommendations/transport/schemas.js": "0a52ee3bce931366b40b50041f9becaf2691b4a63ceea466f88209c3a996841c",
+    "event-recommendations/transport/register-route.js": "9fdd539ed2b48582a2a4fa7a6a7a0abcb8fe657a411b5d086937f162a9fe8b66",
+    "friends/infrastructure/social-authority.js": "1e48c833a5aa60b4d6733bd507e8d4aa5eab3b98b8917fd57b94cd5dcda1d8d4"
+  },
+  "mountedHelperHashes": {
+    "backend/dist/src/event-browse/domain/browse-values.js": "3440d252bb37b14607dc5a73406b341c7835ba45eaec8b39f552d9db2eaa5859",
+    "backend/dist/src/event-detail/domain/venue-address.js": "5f6adcdd8d2fe56273aa53bdefd47278c249d509fd1bfd8e0a17bb803443a02a",
+    "backend/dist/src/event-browse/domain/interest-classification.js": "63d0fff71c19654c7d85a15fc4f8cdd9984e4528a8414b623e6453b9064656f9",
+    "backend/dist/src/shared/ports/dependency-failure.js": "46e84edbea38e1afc9310c35c5c53265de4b308d99edf8b52a4fb3c128b57d7d",
+    "backend/dist/src/event-browse/infrastructure/public-event-pages.js": "ab4be670bc06b85ef1dfdc4ce6e8dde789c124bc551ff83376165b64c4bb787f",
+    "backend/dist/src/recommendation-profile/infrastructure/region-geometry.js": "62a03a294481a4404dcb1fa66cb58e1ee4fe66be910d0ab8a929b17af1346288",
+    "backend/dist/src/event-detail/domain/event-content.js": "c71af4a32dcf3a9db7163329d7e76643f6a3c9731b3ef720239db13875409b95",
+    "backend/dist/src/shared/application/authoritative-values.js": "599dfd6e37633470e98f16fe319024bfd51df332c4063a319c5d02560e300155",
+    "backend/dist/src/shared/application/app-failure.js": "6a228fbe5c71af970a98961bf7f8b7bff9ecf26f492d746949ddc9f53ac3fa56",
+    "backend/dist/src/shared/domain/result.js": "253a5abdd55b23ed1a6cb29d0b0a0839f041b81b0798257b144259a31c9fb75d",
+    "backend/dist/src/recommendation-profile/domain/areas.js": "3a6f662acabcaca6ed2a2d0b3a5700d40e3c168cd11a582e17c8139a8f5fe8ef",
+    "backend/dist/src/friends/domain/social-failure.js": "ebbee425692ccd45a9eafe08e875091a8f37ba4c2b162f5a4f2c2d0697c1d91d",
+    "backend/dist/src/check-ins/domain/content.js": "cadc45311d018258c461c223ea53e5c4642d07a8d2d78885273ac0d4a9217a32",
+    "backend/dist/src/check-ins/domain/note.js": "cc5cfbc3f91be889659a6bd8f6c68a3756e3011456f8f5485caf0689b005be48",
+    "backend/dist/src/weather/domain/weather.js": "4f837ea35e7fcc4f5cd2280344ec21050ccd181eca19b810b8f44a07cd8d8fa9",
+    "backend/dist/src/onboarding/domain/username.js": "384e761ecf9ad0a8bc3672c3280800a334e56308e2f952d6c114252ae57a9f35",
+    "backend/dist/src/event-recommendations/infrastructure/event-records.js": "4c0fe97a1c00e4a62324a7edecaa8414b759886aed92612159e5f822789eb10a",
+    "backend/dist/src/shared/infrastructure/firebase/firestore-records.js": "c0786a498605786b2297afc9270b7ebe0a5fe5ad3c85d473f481742d624b910b",
+    "backend/dist/src/transport/authenticate.js": "854d21cc58f9fbd207d2e2b05808b75b3f583cae563945dbe7ba390645f87628",
+    "backend/dist/src/transport/error-response.js": "5337308155cf3f95bd2c1f888a36fee96755e4d9bfc1f6c7768d8f766409ce68",
+    "backend/dist/src/event-detail/transport/content-schema.js": "ade78d2014240d1ac202cf20ddeb26c18a3ed71651b8145126c314f64f76a343",
+    "backend/dist/src/transport/schemas.js": "0c09cdbb083748d22d201e21bb4400dbe289d7d78b694b8b30a2e427532bfecc",
+    "backend/dist/src/weather/transport/schemas.js": "f3cf2c1838a4dc109b46e0d4abceb6ab7273b5eecee14400d74a99376943f2cb",
+    "backend/dist/src/account/domain/profile-details.js": "891dcd1f9f4a30120be06d0f40bcc316ec1816804ecd6d9f21d7084cd0f77afd",
+    "backend/dist/src/account/domain/profile-values.js": "195910f6bb99cff0c5c095f207631e3c14c7e113520364c7e763b325feeb5e49",
+    "backend/dist/src/friends/infrastructure/firestore-friend-repository.js": "47c672a8d9e8b50471d195883774c6805332370e481010e09053b8e5044fc6f7",
+    "backend/dist/src/recommendation-profile/domain/recommendation-profile.js": "a5d9658df6548f49e817eb7af71a591e1e1b65b9873d7748ad4f47dc4688eeeb",
+    "backend/dist/src/friends/domain/friend-search.js": "4338904f8de6f996d47a5376f336717b094b4a97817ab9c4de91a8a5ca9ef1f5",
+    "backend/dist/src/friends/domain/request-reference.js": "13a2406fcb45e42814527e981cf0c3c8259c69059f884c054db11c28e3ed122b",
+    "backend/dist/src/account/infrastructure/firestore-account-preferences-repository.js": "bdcf23606d364fb3435c8c002b32e4004bb571029e85e08a65dcade7c7ae17d7",
+    "backend/dist/src/account/domain/cloud-ai-consent.js": "6b20abb20da79fb608623e2610c39e0177630051d15899e16dd5705236422c11",
+    "backend/dist/src/account/domain/purpose-revocation-generation.js": "5a35e92c3724e10f6fe04357efa6b650c801fe1b8e4d9ff30e4b71a6889bb806",
+    "backend/dist/src/shared/infrastructure/firebase/feature-environment.js": "55b502d55062ab0bcfd540d56b1f7525e475d14a123feaabdc950cd41564ca30",
+    "backend/dist/src/shared/infrastructure/firebase/controlled-emulator-environment.js": "1f87c0161cafa621e2e9731e70e11f1ff5fb577255adda84a2e0c0562ba5aa32",
+    "assets/regions/sg-planning-areas-2025.json": "4df9d3b75753b819da283dd89de8e2c4ce0a36a4120d5c72fb3318464431cbfe"
+  },
+  "controlledPersonalizationHelperSha256": "09d3098d0fd2d9ac27951f0d7d8d583294d679fc0829a72c97876edca5112b53",
+  "candidateFilesStillMatch": true,
+  "probeSha256": "13b8212216d0dfc4c63b5565a4c496b7f65f1a39d01e207a7f5ab7f91285898e",
+  "mountedVerification": {
+    "stage": "mounted-code-verification",
+    "ok": true,
+    "mountedSourceCommit": "a447689781b8b389c972009380a25c63f39fd5d7",
+    "manifestSha256": "adc7a7852aa0ad43cd567587e10ab3121bf60ec250efbcf851149580dc88b2ca",
+    "helperCount": 35
+  },
+  "acquisition": {
+    "stage": "acquisition-diagnostics",
+    "outcome": "unavailable",
+    "elapsedMs": 80779,
+    "completedTasks": 11,
+    "rawRecords": 141,
+    "uniqueRecords": 0,
+    "tasks": [
+      {
+        "index": 1,
+        "records": 10,
+        "elapsedMs": 23165
+      },
+      {
+        "index": 2,
+        "records": 10,
+        "elapsedMs": 23647
+      },
+      {
+        "index": 3,
+        "records": 10,
+        "elapsedMs": 23667
+      },
+      {
+        "index": 4,
+        "records": 10,
+        "elapsedMs": 15985
+      },
+      {
+        "index": 5,
+        "records": 10,
+        "elapsedMs": 20674
+      },
+      {
+        "index": 6,
+        "records": 7,
+        "elapsedMs": 16633
+      },
+      {
+        "index": 7,
+        "records": 5,
+        "elapsedMs": 14647
+      },
+      {
+        "index": 8,
+        "records": 10,
+        "elapsedMs": 15099
+      },
+      {
+        "index": 9,
+        "records": 10,
+        "elapsedMs": 20733
+      },
+      {
+        "index": 10,
+        "records": 9,
+        "elapsedMs": 17187
+      },
+      {
+        "index": 11,
+        "records": 10,
+        "elapsedMs": 18404
+      }
+    ]
+  },
+  "pipeline": null,
+  "controlledFixtureApplication": null,
+  "processCleanup": {
+    "stage": "probe-watchdog",
+    "phase": "complete",
+    "code": 1,
+    "signal": null,
+    "deadlineHit": false,
+    "observedOwnedProcesses": 16,
+    "ownedRunningRemaining": 0,
+    "stderrBytes": 0
+  },
+  "sshCompleted": true,
+  "failure": null,
+  "budgets": {
+    "sourceMs": 180000,
+    "watchdogMs": 210000,
+    "sshSessionSeconds": 300,
+    "requiredTasks": 15,
+    "maxRawRecords": 190
+  },
+  "mutations": {
+    "service": false,
+    "settings": false,
+    "packageSelector": false,
+    "users": false,
+    "model": false,
+    "notifications": false
+  },
+  "attemptHistory": [
+    {
+      "startedAtUtc": "2026-11-17T01:31:05Z",
+      "result": "SSH ended before result; source outcome unknown",
+      "reconciledAtUtc": "2026-11-17T01:35:00.715Z",
+      "ownedProbeProcessesRemaining": 0,
+      "repair": "SSH timeout changed from 60 to 300 seconds only; source and watchdog budgets unchanged"
+    },
+    {
+      "startedAtUtc": "2026-11-17T01:35:37Z",
+      "result": "Complete atomic source unavailable with TimeoutError",
+      "elapsedMs": 65561,
+      "completedTasks": 0,
+      "rawRecords": 0,
+      "artifact": "cloud-source-probe-20261117T013537Z.json",
+      "artifactSha256": "3f46982d9220b1efaf404329e28ddacc64d853cdfb5250be775cbf777d2dcc77"
+    },
+    {
+      "startedAtUtc": "2026-11-17T01:39:34Z",
+      "result": "Single default page successful: navigation 200 and search 201",
+      "artifact": "cloud-source-navigation-20261117T013934Z.json",
+      "artifactSha256": "181d269547223abe437a601b84706c7f801704276f7ae92ae373517130e356cf"
+    },
+    {
+      "startedAtUtc": "20261117T014820Z",
+      "result": "failed",
+      "artifact": "cloud-source-stages-20261117T014820Z.json",
+      "artifactSha256": "7db83f80e40929074c8df584751b6d248a9e5d2b7854bf0b40eaab4d074c15e7",
+      "changeFromPriorFullAttempt": "Same production reader with stage-only launch proxy; full controlled fixture added without extra source acquisition"
+    }
+  ],
+  "supersession": "The latest complete attempt determines this receipt gate result; earlier failure and diagnostic artifacts are retained unchanged and are not erased by a later pass.",
+  "limitations": [
+    "Public provider observations are time-specific and do not establish long-term availability or a complete Singapore catalogue.",
+    "The earlier 65.561-second source timeout did not include stage instrumentation; its precise cause remains unestablished.",
+    "Food, Dance and Music personalization uses synthetic single-interest requesters with an in-memory Firestore gateway over the same real public snapshot; it is not real-account or deployed HTTP acceptance.",
+    "OnePA is the only provider read by this probe; Ticketmaster availability is not asserted.",
+    "No backend package was activated, service/configuration/selector changed, or account/model/notification operation performed; no physical-device acceptance is established."
+  ],
+  "observedProviderFailure": {
+    "stage": "candidate-browser-stage",
+    "elapsedMs": 78816,
+    "pageIndex": 2,
+    "method": "searchResponse",
+    "status": 403,
+    "taskIndex": 12,
+    "requestTaskIndex": 12,
+    "keywordMatches": true,
+    "skip": 0,
+    "take": 10,
+    "publicFixedQuery": "game",
+    "interest": "Gaming"
+  },
+  "candidatePipelineFailure": {
+    "stage": "public-acquisition",
+    "ok": false,
+    "errorCategory": "Error",
+    "reason": "candidate_pipeline_unavailable"
+  },
+  "snapshotProduced": false,
+  "controlledApplicationExecuted": false,
+  "atomicOutcome": "Entire onePA candidate unavailable; completed task rows were not published or used as recommendations."
+}

@@ -1,0 +1,40 @@
+{
+  "atUtc": "2026-11-17T01:53:46.848Z",
+  "serviceState": "Running",
+  "activePackage": "2026111511215971.zip",
+  "backendDeployed": false,
+  "ownedDiagnosticAccountFieldsUnchanged": true,
+  "authenticatedReads": [
+    {
+      "path": "/v1/me/friends",
+      "status": 200,
+      "elapsedMs": 1318
+    },
+    {
+      "path": "/v1/me/friends/search?q=member",
+      "status": 200,
+      "elapsedMs": 1130
+    },
+    {
+      "path": "/v1/me/profile",
+      "status": 200,
+      "elapsedMs": 645
+    },
+    {
+      "path": "/v1/me/interests",
+      "status": 200,
+      "elapsedMs": 705
+    },
+    {
+      "path": "/v1/me/recommendation-profile",
+      "status": 200,
+      "elapsedMs": 691
+    }
+  ],
+  "productWrites": 0,
+  "modelCalls": 0,
+  "connectedAdbDevices": 0,
+  "installed": false,
+  "phoneAcceptance": false,
+  "sourceGateBlockedBy": "onePA Gaming/game HTTP403"
+}

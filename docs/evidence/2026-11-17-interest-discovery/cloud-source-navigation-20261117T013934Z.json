@@ -1,0 +1,161 @@
+{
+  "verification": "single default public page diagnostic only",
+  "releaseGateEvidence": false,
+  "startedAtUtc": "20261117T013934Z",
+  "events": [
+    {
+      "stage": "single-page-navigation",
+      "navigationStatus": 200,
+      "elapsedMs": 7344
+    },
+    {
+      "stage": "single-page-search",
+      "ok": true,
+      "status": 201,
+      "elapsedMs": 11708,
+      "grid": {
+        "grids": 1,
+        "offset": 0,
+        "limit": 10,
+        "total": 2087,
+        "records": 10
+      }
+    },
+    {
+      "stage": "single-page-observation",
+      "elapsedMs": 11973,
+      "navigationStatus": 200,
+      "documentResponses": [
+        {
+          "elapsedMs": 5113,
+          "onepa": true,
+          "status": 200
+        }
+      ],
+      "searchRequests": [
+        {
+          "elapsedMs": 10401,
+          "method": "POST",
+          "hasObjectBody": true,
+          "hasSearchKeyword": true,
+          "defaultKeyword": true,
+          "skip": 0,
+          "take": 10
+        }
+      ],
+      "searchResponses": [
+        {
+          "elapsedMs": 10998,
+          "status": 201
+        }
+      ],
+      "requestFailures": [
+        {
+          "elapsedMs": 5921,
+          "onepa": false,
+          "type": "stylesheet",
+          "errorCategory": "net::ERR_FAILED"
+        },
+        {
+          "elapsedMs": 6669,
+          "onepa": true,
+          "type": "image",
+          "errorCategory": "net::ERR_FAILED"
+        },
+        {
+          "elapsedMs": 6669,
+          "onepa": true,
+          "type": "image",
+          "errorCategory": "net::ERR_FAILED"
+        },
+        {
+          "elapsedMs": 6669,
+          "onepa": true,
+          "type": "image",
+          "errorCategory": "net::ERR_FAILED"
+        },
+        {
+          "elapsedMs": 6669,
+          "onepa": true,
+          "type": "image",
+          "errorCategory": "net::ERR_FAILED"
+        },
+        {
+          "elapsedMs": 7555,
+          "onepa": false,
+          "type": "script",
+          "errorCategory": "net::ERR_FAILED"
+        },
+        {
+          "elapsedMs": 7779,
+          "onepa": true,
+          "type": "image",
+          "errorCategory": "net::ERR_FAILED"
+        },
+        {
+          "elapsedMs": 8110,
+          "onepa": true,
+          "type": "image",
+          "errorCategory": "net::ERR_FAILED"
+        },
+        {
+          "elapsedMs": 8110,
+          "onepa": true,
+          "type": "image",
+          "errorCategory": "net::ERR_FAILED"
+        },
+        {
+          "elapsedMs": 8117,
+          "onepa": true,
+          "type": "image",
+          "errorCategory": "net::ERR_FAILED"
+        },
+        {
+          "elapsedMs": 8117,
+          "onepa": true,
+          "type": "image",
+          "errorCategory": "net::ERR_FAILED"
+        },
+        {
+          "elapsedMs": 8361,
+          "onepa": false,
+          "type": "script",
+          "errorCategory": "net::ERR_FAILED"
+        }
+      ],
+      "blocked": {
+        "stylesheet": 1,
+        "image": 24,
+        "script": 3,
+        "fetch": 2,
+        "ping": 1
+      },
+      "visible": {
+        "ready": "complete",
+        "challenge": false,
+        "eventLinks": 10
+      }
+    },
+    {
+      "stage": "probe-watchdog",
+      "phase": "complete",
+      "code": 0,
+      "signal": null,
+      "deadlineHit": false,
+      "observedOwnedProcesses": 13,
+      "ownedRunningRemaining": 0,
+      "stderrBytes": 0
+    }
+  ],
+  "sshCompleted": true,
+  "probeSha256": "c612fea5db08c6a2d794fc4507161deb2827141696ee0676b3cc5e7351ef770c",
+  "mutations": {
+    "service": false,
+    "settings": false,
+    "packageSelector": false,
+    "users": false,
+    "model": false,
+    "notifications": false
+  },
+  "limitation": "This single-page diagnostic does not satisfy the full 15-task source gate."
+}

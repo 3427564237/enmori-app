@@ -1,0 +1,96 @@
+{
+  "recordedAtUtc": "2026-11-17T01:37:54.336398+00:00",
+  "verification": "pre-switch Azure candidate public-source pipeline",
+  "releaseGatePassed": false,
+  "candidateHead": "40fcbe445b2cc324d82cf97ba95d04dfea7b48b4",
+  "workingTreeCandidate": true,
+  "candidateSourceHashes": {
+    "backend/src/event-browse/domain/onepa-interest-classification.ts": "4a80864d5f02bb06bdbd9330f133ec756074f421683e751eb2b4ff557c4b400f",
+    "backend/src/event-browse/infrastructure/controlled-source-projection.ts": "c2515956fd6e1ae6d7a2f86ae39e0c5fa37fa7707166f1973dca85681dfdae63",
+    "backend/src/event-browse/infrastructure/onepa-browse-source.ts": "05962ff1592efa9e9f0f28c9806cf718a4726aeb193ec6e69673a349b0f646ee",
+    "backend/src/event-browse/infrastructure/onepa-public-catalogue.ts": "217eb42f173bc52546a512d9de872ac531d454454b695743a0e09cbf5f7a9c9c",
+    "backend/src/event-recommendations/domain/rank-events.ts": "909c64c16e3d74dfcd1851ede27ebc1aa28d2e4655ad56fc2947d7ec1e1673b4"
+  },
+  "candidateCompiledHashes": {
+    "event-browse/domain/onepa-interest-classification.js": "739d471b49066590ad5bc921c797cd660b9b4d3a4b85cd855f7fbb484b5beb25",
+    "event-browse/infrastructure/controlled-source-projection.js": "0ed52e3a16de18f10e4cb39238f4473e6ac5a9ae38d603fce690fd98fbe5a8fc",
+    "event-browse/infrastructure/onepa-browse-source.js": "75b8e24b67c6e162ee8dc654475c539594bbf14257de2fea9e589a36c3ddb083",
+    "event-browse/infrastructure/onepa-public-catalogue.js": "faa5fdc4a62d76ced105ff1d2f8e198206daac30a03bb0fd442005c4e2699062",
+    "event-recommendations/domain/rank-events.js": "71c9142cb87a4d0c2a76f886711da459462a62ee1630656a6df94c9c54514d40"
+  },
+  "candidateImportRewriteHashes": {
+    "event-browse/domain/onepa-interest-classification.js": "739d471b49066590ad5bc921c797cd660b9b4d3a4b85cd855f7fbb484b5beb25",
+    "event-browse/infrastructure/controlled-source-projection.js": "c0ff79b335025701bd1e382d29a327284eac204026618628ac11e86269052807",
+    "event-browse/infrastructure/onepa-browse-source.js": "fdbb7157c775b88bf3e3a6eb298851482288f13fe4e05896115a3535e5c89cb1",
+    "event-browse/infrastructure/onepa-public-catalogue.js": "c9861733d55dcd52f514b99c8359e85bf7c382f7fea3bb9e44533063dcb9cf39",
+    "event-recommendations/domain/rank-events.js": "71c9142cb87a4d0c2a76f886711da459462a62ee1630656a6df94c9c54514d40"
+  },
+  "mountedHelperHashes": {
+    "backend/dist/src/shared/ports/dependency-failure.js": "46e84edbea38e1afc9310c35c5c53265de4b308d99edf8b52a4fb3c128b57d7d",
+    "backend/dist/src/event-browse/domain/browse-values.js": "3440d252bb37b14607dc5a73406b341c7835ba45eaec8b39f552d9db2eaa5859",
+    "backend/dist/src/event-detail/domain/venue-address.js": "5f6adcdd8d2fe56273aa53bdefd47278c249d509fd1bfd8e0a17bb803443a02a",
+    "backend/dist/src/event-browse/domain/interest-classification.js": "63d0fff71c19654c7d85a15fc4f8cdd9984e4528a8414b623e6453b9064656f9",
+    "backend/dist/src/event-browse/domain/source-event-id.js": "b0c88465c00850e62d5dae06891aa561d7468515a27958d9aef84c17bf0f5359",
+    "backend/dist/src/event-browse/infrastructure/public-event-pages.js": "ab4be670bc06b85ef1dfdc4ce6e8dde789c124bc551ff83376165b64c4bb787f",
+    "backend/dist/src/recommendation-profile/infrastructure/region-geometry.js": "62a03a294481a4404dcb1fa66cb58e1ee4fe66be910d0ab8a929b17af1346288",
+    "assets/regions/sg-planning-areas-2025.json": "4df9d3b75753b819da283dd89de8e2c4ce0a36a4120d5c72fb3318464431cbfe"
+  },
+  "candidateFilesStillMatch": true,
+  "probeSha256": "5af4044a0aa009112d488b847d0423374b239a6bfce2987221c2a6d437864602",
+  "mountedVerification": {
+    "stage": "mounted-code-verification",
+    "ok": true,
+    "mountedSourceCommit": "a447689781b8b389c972009380a25c63f39fd5d7",
+    "manifestSha256": "adc7a7852aa0ad43cd567587e10ab3121bf60ec250efbcf851149580dc88b2ca",
+    "helperCount": 8
+  },
+  "acquisition": {
+    "stage": "acquisition-diagnostics",
+    "outcome": "unavailable",
+    "elapsedMs": 65561,
+    "completedTasks": 0,
+    "rawRecords": 0,
+    "uniqueRecords": 0,
+    "tasks": []
+  },
+  "pipeline": null,
+  "processCleanup": {
+    "stage": "probe-watchdog",
+    "phase": "complete",
+    "code": 1,
+    "signal": null,
+    "deadlineHit": false,
+    "observedOwnedProcesses": 20,
+    "ownedRunningRemaining": 0,
+    "stderrBytes": 0
+  },
+  "sshCompleted": true,
+  "failure": null,
+  "budgets": {
+    "sourceMs": 180000,
+    "watchdogMs": 210000,
+    "sshSessionSeconds": 300
+  },
+  "mutations": {
+    "service": false,
+    "settings": false,
+    "packageSelector": false,
+    "users": false,
+    "model": false,
+    "notifications": false
+  },
+  "priorAttempt": {
+    "startedAtUtc": "2026-11-17T01:31:05Z",
+    "publicAcquisitionStartedAtUtc": "2026-11-17T01:31:20.388Z",
+    "result": "SSH channel ended before a source result; source outcome unknown",
+    "reconciledAtUtc": "2026-11-17T01:35:00.715Z",
+    "probeProcessesRemaining": 0,
+    "mountedSourceCommitUnchanged": true,
+    "repair": "SSH session lifetime increased from 60 to 300 seconds; source and watchdog budgets unchanged"
+  },
+  "limitations": [
+    "Public provider responses are time-specific; this is not a complete Singapore catalogue.",
+    "Ranking uses a synthetic all-interest selection over real public source rows; no real account profile or preferences are read or changed.",
+    "No backend package was activated, no service/configuration changed, and no APK or physical-device acceptance is established by this probe."
+  ]
+}
