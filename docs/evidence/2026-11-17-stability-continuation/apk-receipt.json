@@ -1,0 +1,14 @@
+{
+  "path": "/home/miku/Downloads/ENMORI-stable-candidate-v86-release.apk",
+  "sizeBytes": 70838168,
+  "sha256": "cedbd33d3538810f4d7a24cadfeb65876c6188f280112f54d6b24027e8bb3270",
+  "package": "com.enmori.app.group",
+  "versionCode": 86,
+  "versionName": "1.0.0-rc20261117",
+  "debuggable": false,
+  "certificateSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+  "configSha256": "eff899f2578b9023f3d2d6a9b4d2b5351153c5b3ea98bd09d38c8611b9805404",
+  "compiledAzureEndpointVerified": true,
+  "companionEnabled": "true",
+  "openAiTestAppEnabled": "true"
+}

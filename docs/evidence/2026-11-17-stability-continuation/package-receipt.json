@@ -1,0 +1,84 @@
+{
+  "createdAtUtc": "2026-11-17T15:26:48.301320+00:00",
+  "sourceCommit": "9e4c3ca6c44bc243823ee3f0a5d34ae3ec76bb28",
+  "backendVersion": 87,
+  "clientVersion": 86,
+  "path": "/home/miku/Downloads/ENMORI-backend-v87-candidate.zip",
+  "sha256": "357e981363ddc0c5297dd224dabbed288e5c637059d9f9819146cc68fa747102",
+  "bytes": 68086761,
+  "baseline": {
+    "version": 85,
+    "sourceCommit": "9fb0e7c9bfc27ca860da66c83e39d9f6245564f4",
+    "sha256": "7b2ffcccbf6c129ccaa839de1fced57125e2c41e33a5f746dc444189fcbe4140",
+    "path": "/home/miku/Downloads/ENMORI-backend-v85-candidate.zip"
+  },
+  "entries": 8570,
+  "everyEntryVerified": true,
+  "changedEntries": [
+    {
+      "path": "backend/dist/src/event-browse/infrastructure/onepa-browse-source.js",
+      "beforeSha256": "354b549cff8d0a33775ec1e9a4773540d9c968fa6e1471d135585eb7cd10da12",
+      "afterSha256": "aa6c7bc4c12e7130d07272e9e31907273689e9f4bba9fe4f0e05ddd2b42056a3",
+      "bytes": 16689
+    },
+    {
+      "path": "backend/dist/src/event-browse/infrastructure/onepa-public-reader.js",
+      "beforeSha256": "d38354b241869fe98edb590096ae3e2817f75b475382a375d497d5138bf7a824",
+      "afterSha256": "76eae620810d9394383550ab5cfaf6c53205176e60c21df6ae118e8c60ea0538",
+      "bytes": 6458
+    },
+    {
+      "path": "backend/dist/src/event-browse/infrastructure/public-event-pages.js",
+      "beforeSha256": "ab4be670bc06b85ef1dfdc4ce6e8dde789c124bc551ff83376165b64c4bb787f",
+      "afterSha256": "7edce674eaf011b3bc61898fdfcf6b0745e48ac9d774aae4e06cb2aedeaa2dcd",
+      "bytes": 12122
+    },
+    {
+      "path": "backend/dist/src/event-browse/infrastructure/onepa-public-reader.js.map",
+      "beforeSha256": "652c3820d2b4ded1305c8e363bc154b1c5a2222f517e11af35fe4a14ed7b19f5",
+      "afterSha256": "840b147e62c4ca6698ba0af2aa88438fe6692a582887d65b4ab18aed5587132c",
+      "bytes": 5937
+    },
+    {
+      "path": "backend/dist/src/event-browse/infrastructure/public-event-pages.js.map",
+      "beforeSha256": "94a4ab17fe030d02738a529adda2e38c87a4fb36efdc66d4f65846a36bcaaf20",
+      "afterSha256": "fb0239eb73c47b5e7d01b45d8ac239fe23783916c290763304d4ce1a213a28be",
+      "bytes": 10152
+    },
+    {
+      "path": "backend/dist/src/event-browse/infrastructure/onepa-browse-source.d.ts",
+      "beforeSha256": "31bb8e61bb8c5c9167b25150feda4d1aeada3133b031906c0a3be31ce2528ee0",
+      "afterSha256": "f1b8c3438775029ab8fb7d1298dbe8f9f31a789d24e626f95be5d28d16023e5f",
+      "bytes": 2446
+    },
+    {
+      "path": "backend/dist/src/event-browse/infrastructure/onepa-browse-source.js.map",
+      "beforeSha256": "56a5be61cb8f072a83387904a14a909f047b3f21c1a2a565099267c0147cb5e3",
+      "afterSha256": "eace8025d18d454829541858d4213862d2f717ea8e37d6dd3886f73cb2ab0c13",
+      "bytes": 17822
+    },
+    {
+      "path": "backend/dist/src/event-browse/infrastructure/public-event-pages.d.ts",
+      "beforeSha256": "4960cb3c00c239c140965c557d9a4044251f8e42f30712ac6ed1afe0742b31fa",
+      "afterSha256": "7e89a7d47e996117815c9c4700545133c0c546cc77951bc1263c2ecebea6ad2b",
+      "bytes": 1832
+    },
+    {
+      "path": "deployment-manifest.json",
+      "beforeSha256": "b3a07766fb2cfbbc011683f0d1fd2b909ab609ab48b82aa8225912ba75bc4246",
+      "afterSha256": "78b42c8af4801e24a6b3c9e684479ac908b4d8473b2134cb49ee60710de07692",
+      "bytes": 502
+    }
+  ],
+  "unchangedDependencyEntries": 7619,
+  "unchangedMapsRetainedAfterSourcePathOnlyComparison": 310,
+  "runtimeDependenciesAndEntrypointUnchanged": true,
+  "manifestChangedFields": [
+    "sourceCommit",
+    "demoVersion"
+  ],
+  "configurationIncluded": false,
+  "uploaded": false,
+  "deployed": false,
+  "aiRenewed": false
+}

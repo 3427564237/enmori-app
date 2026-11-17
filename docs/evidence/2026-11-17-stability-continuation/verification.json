@@ -1,0 +1,119 @@
+{
+  "clientSourceCommit": "7d2c0b24f849900765a753d6ba5c3b6eb6d3c048",
+  "baselineClientVersion": 84,
+  "baselineBackendVersion": 85,
+  "clientChanges": [
+    "Delay read-state checks until a topic is established, preserving genuine errors and existing-topic behavior",
+    "Scrollable friend tabs retain full-size labels",
+    "Discovery end marker follows the current cards"
+  ],
+  "tests": {
+    "fullFlutterPassed": 2017,
+    "newPermanentTests": 23,
+    "staticAnalysis": "No issues found",
+    "aiFocusedPassed": 393,
+    "friendFocusedPassed": 67,
+    "friendLegacyFollowupPassed": 17
+  },
+  "firstFullRun": {
+    "passed": 2016,
+    "failed": 1,
+    "failure": "Existing layout_refinement_test tapped My friends after it had scrolled outside viewport",
+    "resolution": "Reveal target, require hit-testability and selected index, preserve original content assertions; no additional production change"
+  },
+  "logs": {
+    "flutter-full-v86.log": {
+      "privatePath": "/home/miku/.local/state/enmori-stable-continuation-20261117/flutter-full-v86.log",
+      "sha256": "e4f49f0ba0eac3f99b5f7900e5408cb0751f8998d34a425ce92f811510857956"
+    },
+    "flutter-full-v86-final.log": {
+      "privatePath": "/home/miku/.local/state/enmori-stable-continuation-20261117/flutter-full-v86-final.log",
+      "sha256": "3396db6231599282dfe4207b91c12b5b832356d0b7633b6cf5bd5dd3d450c289"
+    },
+    "analyze-v86.log": {
+      "privatePath": "/home/miku/.local/state/enmori-stable-continuation-20261117/analyze-v86.log",
+      "sha256": "8e9ea7963b9e7be092b091b5d5be5a803e9a3a13f84bf5820f451f0ecf101045"
+    },
+    "ai-read-state-before.log": {
+      "privatePath": "/home/miku/.local/state/enmori-stable-continuation-20261117/ai-read-state-before.log",
+      "sha256": "a66552f26a386cd17fd4bc215be8c1c84181a78e0d08df71b8c979cca0219131"
+    },
+    "ai-read-state-regression-final.log": {
+      "privatePath": "/home/miku/.local/state/enmori-stable-continuation-20261117/ai-read-state-regression-final.log",
+      "sha256": "715e5be78eca50c088befcc8f1762a33310774a92324e431f30f5e6bee0c4042"
+    },
+    "friend-layout-before.log": {
+      "privatePath": "/home/miku/.local/state/enmori-stable-continuation-20261117/friend-layout-before.log",
+      "sha256": "89f2ad09b4d53deab911f923bd49fd2eb32959cf63934ca364e3d2fe01b3884e"
+    },
+    "friend-layout-regression.log": {
+      "privatePath": "/home/miku/.local/state/enmori-stable-continuation-20261117/friend-layout-regression.log",
+      "sha256": "b84eefe96ae38d369da62a92fa7bed0711750db312c2f70ec2d4d5539bee3446"
+    },
+    "friend-layout-legacy-before.log": {
+      "privatePath": "/home/miku/.local/state/enmori-stable-continuation-20261117/friend-layout-legacy-before.log",
+      "sha256": "c88ecbaddfab3efd05ace6038bc903b97fa695b4690055cce2d4c2777f97fe47"
+    },
+    "friend-layout-legacy-regression.log": {
+      "privatePath": "/home/miku/.local/state/enmori-stable-continuation-20261117/friend-layout-legacy-regression.log",
+      "sha256": "9201e88c43b02d9a8853293668d2a17b70a2a9770287f1f401127c67b523c135"
+    },
+    "build-v86.log": {
+      "privatePath": "/home/miku/.local/state/enmori-stable-continuation-20261117/build-v86.log",
+      "sha256": "9d73ac93c9f6ff800a94977053ae9011372fd29985a1857f64c6702c0b2a30f5"
+    },
+    "package-compile-v87.log": {
+      "privatePath": "/home/miku/.local/state/enmori-stable-continuation-20261117/package-compile-v87.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "backendAtStart": {
+    "atUtc": "2026-11-17T14:46:39.784751+00:00",
+    "passed": true,
+    "verification": "actual_application_container_ssh_mounted_manifest",
+    "serviceWrites": 0,
+    "configurationWrites": 0,
+    "productWrites": 0,
+    "publicEventSourceCalls": 0,
+    "modelCalls": 0,
+    "manifest": {
+      "sourceCommit": "9fb0e7c9bfc27ca860da66c83e39d9f6245564f4",
+      "demoVersion": 85,
+      "manifestSha256": "b3a07766fb2cfbbc011683f0d1fd2b909ab609ab48b82aa8225912ba75bc4246"
+    },
+    "completedAtUtc": "2026-11-17T14:46:49.078340+00:00"
+  },
+  "aiRenewed": false,
+  "phoneOperated": false,
+  "releaseReady": false,
+  "candidate": {
+    "path": "/home/miku/Downloads/ENMORI-stable-candidate-v86-release.apk",
+    "sizeBytes": 70838168,
+    "sha256": "cedbd33d3538810f4d7a24cadfeb65876c6188f280112f54d6b24027e8bb3270",
+    "package": "com.enmori.app.group",
+    "versionCode": 86,
+    "versionName": "1.0.0-rc20261117",
+    "debuggable": false,
+    "certificateSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+    "configSha256": "eff899f2578b9023f3d2d6a9b4d2b5351153c5b3ea98bd09d38c8611b9805404",
+    "compiledAzureEndpointVerified": true,
+    "companionEnabled": "true",
+    "openAiTestAppEnabled": "true",
+    "sourceCommit": "7d2c0b24f849900765a753d6ba5c3b6eb6d3c048"
+  },
+  "backendCandidate": {
+    "version": 87,
+    "sourceCommit": "9e4c3ca6c44bc243823ee3f0a5d34ae3ec76bb28",
+    "tests": {
+      "full": 2105,
+      "eventBrowse": 184,
+      "independentFocused": 57,
+      "firebaseEmulator": 21,
+      "azureEntry": 9
+    },
+    "packageReceipt": "package-receipt.json",
+    "deployed": false
+  },
+  "runtimeBackendReceipt": "current-backend.json",
+  "pubspecLockUnchanged": true
+}

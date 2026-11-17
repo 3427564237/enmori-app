@@ -1,5 +1,7 @@
 # ENMORI v85 后端部署与 v84 模拟器回归
 
+后续记录：[v86 客户端及 v87 后端候选修复](../2026-11-17-stability-continuation/README.md)已完成本地回归；v87 尚待单独部署确认，线上仍为本页的 v85。本页保留原 v84／v85 观察，不转记为新组合验收。
+
 2026-11-17，Asia/Singapore。**已按批准方案部署 v85，实际挂载身份及现有服务 owner 核对通过；仍不能定版。** AI 资金授权没有续期，未操作用户手机，没有模型验证发送。onePA 和最初启动失败的未明部分继续保留。
 
 依据：[本次部署批准](../../decisions/2026-11-17-li-v85-deployment.md)。此前的 [v85 修复、2,048 项测试与包审查](../2026-11-17-backend-expiry/README.md)、[v84 客户端修复](../2026-11-17-stable-followup/README.md)和 [v83 真机审查](../2026-11-17-stable-candidate/README.md)继续有效，各证据类型不互相替代。

@@ -1,0 +1,23 @@
+{
+  "atUtc": "2026-11-17T15:32:30.210715+00:00",
+  "device": "emulator-5556",
+  "wifiAndDataMatchInitial": true,
+  "fontAndScreenTimeoutMatchInitial": true,
+  "densityMatchesInitial": true,
+  "languageRestored": "en",
+  "ownedUiDumpRemoved": true,
+  "ownedReadOnlyAvdClosed": true,
+  "explicitEmulatorNoLongerConnected": true,
+  "physicalPhoneOperated": false,
+  "accountDeletedOrReset": false,
+  "productMutationActionsIssued": 0,
+  "modelCallsIssuedByOperator": 0,
+  "aiRenewed": false,
+  "cleanupObservation": "Initial 2-second post-kill disconnect assertion was premature; prior settings assertions and force-stop/dump removal/kill completed. Subsequent explicit emulator connection check confirms close.",
+  "finalConnectionChecks": [
+    {
+      "atUtc": "2026-11-17T15:32:30.210694+00:00",
+      "connected": false
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "atUtc": "2026-11-17T15:30:42.376848+00:00",
+  "passed": true,
+  "verification": "actual_application_container_ssh_mounted_manifest",
+  "serviceWrites": 0,
+  "configurationWrites": 0,
+  "productWrites": 0,
+  "publicEventSourceCalls": 0,
+  "modelCalls": 0,
+  "manifest": {
+    "sourceCommit": "9fb0e7c9bfc27ca860da66c83e39d9f6245564f4",
+    "demoVersion": 85,
+    "manifestSha256": "b3a07766fb2cfbbc011683f0d1fd2b909ab609ab48b82aa8225912ba75bc4246"
+  },
+  "completedAtUtc": "2026-11-17T15:30:52.050024+00:00"
+}
