@@ -1,4 +1,5 @@
 import '../../../core/presentation/refresh_on_return.dart';
+import '../../../core/presentation/event_source_coverage_notice.dart';
 
 import 'dart:async';
 
@@ -490,6 +491,10 @@ final class _ParticipationEventsPageState
                             ],
                           ),
                         ),
+                      EventSourceCoverageNotice(
+                        sourceStatus: value.sourceStatus,
+                        sourceCoverage: value.sourceCoverage,
+                      ),
                       for (final item in matching) ...[
                         EventCard.summary(
                           key: ValueKey(item.eventId ?? item.browseId),

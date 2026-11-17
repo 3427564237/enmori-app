@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/result/result.dart';
@@ -168,7 +169,9 @@ final class EventBatchesController extends Notifier<EventBatchesState> {
     if (!ref.mounted || generation != _generation || !_authenticated) return;
     if (result case Success<ActivityRead>(value: final ActivityBatch batch)) {
       if (next &&
-          (batch.asOf != previous!.asOf || batch.nextCursor == cursor)) {
+          (batch.asOf != previous!.asOf ||
+              batch.nextCursor == cursor ||
+              !mapEquals(batch.sourceCoverage, previous.sourceCoverage))) {
         state = EventBatchesState(
           batch: previous,
           failure: const AppFailure(
@@ -193,6 +196,7 @@ final class EventBatchesController extends Notifier<EventBatchesState> {
         batch: ActivityBatch(
           asOf: batch.asOf,
           sourceStatus: batch.sourceStatus,
+          sourceCoverage: batch.sourceCoverage,
           items: items,
           nextCursor: batch.nextCursor,
         ),

@@ -5,6 +5,8 @@ import 'dart:async';
 
 import '../../../core/presentation/enmori_localizations.dart';
 
+import '../../../core/presentation/event_source_coverage_notice.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -159,7 +161,11 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                 isError: true,
               ),
               AsyncData<ActivityRead?>(
-                value: ActivityBatch(:final items, :final sourceStatus),
+                value: ActivityBatch(
+                  :final items,
+                  :final sourceStatus,
+                  :final sourceCoverage,
+                ),
               ) =>
                 Column(
                   children: [
@@ -167,6 +173,10 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                       Text(
                         '${source.key}: ${source.value ? context.tr('available', '可用') : context.tr('unavailable', '暂不可用')}',
                       ),
+                    EventSourceCoverageNotice(
+                      sourceStatus: sourceStatus,
+                      sourceCoverage: sourceCoverage,
+                    ),
                     if (items.isEmpty)
                       StatusPanel(
                         title: context.tr('No activities to show', '暂无活动'),

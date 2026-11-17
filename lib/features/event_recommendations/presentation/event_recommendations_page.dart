@@ -1,4 +1,5 @@
 import '../../../core/presentation/refresh_on_return.dart';
+import '../../../core/presentation/event_source_coverage_notice.dart';
 import 'recommendation_reason.dart';
 import '../../../core/presentation/enmori_localizations.dart';
 
@@ -675,8 +676,13 @@ final class _RecommendationContentState extends State<_RecommendationContent> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (state is AsyncData<EventRecommendationResponse>)
+                if (state is AsyncData<EventRecommendationResponse>) ...[
                   _SourceAvailabilityNotice(status: state.value.sourceStatus),
+                  EventSourceCoverageNotice(
+                    sourceStatus: state.value.sourceStatus,
+                    sourceCoverage: state.value.sourceCoverage,
+                  ),
+                ],
                 content,
               ],
             ),

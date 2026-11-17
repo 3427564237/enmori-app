@@ -68,6 +68,26 @@ final class BackendEventRecommendationRepository
         sourceStatus[provider] = available;
       }
     }
+    final sourceCoverage = <String, bool>{};
+    if (value.containsKey('sourceCoverage')) {
+      final rows = value['sourceCoverage'];
+      if (formulaVersion != 'event_recommendation_v3' ||
+          rows is! List ||
+          rows.length > 1) {
+        return _invalidResponse();
+      }
+      for (final row in rows) {
+        if (row is! Map<String, dynamic> ||
+            row.length != 2 ||
+            row['provider'] != 'onepa' ||
+            row['complete'] is! bool ||
+            sourceStatus['onepa'] != true ||
+            sourceCoverage.containsKey('onepa')) {
+          return _invalidResponse();
+        }
+        sourceCoverage['onepa'] = row['complete'] as bool;
+      }
+    }
     final parsedItems = <EventRecommendation>[];
     final ids = <String>{};
     for (final item in items) {
@@ -199,6 +219,7 @@ final class BackendEventRecommendationRepository
         formulaVersion: formulaVersion,
         items: parsedItems,
         sourceStatus: Map.unmodifiable(sourceStatus),
+        sourceCoverage: sourceCoverage,
       ),
     );
   }

@@ -143,6 +143,41 @@ final class BackendActivityRepository implements PagedActivityRepository {
         }
         final rows = raw['items']! as List;
         if (rows.length > 40) return _invalid();
+        final sourceStatus = <String, bool>{};
+        final sourceCoverage = <String, bool>{};
+        if (raw.containsKey('sourceStatus')) {
+          final sources = raw['sourceStatus'];
+          if (sources is! List || sources.length > 2) return _invalid();
+          for (final row in sources) {
+            if (row is! Map<String, dynamic> ||
+                row.keys.any(
+                  (key) => !const [
+                    'provider',
+                    'available',
+                    'coverageComplete',
+                  ].contains(key),
+                )) {
+              return _invalid();
+            }
+            final provider = row['provider'], available = row['available'];
+            if (provider is! String ||
+                !const ['onepa', 'ticketmaster'].contains(provider) ||
+                available is! bool ||
+                sourceStatus.containsKey(provider)) {
+              return _invalid();
+            }
+            sourceStatus[provider] = available;
+            if (row.containsKey('coverageComplete')) {
+              final complete = row['coverageComplete'];
+              if (provider != 'onepa' ||
+                  available != true ||
+                  complete is! bool) {
+                return _invalid();
+              }
+              sourceCoverage[provider] = complete;
+            }
+          }
+        }
         final items = <ActivitySummary>[];
         final ids = <String>{};
         for (final row in rows) {
@@ -172,10 +207,8 @@ final class BackendActivityRepository implements PagedActivityRepository {
           ActivityBatch(
             asOf: raw['asOf']! as String,
             items: items,
-            sourceStatus: {
-              for (final row in (raw['sourceStatus'] as List? ?? const []))
-                (row as Map)['provider'] as String: row['available'] as bool,
-            },
+            sourceStatus: sourceStatus,
+            sourceCoverage: sourceCoverage,
             nextCursor: raw['nextCursor'] as String?,
           ),
         );

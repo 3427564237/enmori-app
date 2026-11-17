@@ -51,12 +51,14 @@ final class EventRecommendation {
 }
 
 final class EventRecommendationResponse {
-  const EventRecommendationResponse({
+  EventRecommendationResponse({
     required this.asOf,
     required this.formulaVersion,
     required this.items,
-    this.sourceStatus = const {},
-  });
+    Map<String, bool> sourceStatus = const {},
+    Map<String, bool> sourceCoverage = const {},
+  }) : sourceStatus = Map.unmodifiable(sourceStatus),
+       sourceCoverage = Map.unmodifiable(sourceCoverage);
 
   final DateTime asOf;
   final String formulaVersion;
@@ -64,6 +66,10 @@ final class EventRecommendationResponse {
 
   /// Missing providers have unknown availability for this exact response.
   final Map<String, bool> sourceStatus;
+
+  /// Known completeness of the acquisition bound to this exact response.
+  /// Missing providers are unknown, not implicitly complete.
+  final Map<String, bool> sourceCoverage;
 }
 
 abstract interface class EventRecommendationRepository {

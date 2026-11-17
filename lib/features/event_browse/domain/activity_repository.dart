@@ -34,9 +34,15 @@ final class ActivityBatch extends ActivityRead {
     required this.asOf,
     required List<ActivitySummary> items,
     this.nextCursor,
-    this.sourceStatus = const {},
-  }) : items = List.unmodifiable(items);
+    Map<String, bool> sourceStatus = const {},
+    Map<String, bool> sourceCoverage = const {},
+  }) : items = List.unmodifiable(items),
+       sourceStatus = Map.unmodifiable(sourceStatus),
+       sourceCoverage = Map.unmodifiable(sourceCoverage);
   final Map<String, bool> sourceStatus;
+
+  /// Missing providers have unknown acquisition coverage in this batch.
+  final Map<String, bool> sourceCoverage;
   final String asOf;
   final List<ActivitySummary> items;
   final String? nextCursor;
