@@ -1,0 +1,14 @@
+{
+  "sourceCommit": "b0f1ac875739bc89e7f2b7ff626f48d7e2160189",
+  "sourceAlsoContainedIn": "9b305490ea199585852f369bc9d0b712e854de8a",
+  "package": "com.enmori.app.group",
+  "versionCode": 78,
+  "versionName": "1.0.0-loading20261117",
+  "path": "/home/miku/Downloads/ENMORI-loading-v78-release.apk",
+  "sha256": "9df65675ae7f8f755ff743e550f80d97ff206806209b2cb484488e073431f165",
+  "sizeBytes": 70805408,
+  "certificateSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+  "debuggable": false,
+  "physicalDevicesConnected": 0,
+  "installed": false
+}

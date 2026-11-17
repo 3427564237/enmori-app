@@ -1,0 +1,485 @@
+{
+  "completedAtUtc": "2026-11-17T05:24:06.132953+00:00",
+  "version": 78,
+  "sourceCommit": "9b305490ea199585852f369bc9d0b712e854de8a",
+  "package": {
+    "name": "2026111704554378.zip",
+    "baseName": "2026111702281277.zip",
+    "sha256": "6005380c4e663bfaebfee898dc1fae56c66c0910b9b4485f0da7ea000070d230",
+    "bytes": 68085970,
+    "sourceCommit": "9b305490ea199585852f369bc9d0b712e854de8a",
+    "everyEntryVerified": true,
+    "entryCount": 8570,
+    "selector": "2026111702281277.zip"
+  },
+  "activation": {
+    "atUtc": "2026-11-17T04:58:24.416622+00:00",
+    "name": "2026111704554378.zip",
+    "sha256": "6005380c4e663bfaebfee898dc1fae56c66c0910b9b4485f0da7ea000070d230"
+  },
+  "start": {
+    "atUtc": "2026-11-17T04:59:05.585099+00:00",
+    "name": "2026111704554378.zip",
+    "phase": "restart"
+  },
+  "mountedManifest": {
+    "atUtc": "2026-11-17T05:03:33.089059+00:00",
+    "passed": true,
+    "verification": "actual_application_container_ssh_mounted_manifest",
+    "serviceWrites": 0,
+    "configurationWrites": 0,
+    "productWrites": 0,
+    "publicEventSourceCalls": 0,
+    "modelCalls": 0,
+    "manifest": {
+      "sourceCommit": "9b305490ea199585852f369bc9d0b712e854de8a",
+      "demoVersion": 78,
+      "manifestSha256": "0890c5a5aeda4e21b4313aa3a4040b231c877135073eba86cfff67f97ccfb1a3"
+    },
+    "completedAtUtc": "2026-11-17T05:03:57.201433+00:00"
+  },
+  "startup": {
+    "atUtc": "2026-11-17T05:21:17.521267+00:00",
+    "events": [
+      {
+        "atUtc": "2026-11-17T05:01:07.8234499Z",
+        "phase": "configuration",
+        "nodeVersion": "24.19.0",
+        "selectedHost": true,
+        "identityEndpointPath": "/msi/token",
+        "cloudTestApp": "armed"
+      },
+      {
+        "atUtc": "2026-11-17T05:02:53.3482705Z",
+        "phase": "listening",
+        "firebaseRead": true,
+        "aiConfigured": true,
+        "aiAvailable": true
+      }
+    ],
+    "platform": [
+      "Starting container: a7aa6427a7ec_enmori-backend-20261029.",
+      "Container is running.",
+      "Site startup probe succeeded after 187.043561 seconds.",
+      "State: Starting, Action: WarmUpProbeSucceeded, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Site startup probe succeeded after 187.043561 seconds., DetailsLevel: INFO"
+    ]
+  },
+  "startToListeningSeconds": 227.763,
+  "currentState": {
+    "state": "Running",
+    "selector": "2026111704554378.zip",
+    "ownershipConfigured": true,
+    "phase": "restart",
+    "intents": [
+      "activate-intent.json",
+      "start-intent.json",
+      "stop-intent.json"
+    ]
+  },
+  "stopProof": {
+    "atUtc": "2026-11-17T04:57:39.768861+00:00",
+    "stopIntentHash": "a8267eee6de7c57345460abf91a19adfdb06f73a0f66cc900b351644a83a329a",
+    "allContainersStopped": true,
+    "httpStopped": true,
+    "localStopped": true,
+    "inventoryBefore": [
+      [
+        "5d60a965180b406a6db5fb1d4bb5f9558655f24eb0d5963955e03bef23e73aeb",
+        "lw0mdlwk0000IK",
+        "STOPPED"
+      ]
+    ],
+    "inventoryAfter": [
+      [
+        "5d60a965180b406a6db5fb1d4bb5f9558655f24eb0d5963955e03bef23e73aeb",
+        "lw0mdlwk0000IK",
+        "STOPPED"
+      ]
+    ],
+    "logHashes": {
+      "2026_11_15_lw0mdlwk0000GU_docker.log": "4107af1ab42a91b4d68e50e01fd17914e25a09386b754d3ff03e96100a5cd93d",
+      "2026_11_15_lw0sdlwk0001LN_docker.log": "913fed99c46315aa3cb1d18355150b834cbc8ce9749029d6cd19793f589708e8",
+      "2026_11_16_lw0mdlwk0000GU_docker.log": "ea711761a331733396c88fac0443f890732b270ac5118fe57ffaada749edc122",
+      "2026_11_16_lw0mdlwk0000IK_docker.log": "637e05cad13cc56308a5fd72ffdce35cb4780ab2b52e0dc6e83be00c7fa6e0d4",
+      "2026_11_17_lw0mdlwk0000IK_docker.log": "85a2d4d009eea5dc8ab4f89f1d130cf1bce8908acead44b78363c6ede051d4eb"
+    },
+    "evidenceKind": "arm-current-instances-and-site-stop-v2",
+    "currentInstanceCount": 1,
+    "currentWorkerStopCompletions": {
+      "lw0mdlwk0000IK": "2026-11-17T04:57:34.623486+00:00"
+    },
+    "historicalWorkersOutsideCurrentInventory": [
+      "lw0mdlwk0000GU",
+      "lw0sdlwk0001LN"
+    ],
+    "inspectedPlatformLogs": 5,
+    "individualContainerTerminationsObserved": false
+  },
+  "ownership": {
+    "before": {
+      "confirmed": true,
+      "mode": "capture-restart",
+      "generation": 92,
+      "attemptCount": 119,
+      "reconciledCount": 117,
+      "spentNanoUsd": 120366700,
+      "reservedNanoUsd": 4096000,
+      "moneyHash": "227b87578bb1e9495ac4eecd110140272fd3be8bead4effea9ec1613222c2056",
+      "ownerSeedCreateAcknowledged": false,
+      "observationPrecedesSeed": false,
+      "ownerPresent": true,
+      "leaseVersion": 7476,
+      "noPaidRequestIssuedByOperator": true
+    },
+    "after": {
+      "confirmed": true,
+      "mode": "observe",
+      "generation": 93,
+      "attemptCount": 119,
+      "reconciledCount": 117,
+      "spentNanoUsd": 120366700,
+      "reservedNanoUsd": 4096000,
+      "moneyHash": "227b87578bb1e9495ac4eecd110140272fd3be8bead4effea9ec1613222c2056",
+      "ownerSeedCreateAcknowledged": false,
+      "observationPrecedesSeed": false,
+      "ownerPresent": true,
+      "leaseVersion": 7483,
+      "noPaidRequestIssuedByOperator": true
+    },
+    "renewal": {
+      "confirmed": true,
+      "mode": "renewal",
+      "generation": 93,
+      "attemptCount": 119,
+      "reconciledCount": 117,
+      "spentNanoUsd": 120366700,
+      "reservedNanoUsd": 4096000,
+      "moneyHash": "227b87578bb1e9495ac4eecd110140272fd3be8bead4effea9ec1613222c2056",
+      "ownerSeedCreateAcknowledged": false,
+      "observationPrecedesSeed": false,
+      "ownerPresent": true,
+      "leaseVersion": 7485,
+      "noPaidRequestIssuedByOperator": true
+    },
+    "laterRenewal": {
+      "confirmed": true,
+      "mode": "renewal",
+      "generation": 93,
+      "attemptCount": 119,
+      "reconciledCount": 117,
+      "spentNanoUsd": 120366700,
+      "reservedNanoUsd": 4096000,
+      "moneyHash": "227b87578bb1e9495ac4eecd110140272fd3be8bead4effea9ec1613222c2056",
+      "ownerSeedCreateAcknowledged": false,
+      "observationPrecedesSeed": false,
+      "ownerPresent": true,
+      "leaseVersion": 7519,
+      "noPaidRequestIssuedByOperator": true
+    },
+    "settingsUnchanged": true,
+    "moneyHashUnchanged": true,
+    "ownerSeedWrites": 0
+  },
+  "authenticatedApi": {
+    "before": {
+      "mode": "before",
+      "atUtc": "2026-11-17T04:55:36.706Z",
+      "productWrites": 0,
+      "modelCalls": 0,
+      "reads": [
+        {
+          "path": "/v1/me/friends",
+          "status": 200,
+          "elapsedMs": 1772
+        },
+        {
+          "path": "/v1/me/friends/search?q=member",
+          "status": 200,
+          "elapsedMs": 1188
+        },
+        {
+          "path": "/v1/me/profile",
+          "status": 200,
+          "elapsedMs": 746
+        },
+        {
+          "path": "/v1/me/interests",
+          "status": 200,
+          "elapsedMs": 854
+        },
+        {
+          "path": "/v1/me/recommendation-profile",
+          "status": 200,
+          "elapsedMs": 763
+        }
+      ],
+      "friendListCount": 0,
+      "profileHash": "c8f26daff2c45d32014cc726b4dcec5009dc79c609bcba40bd5620934517d99a",
+      "interestsHash": "b0d7edf9b723102cac6d13aa6d8f48c54858ea028c0285fe76bdbd571564147a",
+      "selectedInterestNames": [],
+      "preferencesHash": "c93bdc59d8b95d4d4f6a192e27244f8857aae48d62dcfb3c2a5307edf623be08",
+      "passed": true,
+      "completedAtUtc": "2026-11-17T04:55:42.653Z"
+    },
+    "initialAfterAttempt": {
+      "mode": "after",
+      "atUtc": "2026-11-17T05:06:09.241Z",
+      "productWrites": 0,
+      "modelCalls": 0,
+      "reads": [
+        {
+          "path": "/v1/me/friends",
+          "status": 200,
+          "elapsedMs": 1293
+        },
+        {
+          "path": "/v1/me/friends/search?q=member",
+          "status": 200,
+          "elapsedMs": 2576
+        },
+        {
+          "path": "/v1/me/profile",
+          "status": 200,
+          "elapsedMs": 800
+        },
+        {
+          "path": "/v1/me/interests",
+          "status": 200,
+          "elapsedMs": 780
+        },
+        {
+          "path": "/v1/me/recommendation-profile",
+          "status": 200,
+          "elapsedMs": 1059
+        },
+        {
+          "path": "/v1/recommendations/events?view=all",
+          "status": 200,
+          "elapsedMs": 4020
+        },
+        {
+          "path": "/v1/recommendations/events?view=home",
+          "status": 200,
+          "elapsedMs": 5284
+        }
+      ],
+      "friendListCount": 0,
+      "profileHash": "c8f26daff2c45d32014cc726b4dcec5009dc79c609bcba40bd5620934517d99a",
+      "interestsHash": "b0d7edf9b723102cac6d13aa6d8f48c54858ea028c0285fe76bdbd571564147a",
+      "selectedInterestNames": [],
+      "preferencesHash": "c93bdc59d8b95d4d4f6a192e27244f8857aae48d62dcfb3c2a5307edf623be08",
+      "existingAccountFieldsUnchanged": true,
+      "sourceStatus": [
+        {
+          "provider": "ticketmaster",
+          "available": true
+        },
+        {
+          "provider": "onepa",
+          "available": true
+        }
+      ],
+      "sourceCoverage": [
+        {
+          "provider": "onepa",
+          "complete": false
+        }
+      ],
+      "matchedInterestCounts": {
+        "Food": 0,
+        "Dance": 0,
+        "Music": 0
+      },
+      "onePaRecommendations": 0,
+      "ranking": {
+        "itemCount": 0,
+        "interestMatches": 0,
+        "otherRelevant": 0,
+        "interestFirst": true,
+        "nonempty": false,
+        "homeMatchesAll": true
+      },
+      "passed": false,
+      "errorType": "TypeError"
+    },
+    "completeWarmPass": {
+      "mode": "warm",
+      "atUtc": "2026-11-17T05:21:43.174Z",
+      "productWrites": 0,
+      "modelCalls": 0,
+      "reads": [
+        {
+          "path": "/v1/me/friends",
+          "status": 200,
+          "elapsedMs": 1201
+        },
+        {
+          "path": "/v1/me/friends/search?q=member",
+          "status": 200,
+          "elapsedMs": 1096
+        },
+        {
+          "path": "/v1/me/profile",
+          "status": 200,
+          "elapsedMs": 666
+        },
+        {
+          "path": "/v1/me/interests",
+          "status": 200,
+          "elapsedMs": 922
+        },
+        {
+          "path": "/v1/me/recommendation-profile",
+          "status": 200,
+          "elapsedMs": 819
+        },
+        {
+          "path": "/v1/recommendations/events?view=all",
+          "status": 200,
+          "elapsedMs": 4540
+        },
+        {
+          "path": "/v1/recommendations/events?view=home",
+          "status": 200,
+          "elapsedMs": 1412
+        },
+        {
+          "path": "/v1/admin/operations-status",
+          "status": 200,
+          "elapsedMs": 808
+        }
+      ],
+      "friendListCount": 0,
+      "profileHash": "c8f26daff2c45d32014cc726b4dcec5009dc79c609bcba40bd5620934517d99a",
+      "interestsHash": "b0d7edf9b723102cac6d13aa6d8f48c54858ea028c0285fe76bdbd571564147a",
+      "selectedInterestNames": [],
+      "preferencesHash": "c93bdc59d8b95d4d4f6a192e27244f8857aae48d62dcfb3c2a5307edf623be08",
+      "existingAccountFieldsUnchanged": true,
+      "sourceStatus": [
+        {
+          "provider": "ticketmaster",
+          "available": true
+        },
+        {
+          "provider": "onepa",
+          "available": true
+        }
+      ],
+      "sourceCoverage": [
+        {
+          "provider": "onepa",
+          "complete": false
+        }
+      ],
+      "matchedInterestCounts": {
+        "Food": 0,
+        "Dance": 0,
+        "Music": 0
+      },
+      "onePaRecommendations": 0,
+      "ranking": {
+        "itemCount": 0,
+        "interestMatches": 0,
+        "otherRelevant": 0,
+        "interestFirst": true,
+        "nonempty": false,
+        "homeMatchesAll": true
+      },
+      "services": [
+        {
+          "service": "backend",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T05:21:54.833Z"
+        },
+        {
+          "service": "firebase",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T05:21:54.833Z",
+          "lastSucceededAt": "2026-11-17T05:21:54.833Z"
+        },
+        {
+          "service": "ai",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T05:21:54.833Z"
+        },
+        {
+          "service": "ticketmaster",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T05:21:52.456Z",
+          "lastSucceededAt": "2026-11-17T05:21:52.456Z"
+        },
+        {
+          "service": "onepa",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T05:19:21.072Z",
+          "lastSucceededAt": "2026-11-17T05:19:21.072Z"
+        }
+      ],
+      "passed": true,
+      "completedAtUtc": "2026-11-17T05:21:55.097Z"
+    },
+    "browse": {
+      "mode": "browse-warm",
+      "atUtc": "2026-11-17T05:21:13.639Z",
+      "productWrites": 0,
+      "modelCalls": 0,
+      "reads": [
+        {
+          "path": "/v1/event-browse",
+          "status": 200,
+          "elapsedMs": 3188
+        }
+      ],
+      "browse": {
+        "itemCount": 25,
+        "sourceStatus": [
+          {
+            "provider": "ticketmaster",
+            "available": true
+          },
+          {
+            "provider": "onepa",
+            "available": true,
+            "coverageComplete": false
+          }
+        ]
+      },
+      "passed": true,
+      "completedAtUtc": "2026-11-17T05:21:17.260Z"
+    }
+  },
+  "interpretation": {
+    "measuredFrom": "operator host authenticated HTTP client",
+    "initialRecommendationAllMs": 4020,
+    "initialRecommendationHomeMs": 5284,
+    "laterRecommendationAllMs": 4540,
+    "laterRecommendationHomeMs": 1412,
+    "laterBrowseMs": 3188,
+    "browseReturnedItems": 25,
+    "bothProvidersAvailable": true,
+    "onePaCoverageComplete": false,
+    "retainedAccountHasActiveInterests": false,
+    "nonemptyPersonalizedRankingAcceptedByThisProbe": false,
+    "sourceMappingEvidence": "Public cloud candidate had Food1 and Dance3; prior v77 real-source controlled requester acceptance remains separate. Account data was not modified to manufacture results.",
+    "backgroundContinuation": "Later authenticated reads served available onePA after more than three cache lifetimes; operations status reports a successful onePA read at2026-11-17T05:19:21.072Z. No extra provider query was dispatched by the operator between the initial and later API checks.",
+    "notAnSla": true
+  },
+  "retainedFailures": [
+    "Pre-ready owner read was unconfirmed; a subsequent management read had ConnectionResetError. Read-only reconciliation confirmed package/settings before successful owner verification.",
+    "Pre-ready mounted SSH check was unavailable; after platform readiness the actual container manifest matched.",
+    "Initial after probe succeeded through recommendation Home matching All, but final Admin status read threw TypeError. Its receipt remains failed; the later full warm probe passed all reads.",
+    "Pre-release second source cycle was unavailable and the two-success assertion failed; see cloud-probe-summary.json."
+  ],
+  "configurationWrites": 0,
+  "productWrites": 0,
+  "modelCalls": 0,
+  "notificationsSent": 0,
+  "rollbackExecuted": false,
+  "physicalDeviceAcceptance": false,
+  "packageReceiptPhase": "Prepared candidate before activation; its selector intentionally records v77. currentState and mountedManifest record the final running v78."
+}

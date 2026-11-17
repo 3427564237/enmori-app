@@ -1,0 +1,299 @@
+{
+  "atUtc": "2026-11-17T04:54:30.791643+00:00",
+  "backendSourceCommit": "9b305490ea199585852f369bc9d0b712e854de8a",
+  "candidateSourceHashes": {
+    "backend/src/bootstrap/controlled-event-browse.ts": "640cbeca8831efa51810443be67415bce545d9ff69a7a41461b9698257be99f3",
+    "backend/src/event-browse/infrastructure/controlled-source-projection.ts": "b5812707815b4a8080d4640068ceaa7166aedd8f4a0956218bdfb0a9ef36eff9",
+    "backend/src/event-browse/domain/source-freshness.ts": "0db41e370e060294c87c0a210e3d9b3230d51f991f500e4dd950aab1f08cec99",
+    "backend/src/event-browse/infrastructure/combined-event-source.ts": "77e1c1945d15c5e35b78b11ddf51250cde3dca4c5e8d0d9a88d6642628187762",
+    "backend/src/event-browse/infrastructure/onepa-browse-source.ts": "a2ea72d4a0da80b5af98c0521ef3ce33bb603cb60166654aabf0106b8cfcc370",
+    "backend/src/event-browse/infrastructure/onepa-public-catalogue.ts": "f9057ee8d0a2ef6b47ada1c4d5d42c9f9bf929aace8f6663860d8d671e27e16d"
+  },
+  "evidence": {
+    "firstWarmRead": {
+      "stage": "warm-cache-probe",
+      "phase": "first-warm-read",
+      "elapsedMs": 214,
+      "items": 71,
+      "counts": {
+        "Food": 1,
+        "Dance": 3,
+        "Music": 2
+      },
+      "sourceCoverage": [
+        {
+          "provider": "onepa",
+          "complete": false
+        }
+      ],
+      "freshness": {
+        "acquiredAt": "2026-11-17T04:50:28.976Z",
+        "expiresAt": "2026-11-17T04:55:28.976Z"
+      },
+      "realTicketmasterReads": 0,
+      "personalReads": 0
+    },
+    "duringBackgroundRead": {
+      "stage": "warm-cache-probe",
+      "phase": "read-during-refresh",
+      "elapsedMs": 9,
+      "items": 71,
+      "oldSnapshotCurrent": true,
+      "refreshStillRunning": true
+    },
+    "cycleStarts": [
+      {
+        "stage": "warm-cache-probe",
+        "phase": "cycle-start",
+        "index": 1,
+        "startedMs": 2274,
+        "settled": false
+      },
+      {
+        "stage": "warm-cache-probe",
+        "phase": "cycle-start",
+        "index": 2,
+        "startedMs": 302273,
+        "settled": false
+      }
+    ],
+    "acquisitions": [
+      {
+        "stage": "warm-cache-probe",
+        "phase": "acquisition",
+        "index": 1,
+        "diagnostics": {
+          "outcome": "partial",
+          "elapsedMs": 147603,
+          "completedTasks": 13,
+          "failedTasks": 2,
+          "settledTasks": 15,
+          "cancelledTasks": 0,
+          "unstartedTasks": 0,
+          "rawRecords": 161,
+          "uniqueRecords": 157,
+          "tasks": [
+            {
+              "index": 0,
+              "status": "complete",
+              "records": 50,
+              "elapsedMs": 24282
+            },
+            {
+              "index": 1,
+              "status": "complete",
+              "records": 10,
+              "elapsedMs": 18205
+            },
+            {
+              "index": 2,
+              "status": "complete",
+              "records": 10,
+              "elapsedMs": 18168
+            },
+            {
+              "index": 3,
+              "status": "complete",
+              "records": 10,
+              "elapsedMs": 18446
+            },
+            {
+              "index": 4,
+              "status": "complete",
+              "records": 10,
+              "elapsedMs": 14148
+            },
+            {
+              "index": 5,
+              "status": "complete",
+              "records": 10,
+              "elapsedMs": 13945
+            },
+            {
+              "index": 6,
+              "status": "complete",
+              "records": 7,
+              "elapsedMs": 15604
+            },
+            {
+              "index": 7,
+              "status": "complete",
+              "records": 5,
+              "elapsedMs": 12643
+            },
+            {
+              "index": 8,
+              "status": "complete",
+              "records": 10,
+              "elapsedMs": 12972
+            },
+            {
+              "index": 9,
+              "status": "complete",
+              "records": 10,
+              "elapsedMs": 11017
+            },
+            {
+              "index": 10,
+              "status": "complete",
+              "records": 9,
+              "elapsedMs": 11607
+            },
+            {
+              "index": 11,
+              "status": "complete",
+              "records": 10,
+              "elapsedMs": 13312
+            },
+            {
+              "index": 12,
+              "status": "complete",
+              "records": 10,
+              "elapsedMs": 14215
+            },
+            {
+              "index": 13,
+              "status": "failed",
+              "records": 0,
+              "elapsedMs": 60057
+            },
+            {
+              "index": 14,
+              "status": "failed",
+              "records": 0,
+              "elapsedMs": 1915
+            }
+          ]
+        }
+      },
+      {
+        "stage": "warm-cache-probe",
+        "phase": "acquisition",
+        "index": 2,
+        "diagnostics": {
+          "outcome": "unavailable",
+          "elapsedMs": 13865,
+          "completedTasks": 0,
+          "failedTasks": 1,
+          "settledTasks": 1,
+          "cancelledTasks": 0,
+          "unstartedTasks": 14,
+          "rawRecords": 10,
+          "uniqueRecords": 0,
+          "tasks": [
+            {
+              "index": 0,
+              "status": "failed",
+              "records": 10,
+              "elapsedMs": 10327
+            },
+            {
+              "index": 1,
+              "status": "not_started",
+              "records": 0,
+              "elapsedMs": 0
+            },
+            {
+              "index": 2,
+              "status": "not_started",
+              "records": 0,
+              "elapsedMs": 0
+            },
+            {
+              "index": 3,
+              "status": "not_started",
+              "records": 0,
+              "elapsedMs": 0
+            },
+            {
+              "index": 4,
+              "status": "not_started",
+              "records": 0,
+              "elapsedMs": 0
+            },
+            {
+              "index": 5,
+              "status": "not_started",
+              "records": 0,
+              "elapsedMs": 0
+            },
+            {
+              "index": 6,
+              "status": "not_started",
+              "records": 0,
+              "elapsedMs": 0
+            },
+            {
+              "index": 7,
+              "status": "not_started",
+              "records": 0,
+              "elapsedMs": 0
+            },
+            {
+              "index": 8,
+              "status": "not_started",
+              "records": 0,
+              "elapsedMs": 0
+            },
+            {
+              "index": 9,
+              "status": "not_started",
+              "records": 0,
+              "elapsedMs": 0
+            },
+            {
+              "index": 10,
+              "status": "not_started",
+              "records": 0,
+              "elapsedMs": 0
+            },
+            {
+              "index": 11,
+              "status": "not_started",
+              "records": 0,
+              "elapsedMs": 0
+            },
+            {
+              "index": 12,
+              "status": "not_started",
+              "records": 0,
+              "elapsedMs": 0
+            },
+            {
+              "index": 13,
+              "status": "not_started",
+              "records": 0,
+              "elapsedMs": 0
+            },
+            {
+              "index": 14,
+              "status": "not_started",
+              "records": 0,
+              "elapsedMs": 0
+            }
+          ]
+        }
+      }
+    ],
+    "cleanup": {
+      "stage": "probe-watchdog",
+      "phase": "complete",
+      "code": 1,
+      "signal": null,
+      "deadlineHit": false,
+      "observedOwnedProcesses": 26,
+      "ownedRunningRemaining": 0,
+      "stderrBytes": 0
+    }
+  },
+  "completeTwoSuccessGatePassed": false,
+  "limitation": "Second required default query acquisition was unavailable. No successful replacement claim; original optimistic two-success assertion failed. Source failure must not be represented as empty or stale success. Synthetic lifecycle suite verifies failure/no re-aging and next-cycle recovery.",
+  "receiptSha256": "dca8e96253828c740ec3056d640a267414d94033bc6ad195d8930aaf21ee8d84",
+  "realTicketmasterReads": 0,
+  "personalReads": 0,
+  "productWrites": 0,
+  "modelCalls": 0,
+  "measurementScope": "internal_source_projection",
+  "authenticatedHttpMeasured": false,
+  "physicalDeviceAcceptance": false
+}

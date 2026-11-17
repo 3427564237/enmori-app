@@ -1,0 +1,12 @@
+{
+  "sourceCommit": "9b305490ea199585852f369bc9d0b712e854de8a",
+  "probeCompiledModulesMatchPackage": {
+    "bootstrap/controlled-event-browse.js": true,
+    "event-browse/infrastructure/controlled-source-projection.js": true,
+    "event-browse/domain/source-freshness.js": true,
+    "event-browse/infrastructure/combined-event-source.js": true,
+    "event-browse/infrastructure/onepa-browse-source.js": true,
+    "event-browse/infrastructure/onepa-public-catalogue.js": true
+  },
+  "remainingHelpersVerifiedAgainstMountedV77": true
+}

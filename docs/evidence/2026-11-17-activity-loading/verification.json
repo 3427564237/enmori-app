@@ -1,0 +1,70 @@
+{
+  "sourceCommit": "9b305490ea199585852f369bc9d0b712e854de8a",
+  "backendPassed": 2016,
+  "azureToolPassed": 9,
+  "flutterPassed": 1917,
+  "flutterAnalysis": "No issues",
+  "focusedEmulatorPassed": 28,
+  "focusedEmulatorSuites": [
+    "interest-management",
+    "s2-event-recommendations",
+    "jin-recommendation-v2",
+    "event-browse-composition",
+    "event-participation",
+    "combined-read-slices"
+  ],
+  "operatorPythonPassed": 74,
+  "operatorNodePassed": 22,
+  "extraBroadEmulatorAttempt": {
+    "tests": 245,
+    "passed": 223,
+    "failed": 17,
+    "skipped": 5,
+    "countedAsPassing": false,
+    "findings": [
+      "Default runner supplied 9099/8080 but event-participation fixture requires 19099/18080. Focused isolated runner passed all28.",
+      "Pinned Dart3.13.2 was absent from the initial PATH.",
+      "Account/AI producer use pre-existing maxAttempts1; legacy race assertions require200/412 but may receive503 after SDK transaction failure. No exact per-case log correlation available.",
+      "Other unchanged fixtures omit current discoverability or explicit historical Note selection, and have obsolete Check-in field expectations.",
+      "No emulator fixtures, account/friends/conversation-store or Firestore gateway changed from deployedv77; out-of-scope fixture repairs were not made."
+    ]
+  },
+  "independentReviews": [
+    "Backend lifecycle, cache freshness, shared admission and shutdown reviewed; issues corrected before2016tests.",
+    "Private operator source/base/package/stop/rollback bindings reviewed; unused unchanged tool removed from payload; current-format verifier wired into all3entrypoints with4new tests."
+  ],
+  "logs": {
+    "backend": {
+      "path": "/tmp/enmori-warm-final-backend.log",
+      "sha256": "21e7679c90229568e7d432363d079758c63475d380cf1c4811cef626164e1347"
+    },
+    "azureTool": {
+      "path": "/tmp/enmori-warm-azure-tool.log",
+      "sha256": "3dc046b0f6225c0ad098b60de93c925424f00bc1f0853fd744a55165ea50ce80"
+    },
+    "flutter": {
+      "path": "/tmp/enmori-v78-flutter-full-final.log",
+      "sha256": "52ea07e3b15e00ce070a5d70586d4e96190d93c6a5c7820127bd044a96935caa"
+    },
+    "flutterAnalysis": {
+      "path": "/tmp/enmori-v78-flutter-analyze.log",
+      "sha256": "b850ad052a1aeaee6b166a62df64438b5ed209629277e1cadbc47e81ff0b09b3"
+    },
+    "emulatorFocused": {
+      "path": "/tmp/enmori-v78-emulator-focused.log",
+      "sha256": "bf35f9da4f1127dd7982d9a585d101415150aa08886ddad28e976fc436aa85c2"
+    },
+    "emulatorBroaderAttempt": {
+      "path": "/tmp/enmori-v78-emulator.log",
+      "sha256": "c1a36786ca1372e0189130be944feb6123803871cb187ff3607c7ce80ea83e00"
+    },
+    "operatorPython": {
+      "path": "/tmp/enmori-v78-operator-routing-tests.log",
+      "sha256": "fb1157d452af9edbc911d6c235c13f6f722135f3fcb3a500fabf8be07265b264"
+    },
+    "operatorNode": {
+      "path": "/tmp/enmori-v78-operator-node.log",
+      "sha256": "73d48cd3a6ed98fe7e9c48000ed007983be42268eca131a6a7048582aa29482d"
+    }
+  }
+}

@@ -1,0 +1,256 @@
+{
+  "atUtc": "2026-11-17T04:57:08.305341+00:00",
+  "appState": "Running",
+  "metrics": [
+    {
+      "name": "CpuPercentage",
+      "points": [
+        {
+          "timeStamp": "2026-11-17T04:27:00Z",
+          "average": 5
+        },
+        {
+          "timeStamp": "2026-11-17T04:28:00Z",
+          "average": 14
+        },
+        {
+          "timeStamp": "2026-11-17T04:29:00Z",
+          "average": 5
+        },
+        {
+          "timeStamp": "2026-11-17T04:30:00Z",
+          "average": 4
+        },
+        {
+          "timeStamp": "2026-11-17T04:31:00Z",
+          "average": 8
+        },
+        {
+          "timeStamp": "2026-11-17T04:32:00Z",
+          "average": 5
+        },
+        {
+          "timeStamp": "2026-11-17T04:33:00Z",
+          "average": 15
+        },
+        {
+          "timeStamp": "2026-11-17T04:34:00Z",
+          "average": 4
+        },
+        {
+          "timeStamp": "2026-11-17T04:35:00Z",
+          "average": 12
+        },
+        {
+          "timeStamp": "2026-11-17T04:36:00Z",
+          "average": 12
+        },
+        {
+          "timeStamp": "2026-11-17T04:37:00Z",
+          "average": 5
+        },
+        {
+          "timeStamp": "2026-11-17T04:38:00Z",
+          "average": 12
+        },
+        {
+          "timeStamp": "2026-11-17T04:39:00Z",
+          "average": 6
+        },
+        {
+          "timeStamp": "2026-11-17T04:40:00Z",
+          "average": 4
+        },
+        {
+          "timeStamp": "2026-11-17T04:41:00Z",
+          "average": 6
+        },
+        {
+          "timeStamp": "2026-11-17T04:42:00Z",
+          "average": 5
+        },
+        {
+          "timeStamp": "2026-11-17T04:43:00Z",
+          "average": 13
+        },
+        {
+          "timeStamp": "2026-11-17T04:44:00Z",
+          "average": 6
+        },
+        {
+          "timeStamp": "2026-11-17T04:45:00Z",
+          "average": 8
+        },
+        {
+          "timeStamp": "2026-11-17T04:46:00Z",
+          "average": 6
+        },
+        {
+          "timeStamp": "2026-11-17T04:47:00Z",
+          "average": 5
+        },
+        {
+          "timeStamp": "2026-11-17T04:48:00Z",
+          "average": 12
+        },
+        {
+          "timeStamp": "2026-11-17T04:49:00Z",
+          "average": 58
+        },
+        {
+          "timeStamp": "2026-11-17T04:50:00Z",
+          "average": 86
+        },
+        {
+          "timeStamp": "2026-11-17T04:51:00Z",
+          "average": 12
+        },
+        {
+          "timeStamp": "2026-11-17T04:52:00Z",
+          "average": 5
+        },
+        {
+          "timeStamp": "2026-11-17T04:53:00Z",
+          "average": 14
+        },
+        {
+          "timeStamp": "2026-11-17T04:54:00Z",
+          "average": 20
+        },
+        {
+          "timeStamp": "2026-11-17T04:55:00Z",
+          "average": 7
+        },
+        {
+          "timeStamp": "2026-11-17T04:56:00Z",
+          "average": 6
+        }
+      ]
+    },
+    {
+      "name": "MemoryPercentage",
+      "points": [
+        {
+          "timeStamp": "2026-11-17T04:27:00Z",
+          "average": 56
+        },
+        {
+          "timeStamp": "2026-11-17T04:28:00Z",
+          "average": 55
+        },
+        {
+          "timeStamp": "2026-11-17T04:29:00Z",
+          "average": 56
+        },
+        {
+          "timeStamp": "2026-11-17T04:30:00Z",
+          "average": 56
+        },
+        {
+          "timeStamp": "2026-11-17T04:31:00Z",
+          "average": 56
+        },
+        {
+          "timeStamp": "2026-11-17T04:32:00Z",
+          "average": 56
+        },
+        {
+          "timeStamp": "2026-11-17T04:33:00Z",
+          "average": 56
+        },
+        {
+          "timeStamp": "2026-11-17T04:34:00Z",
+          "average": 56
+        },
+        {
+          "timeStamp": "2026-11-17T04:35:00Z",
+          "average": 55
+        },
+        {
+          "timeStamp": "2026-11-17T04:36:00Z",
+          "average": 54
+        },
+        {
+          "timeStamp": "2026-11-17T04:37:00Z",
+          "average": 55
+        },
+        {
+          "timeStamp": "2026-11-17T04:38:00Z",
+          "average": 55
+        },
+        {
+          "timeStamp": "2026-11-17T04:39:00Z",
+          "average": 55
+        },
+        {
+          "timeStamp": "2026-11-17T04:40:00Z",
+          "average": 55
+        },
+        {
+          "timeStamp": "2026-11-17T04:41:00Z",
+          "average": 55
+        },
+        {
+          "timeStamp": "2026-11-17T04:42:00Z",
+          "average": 55
+        },
+        {
+          "timeStamp": "2026-11-17T04:43:00Z",
+          "average": 55
+        },
+        {
+          "timeStamp": "2026-11-17T04:44:00Z",
+          "average": 54
+        },
+        {
+          "timeStamp": "2026-11-17T04:45:00Z",
+          "average": 55
+        },
+        {
+          "timeStamp": "2026-11-17T04:46:00Z",
+          "average": 55
+        },
+        {
+          "timeStamp": "2026-11-17T04:47:00Z",
+          "average": 55
+        },
+        {
+          "timeStamp": "2026-11-17T04:48:00Z",
+          "average": 55
+        },
+        {
+          "timeStamp": "2026-11-17T04:49:00Z",
+          "average": 76
+        },
+        {
+          "timeStamp": "2026-11-17T04:50:00Z",
+          "average": 80
+        },
+        {
+          "timeStamp": "2026-11-17T04:51:00Z",
+          "average": 56
+        },
+        {
+          "timeStamp": "2026-11-17T04:52:00Z",
+          "average": 55
+        },
+        {
+          "timeStamp": "2026-11-17T04:53:00Z",
+          "average": 56
+        },
+        {
+          "timeStamp": "2026-11-17T04:54:00Z",
+          "average": 52
+        },
+        {
+          "timeStamp": "2026-11-17T04:55:00Z",
+          "average": 52
+        },
+        {
+          "timeStamp": "2026-11-17T04:56:00Z",
+          "average": 52
+        }
+      ]
+    }
+  ]
+}
