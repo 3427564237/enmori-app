@@ -79,3 +79,9 @@ verification after code/build checks, coordinating phone use and stopping if
 another foreground interaction interrupts the trial. Preserve the preceding
 deferral and interrupted observation as historical evidence; connection itself
 does not establish installation or any acceptance result.
+
+A later phone-use interruption was paused immediately. LI then explicitly
+confirmed **“我暂时不使用手机，请继续验收”**. Continue the same bounded
+acceptance with foreground checks before input. The newly observed unknown
+Check-in-edit outcome/exit wording is within the original rooted-minimal-repair
+authorization; preserve its write/revision/reload contract.

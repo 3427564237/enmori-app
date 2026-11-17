@@ -22,6 +22,8 @@ final class CheckInEditPage extends ConsumerStatefulWidget {
 class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
   Object? _openedSession;
   bool _sessionBound = false;
+  bool _allowLeave = false;
+  bool _confirmingLeave = false;
   late CheckIn _current;
   late final TextEditingController _note;
   late CheckInVisibility _visibility;
@@ -69,7 +71,12 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
     }
   }
 
-  Future<bool> _confirm(String title, String body, String action) async =>
+  Future<bool> _confirm(
+    String title,
+    String body,
+    String action, {
+    String? cancelLabel,
+  }) async =>
       await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
@@ -78,7 +85,7 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text(context.tr('Cancel', '取消')),
+              child: Text(cancelLabel ?? context.tr('Cancel', '取消')),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
@@ -121,6 +128,13 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
     final mustReload =
         state.failure != null &&
         state.failure!.kind != AppFailureKind.checkInInvalid;
+    final outcomeUnconfirmed = switch (state.failure?.kind) {
+      null ||
+      AppFailureKind.checkInInvalid ||
+      AppFailureKind.checkInRevisionPreconditionFailed ||
+      AppFailureKind.checkInUnavailable => false,
+      _ => true,
+    };
     ref.listen(checkInEditControllerProvider, (previous, next) {
       if (next.saved != null || next.deleted) {
         Navigator.of(context).pop(
@@ -129,23 +143,50 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
       }
     });
     return PopScope(
-      canPop: !state.pending && !_dirty,
+      canPop: _allowLeave || (!state.pending && !outcomeUnconfirmed && !_dirty),
       onPopInvokedWithResult: (didPop, result) async {
-        if (didPop || state.pending) return;
-        if (await _confirm(
-              context.tr('Discard changes?', '放弃修改？'),
-              context.tr('Your unsaved changes will be lost.', '未保存的修改将会丢失。'),
-              context.tr('Discard', '放弃'),
-            ) &&
-            context.mounted) {
-          setState(() {
-            _note.text = _current.note;
-            _mood = _current.mood;
-            _activity = _current.activity;
-            _locationLabel = _current.locationLabel;
-            _visibility =
-                _current.checkInVisibility ?? CheckInVisibility.private;
-          });
+        if (didPop || _confirmingLeave) return;
+        if (state.pending) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                content: Text(
+                  context.tr(
+                    'Please wait while this request completes.',
+                    '请求正在处理中，请稍候。',
+                  ),
+                ),
+              ),
+            );
+          return;
+        }
+        _confirmingLeave = true;
+        final leave = await _confirm(
+          outcomeUnconfirmed
+              ? context.tr('Leave this Check-in?', '离开这条签到？')
+              : context.tr('Discard changes?', '放弃修改？'),
+          outcomeUnconfirmed
+              ? context.tr(
+                  'The request may have completed. Leaving does not cancel or undo it. Reload this record or check History before making another change.',
+                  '请求可能已经完成。离开不会取消请求或撤销已生效的修改。请重新读取这条记录，或先查看历史记录，再继续修改。',
+                )
+              : context.tr('Your unsaved changes will be lost.', '未保存的修改将会丢失。'),
+          outcomeUnconfirmed
+              ? context.tr('Leave', '离开')
+              : context.tr('Discard', '放弃'),
+          cancelLabel: outcomeUnconfirmed
+              ? context.tr('Keep editing', '继续编辑')
+              : null,
+        );
+        _confirmingLeave = false;
+        if (leave &&
+            context.mounted &&
+            identical(
+              ref.read(authSessionProvider).asData?.value,
+              _openedSession,
+            )) {
+          setState(() => _allowLeave = true);
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (context.mounted) Navigator.pop(context);
           });
