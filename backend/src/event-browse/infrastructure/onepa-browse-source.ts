@@ -310,7 +310,8 @@ export class OnePaBrowseSource implements BrowseSource {
       this.pending.set(url, work);
     }
     try {
-      return await work;
+      const row = await work;
+      return row && row.startAt > asOf ? row : undefined;
     } finally {
       if (this.pending.get(url) === work) this.pending.delete(url);
     }
