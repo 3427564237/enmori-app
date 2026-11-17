@@ -1,0 +1,44 @@
+{
+  "observedAtUtc": "2026-11-17T04:22:17.809826+00:00",
+  "readOnly": true,
+  "app": {
+    "state": "Running",
+    "location": "Japan East"
+  },
+  "alwaysOn": true,
+  "plan": {
+    "location": "Japan East",
+    "sku": {
+      "name": "B2",
+      "tier": "Basic",
+      "size": "B2",
+      "family": "B",
+      "capacity": 1
+    },
+    "numberOfSites": 1
+  },
+  "estimatedAvailableUsd": 90.87,
+  "creditExpiry": [
+    "2027-10-28T07:20:08.0000000Z"
+  ],
+  "spendingLimit": "On",
+  "b2UsdPerHour": 0.037,
+  "conservative62DayComputeUsd": 55.056,
+  "estimatedRemainingUsd": 35.814,
+  "computeOnly": true,
+  "fourHourMetrics": [
+    {
+      "name": "CpuPercentage",
+      "points": 48,
+      "average": 12.195833333333333,
+      "largestFiveMinuteAverage": 36
+    },
+    {
+      "name": "MemoryPercentage",
+      "points": 48,
+      "average": 52.9125,
+      "largestFiveMinuteAverage": 64.6
+    }
+  ],
+  "runtimeOrBillingChanges": 0
+}
