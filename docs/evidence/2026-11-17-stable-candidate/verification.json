@@ -1,0 +1,246 @@
+{
+  "sourceCommit": "abc072adfdae57e4cdd0fd7c9de4b2bbfe21a445",
+  "baseCommit": "c6f138b90522f5d5131a55f190dffa8965cd3bda",
+  "apk": {
+    "path": "/home/miku/Downloads/ENMORI-stable-candidate-v83-release.apk",
+    "sizeBytes": 70838168,
+    "sha256": "7dd81dfdc2783a58cd6acfbf5d446000b1c35312364f25e5975d4160270fc9b8",
+    "package": "com.enmori.app.group",
+    "versionCode": 83,
+    "versionName": "1.0.0-rc20261117",
+    "debuggable": false,
+    "certificateSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+    "configSha256": "eff899f2578b9023f3d2d6a9b4d2b5351153c5b3ea98bd09d38c8611b9805404",
+    "compiledAzureEndpointVerified": true,
+    "companionEnabled": "true",
+    "openAiTestAppEnabled": "true"
+  },
+  "verification": {
+    "fullFlutterTests": 1984,
+    "staticAnalysis": "no issues",
+    "backendFocusedTests": 80
+  },
+  "logs": {
+    "full-flutter-final.log": {
+      "path": "/home/miku/.local/state/enmori-stable-audit-20261117/full-flutter-final.log",
+      "sha256": "42563e520e5020146e9fb7afb3c1e422430068a482e41549d5f9423d49d2ae95"
+    },
+    "full-flutter.log": {
+      "path": "/home/miku/.local/state/enmori-stable-audit-20261117/full-flutter.log",
+      "sha256": "d9d280cebf41cc10f2484a5344c2abc8140aae27bf2172cdcf6cbf025c247156"
+    },
+    "analyze-final.log": {
+      "path": "/home/miku/.local/state/enmori-stable-audit-20261117/analyze-final.log",
+      "sha256": "2e646fe746d7e6f40e99fa418fadcbcd1eb90b1ffa687a19169b9d61d1e27630"
+    },
+    "build-v80.log": {
+      "path": "/home/miku/.local/state/enmori-stable-audit-20261117/build-v80.log",
+      "sha256": "f895aabb1ccdde1e998904fa7e9c82b5ed1badd3a1496cf98ff6a1a4adf7a634"
+    },
+    "install-v80.log": {
+      "path": "/home/miku/.local/state/enmori-stable-audit-20261117/install-v80.log",
+      "sha256": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7"
+    },
+    "full-flutter-v81.log": {
+      "path": "/home/miku/.local/state/enmori-stable-audit-20261117/full-flutter-v81.log",
+      "sha256": "1ad203756b9d219b110740590bd6a855143582e52a44bc264a3ceeed16de5e49"
+    },
+    "analyze-v81.log": {
+      "path": "/home/miku/.local/state/enmori-stable-audit-20261117/analyze-v81.log",
+      "sha256": "c7f3c15a32e5a7655495c768dda0966879b8765904b0e9e1b13bf34389acd24b"
+    },
+    "build-v81.log": {
+      "path": "/home/miku/.local/state/enmori-stable-audit-20261117/build-v81.log",
+      "sha256": "c68c574592166ad036480b68e963be783f82baa0a20c5ab8f1a43ef467230678"
+    },
+    "full-flutter-v82.log": {
+      "path": "/home/miku/.local/state/enmori-stable-audit-20261117/full-flutter-v82.log",
+      "sha256": "dea79cc197c84298b3661bea6497a0cd2a9297ef0999e15d63eb5e2108021c24"
+    },
+    "analyze-v82.log": {
+      "path": "/home/miku/.local/state/enmori-stable-audit-20261117/analyze-v82.log",
+      "sha256": "640234ce1c5bb59b7b1e3782802aff4366dfc3598bb5c2ad62b7da07538b64fc"
+    },
+    "build-v82.log": {
+      "path": "/home/miku/.local/state/enmori-stable-audit-20261117/build-v82.log",
+      "sha256": "c42c5029a20ff7c388f7eedfa00cb4169f7060db20ed9ee16749a65295ddd553"
+    },
+    "install-v82.log": {
+      "path": "/home/miku/.local/state/enmori-stable-audit-20261117/install-v82.log",
+      "sha256": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7"
+    },
+    "install-v81.log": {
+      "path": "/home/miku/.local/state/enmori-stable-audit-20261117/install-v81.log",
+      "sha256": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7"
+    },
+    "install-v81-attempt1-locked.log": {
+      "path": "/home/miku/.local/state/enmori-stable-audit-20261117/install-v81-attempt1-locked.log",
+      "sha256": "62f93dd524a20a94281e1e061d31321d46a07ed6521deacc7204e031e668dcd5"
+    },
+    "full-flutter-v83.log": {
+      "path": "/home/miku/.local/state/enmori-stable-audit-20261117/full-flutter-v83.log",
+      "sha256": "c324f1457302962a6923f45061b0b64e8e42f8f8f60a2a4b61e4ea100ed0beb1"
+    },
+    "analyze-v83.log": {
+      "path": "/home/miku/.local/state/enmori-stable-audit-20261117/analyze-v83.log",
+      "sha256": "7e2bb83dab4c088f99c9fcf242d31b1e26a03c9c081787f20d20ff2433a192d0"
+    },
+    "build-v83.log": {
+      "path": "/home/miku/.local/state/enmori-stable-audit-20261117/build-v83.log",
+      "sha256": "42d81c2b15ecc47d9e924dd04a794ae1364fe80ec49d7943f9c1b03ba348427f"
+    },
+    "install-v83.log": {
+      "path": "/home/miku/.local/state/enmori-stable-audit-20261117/install-v83.log",
+      "sha256": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7"
+    }
+  },
+  "phone": {
+    "installedVersionCode": 83,
+    "installedApkSha256": "7dd81dfdc2783a58cd6acfbf5d446000b1c35312364f25e5975d4160270fc9b8",
+    "matchesDeliveredApk": true,
+    "installCommandResult": "Performing Streamed Install\nSuccess",
+    "retainedDataInstall": true,
+    "physicalAcceptance": "bounded final-v83 core-flow acceptance completed with known failures and unverified cases; not a stable-release pass",
+    "acceptanceCompletedAt": "2026-11-17T20:45:24+08:00",
+    "restoredDeviceSettings": {
+      "receipt": "v83-restored-device-settings.json",
+      "sha256": "fe9275bf3b8acce55806ccfe96689bee1ed7c17b47c8aed62236a5bce0693768",
+      "values": {
+        "font_scale": "1.0",
+        "wifi_on": "1",
+        "mobile_data": "1",
+        "ui_night_mode": "4",
+        "screen_off_timeout": "600000",
+        "window_animation_scale": "1.0",
+        "transition_animation_scale": "1.0",
+        "animator_duration_scale": "1.0"
+      }
+    },
+    "cleanup": {
+      "syntheticCheckIn": "deleted; History empty for today and final Home zero",
+      "syntheticAiConversation": "deleted; later History reread absent from its original first-row position",
+      "originalPlans": {
+        "total": 9,
+        "interested": 1,
+        "going": 2,
+        "none": 6,
+        "hidden": 0,
+        "unconfirmedWarning": false
+      },
+      "interests": "original three restored after temporary save",
+      "language": "English",
+      "planFilter": "All records",
+      "finalPage": "Home",
+      "note": "logical state restoration; create/delete audit and plan revisions are not byte-for-byte rollback"
+    }
+  },
+  "backend": {
+    "version": "v78",
+    "sourceCommit": "9b305490ea199585852f369bc9d0b712e854de8a",
+    "package": "2026111704554378.zip",
+    "sha256": "6005380c4e663bfaebfee898dc1fae56c66c0910b9b4485f0da7ea000070d230",
+    "deployedByThisTask": false
+  },
+  "supersededCandidateV80": {
+    "sourceCommit": "82a6658d4b5bc306f6d698e83b78d36dbeaff2ac",
+    "apk": {
+      "path": "/home/miku/Downloads/ENMORI-stable-candidate-v80-release.apk",
+      "sizeBytes": 70838168,
+      "sha256": "3f6cecd324efd584c745f1ac010d23c8586e0014150dd39bbc4a2395d588f7ab",
+      "package": "com.enmori.app.group",
+      "versionCode": 80,
+      "versionName": "1.0.0-rc20261117",
+      "debuggable": false,
+      "certificateSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+      "configSha256": "eff899f2578b9023f3d2d6a9b4d2b5351153c5b3ea98bd09d38c8611b9805404",
+      "compiledAzureEndpointVerified": true,
+      "companionEnabled": "true",
+      "openAiTestAppEnabled": "true"
+    },
+    "verification": {
+      "fullFlutterTests": 1967,
+      "staticAnalysis": "no issues",
+      "backendFocusedTests": 80
+    },
+    "phone": {
+      "installedVersionCode": 80,
+      "installedApkSha256": "3f6cecd324efd584c745f1ac010d23c8586e0014150dd39bbc4a2395d588f7ab",
+      "matchesDeliveredApk": true,
+      "installCommandResult": "Success",
+      "retainedDataInstall": true,
+      "physicalAcceptance": "partial observations completed; superseded by v81 after SC-07; see physical-acceptance.md"
+    }
+  },
+  "supersededCandidateV81": {
+    "sourceCommit": "683f0a1a41d20936ffcf524ab5cdbb436bb5bbca",
+    "apk": {
+      "path": "/home/miku/Downloads/ENMORI-stable-candidate-v81-release.apk",
+      "sizeBytes": 70838168,
+      "sha256": "92f29670486115a8b3492a31ceed9f21d76372a759044db8c5129b3213f2f548",
+      "package": "com.enmori.app.group",
+      "versionCode": 81,
+      "versionName": "1.0.0-rc20261117",
+      "debuggable": false,
+      "certificateSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+      "configSha256": "eff899f2578b9023f3d2d6a9b4d2b5351153c5b3ea98bd09d38c8611b9805404",
+      "compiledAzureEndpointVerified": true,
+      "companionEnabled": "true",
+      "openAiTestAppEnabled": "true"
+    },
+    "verification": {
+      "fullFlutterTests": 1973,
+      "staticAnalysis": "no issues",
+      "backendFocusedTests": 80
+    },
+    "phone": {
+      "installedVersionCode": 81,
+      "installedApkSha256": "92f29670486115a8b3492a31ceed9f21d76372a759044db8c5129b3213f2f548",
+      "matchesDeliveredApk": true,
+      "installCommandResult": "Performing Streamed Install\nSuccess",
+      "retainedDataInstall": true,
+      "physicalAcceptance": "partial observations completed; superseded by v82 after SC-10"
+    }
+  },
+  "supersededCandidateV82": {
+    "sourceCommit": "e5cdb7bcca8b6fc35679badaad06638e0c77722d",
+    "apk": {
+      "path": "/home/miku/Downloads/ENMORI-stable-candidate-v82-release.apk",
+      "sizeBytes": 70838172,
+      "sha256": "9bd1e2a973c59962ed5fcd06b69c7ba5363118dabfaa915185ff16f56aa706ba",
+      "package": "com.enmori.app.group",
+      "versionCode": 82,
+      "versionName": "1.0.0-rc20261117",
+      "debuggable": false,
+      "certificateSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+      "configSha256": "eff899f2578b9023f3d2d6a9b4d2b5351153c5b3ea98bd09d38c8611b9805404",
+      "compiledAzureEndpointVerified": true,
+      "companionEnabled": "true",
+      "openAiTestAppEnabled": "true"
+    },
+    "verification": {
+      "fullFlutterTests": 1978,
+      "staticAnalysis": "no issues",
+      "backendFocusedTests": 80
+    },
+    "phone": {
+      "installedVersionCode": 82,
+      "installedApkSha256": "9bd1e2a973c59962ed5fcd06b69c7ba5363118dabfaa915185ff16f56aa706ba",
+      "matchesDeliveredApk": true,
+      "installCommandResult": "Performing Streamed Install\nSuccess",
+      "retainedDataInstall": true,
+      "physicalAcceptance": "bounded core-flow observations completed; superseded by v83 after SC-13 component feedback repair"
+    }
+  },
+  "releaseDecision": {
+    "readyToFreeze": false,
+    "primaryBlocker": "AI authorization effective/credit/balance/price expires 2026-11-18T00:00:00+08:00",
+    "unclosed": [
+      "SC-03 external-detail failures/final recovery missing",
+      "SC-05 approved readable terms absent",
+      "SC-09 historical Home reset cause missing",
+      "SC-12 independent AI read-state warning cause missing",
+      "SC-15 transient startup-gate read cause missing"
+    ],
+    "limitations": "See README and physical-acceptance; no global UAT or success-rate claim"
+  }
+}

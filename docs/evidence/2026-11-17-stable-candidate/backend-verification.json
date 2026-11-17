@@ -1,0 +1,1168 @@
+{
+  "scope": "backend read-only audit; no physical device evidence",
+  "identity": {
+    "atUtc": "2026-11-17T10:18:42.796734+00:00",
+    "serviceWrites": 0,
+    "configurationWrites": 0,
+    "productWrites": 0,
+    "modelCalls": 0,
+    "hosting": {
+      "state": "Running",
+      "alwaysOn": true,
+      "sku": "B2",
+      "capacity": 1
+    },
+    "selector": "2026111704554378.zip",
+    "archiveBytes": 68085970,
+    "archiveSha256": "6005380c4e663bfaebfee898dc1fae56c66c0910b9b4485f0da7ea000070d230",
+    "packageManifest": {
+      "sourceCommit": "9b305490ea199585852f369bc9d0b712e854de8a",
+      "demoVersion": 78,
+      "sha256": "0890c5a5aeda4e21b4313aa3a4040b231c877135073eba86cfff67f97ccfb1a3"
+    },
+    "selectorUnchanged": true,
+    "completedAtUtc": "2026-11-17T10:19:12.018183+00:00",
+    "passed": true
+  },
+  "mountedManifest": {
+    "atUtc": "2026-11-17T10:18:43.942003+00:00",
+    "passed": true,
+    "verification": "actual_application_container_ssh_mounted_manifest",
+    "serviceWrites": 0,
+    "configurationWrites": 0,
+    "productWrites": 0,
+    "publicEventSourceCalls": 0,
+    "modelCalls": 0,
+    "manifest": {
+      "sourceCommit": "9b305490ea199585852f369bc9d0b712e854de8a",
+      "demoVersion": 78,
+      "manifestSha256": "0890c5a5aeda4e21b4313aa3a4040b231c877135073eba86cfff67f97ccfb1a3"
+    },
+    "completedAtUtc": "2026-11-17T10:19:18.373098+00:00"
+  },
+  "backendTree": "82de307a0f57d4ba04ee572f93203c194f7ed71e",
+  "apiTree": "905ea276705413d36dfd5032f0d66ada28189ac2",
+  "backendAndApiTreesMatchV78RuntimeSource": true,
+  "reads": [
+    {
+      "sample": "1",
+      "atUtc": "2026-11-17T10:19:36.074Z",
+      "client": "operator-host authenticated HTTP; retained test account",
+      "productWrites": 0,
+      "modelCalls": 0,
+      "reads": [
+        {
+          "path": "/v1/me/profile",
+          "startedAtUtc": "2026-11-17T10:19:36.493Z",
+          "status": 200,
+          "elapsedMs": 821
+        },
+        {
+          "path": "/v1/recommendations/events?view=all",
+          "startedAtUtc": "2026-11-17T10:19:37.315Z",
+          "status": 200,
+          "elapsedMs": 917
+        },
+        {
+          "path": "/v1/recommendations/events?view=home",
+          "startedAtUtc": "2026-11-17T10:19:38.233Z",
+          "status": 200,
+          "elapsedMs": 921
+        },
+        {
+          "path": "/v1/event-browse",
+          "startedAtUtc": "2026-11-17T10:19:39.155Z",
+          "status": 200,
+          "elapsedMs": 2545
+        },
+        {
+          "path": "/v1/event-browse/:browseId [ticketmaster]",
+          "startedAtUtc": "2026-11-17T10:19:41.700Z",
+          "status": 200,
+          "elapsedMs": 5134
+        },
+        {
+          "path": "/v1/events/:eventId [ticketmaster]",
+          "startedAtUtc": "2026-11-17T10:19:46.835Z",
+          "status": 200,
+          "elapsedMs": 5324
+        },
+        {
+          "path": "/v1/event-browse/:browseId [onepa]",
+          "startedAtUtc": "2026-11-17T10:19:52.158Z",
+          "status": 200,
+          "elapsedMs": 1125
+        },
+        {
+          "path": "/v1/events/:eventId [onepa]",
+          "startedAtUtc": "2026-11-17T10:19:53.284Z",
+          "status": 200,
+          "elapsedMs": 718
+        },
+        {
+          "path": "/v1/admin/operations-status",
+          "startedAtUtc": "2026-11-17T10:19:54.002Z",
+          "status": 200,
+          "elapsedMs": 588
+        }
+      ],
+      "recommendations_all": {
+        "count": 0,
+        "formulaVersion": "event_recommendation_v3",
+        "sourceStatus": [
+          {
+            "provider": "ticketmaster",
+            "available": true
+          },
+          {
+            "provider": "onepa",
+            "available": true
+          }
+        ],
+        "sourceCoverage": [
+          {
+            "provider": "onepa",
+            "complete": false
+          }
+        ]
+      },
+      "recommendations_home": {
+        "count": 0,
+        "formulaVersion": "event_recommendation_v3",
+        "sourceStatus": [
+          {
+            "provider": "ticketmaster",
+            "available": true
+          },
+          {
+            "provider": "onepa",
+            "available": true
+          }
+        ],
+        "sourceCoverage": [
+          {
+            "provider": "onepa",
+            "complete": false
+          }
+        ]
+      },
+      "browse": {
+        "count": 25,
+        "sourceStatus": [
+          {
+            "provider": "ticketmaster",
+            "available": true
+          },
+          {
+            "provider": "onepa",
+            "available": true,
+            "coverageComplete": false
+          }
+        ]
+      },
+      "browseDetail_ticketmaster": {
+        "read": true,
+        "hasEventId": true
+      },
+      "eventDetail_ticketmaster": {
+        "read": true
+      },
+      "browseDetail_onepa": {
+        "read": true,
+        "hasEventId": true
+      },
+      "eventDetail_onepa": {
+        "read": true
+      },
+      "services": [
+        {
+          "service": "backend",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:19:54.544Z"
+        },
+        {
+          "service": "firebase",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:19:54.544Z",
+          "lastSucceededAt": "2026-11-17T10:19:54.544Z"
+        },
+        {
+          "service": "ai",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:19:54.544Z"
+        },
+        {
+          "service": "ticketmaster",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:19:41.067Z",
+          "lastSucceededAt": "2026-11-17T10:19:41.067Z"
+        },
+        {
+          "service": "onepa",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:19:53.049Z",
+          "lastSucceededAt": "2026-11-17T10:19:53.049Z"
+        }
+      ],
+      "completedAtUtc": "2026-11-17T10:19:54.590Z",
+      "allReads200": true
+    },
+    {
+      "sample": "2",
+      "atUtc": "2026-11-17T10:22:40.624Z",
+      "client": "operator-host authenticated HTTP; retained test account",
+      "productWrites": 0,
+      "modelCalls": 0,
+      "reads": [
+        {
+          "path": "/v1/me/profile",
+          "startedAtUtc": "2026-11-17T10:22:41.024Z",
+          "status": 200,
+          "elapsedMs": 811
+        },
+        {
+          "path": "/v1/recommendations/events?view=all",
+          "startedAtUtc": "2026-11-17T10:22:41.835Z",
+          "status": 200,
+          "elapsedMs": 818
+        },
+        {
+          "path": "/v1/recommendations/events?view=home",
+          "startedAtUtc": "2026-11-17T10:22:42.654Z",
+          "status": 200,
+          "elapsedMs": 821
+        },
+        {
+          "path": "/v1/event-browse",
+          "startedAtUtc": "2026-11-17T10:22:43.475Z",
+          "status": 200,
+          "elapsedMs": 2344
+        },
+        {
+          "path": "/v1/event-browse/:browseId [ticketmaster]",
+          "startedAtUtc": "2026-11-17T10:22:45.819Z",
+          "status": 200,
+          "elapsedMs": 5033
+        },
+        {
+          "path": "/v1/events/:eventId [ticketmaster]",
+          "startedAtUtc": "2026-11-17T10:22:50.853Z",
+          "status": 200,
+          "elapsedMs": 7777
+        },
+        {
+          "path": "/v1/event-browse/:browseId [onepa]",
+          "startedAtUtc": "2026-11-17T10:22:58.630Z",
+          "status": 200,
+          "elapsedMs": 1127
+        },
+        {
+          "path": "/v1/events/:eventId [onepa]",
+          "startedAtUtc": "2026-11-17T10:22:59.757Z",
+          "status": 200,
+          "elapsedMs": 817
+        },
+        {
+          "path": "/v1/admin/operations-status",
+          "startedAtUtc": "2026-11-17T10:23:00.574Z",
+          "status": 200,
+          "elapsedMs": 811
+        }
+      ],
+      "recommendations_all": {
+        "count": 0,
+        "formulaVersion": "event_recommendation_v3",
+        "sourceStatus": [
+          {
+            "provider": "ticketmaster",
+            "available": true
+          },
+          {
+            "provider": "onepa",
+            "available": true
+          }
+        ],
+        "sourceCoverage": [
+          {
+            "provider": "onepa",
+            "complete": false
+          }
+        ]
+      },
+      "recommendations_home": {
+        "count": 0,
+        "formulaVersion": "event_recommendation_v3",
+        "sourceStatus": [
+          {
+            "provider": "ticketmaster",
+            "available": true
+          },
+          {
+            "provider": "onepa",
+            "available": true
+          }
+        ],
+        "sourceCoverage": [
+          {
+            "provider": "onepa",
+            "complete": false
+          }
+        ]
+      },
+      "browse": {
+        "count": 25,
+        "sourceStatus": [
+          {
+            "provider": "ticketmaster",
+            "available": true
+          },
+          {
+            "provider": "onepa",
+            "available": true,
+            "coverageComplete": false
+          }
+        ]
+      },
+      "browseDetail_ticketmaster": {
+        "read": true,
+        "hasEventId": true
+      },
+      "eventDetail_ticketmaster": {
+        "read": true
+      },
+      "browseDetail_onepa": {
+        "read": true,
+        "hasEventId": true
+      },
+      "eventDetail_onepa": {
+        "read": true
+      },
+      "services": [
+        {
+          "service": "backend",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:23:01.208Z"
+        },
+        {
+          "service": "firebase",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:23:01.208Z",
+          "lastSucceededAt": "2026-11-17T10:23:01.208Z"
+        },
+        {
+          "service": "ai",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:23:01.208Z"
+        },
+        {
+          "service": "ticketmaster",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:22:45.387Z",
+          "lastSucceededAt": "2026-11-17T10:22:45.387Z"
+        },
+        {
+          "service": "onepa",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:19:53.049Z",
+          "lastSucceededAt": "2026-11-17T10:19:53.049Z"
+        }
+      ],
+      "completedAtUtc": "2026-11-17T10:23:01.386Z",
+      "allReads200": true
+    },
+    {
+      "sample": "3",
+      "atUtc": "2026-11-17T10:24:22.459Z",
+      "client": "operator-host authenticated HTTP; retained test account",
+      "productWrites": 0,
+      "modelCalls": 0,
+      "reads": [
+        {
+          "path": "/v1/me/profile",
+          "startedAtUtc": "2026-11-17T10:24:22.832Z",
+          "status": 200,
+          "elapsedMs": 891
+        },
+        {
+          "path": "/v1/recommendations/events?view=all",
+          "startedAtUtc": "2026-11-17T10:24:23.724Z",
+          "status": 200,
+          "elapsedMs": 52142
+        },
+        {
+          "path": "/v1/recommendations/events?view=home",
+          "startedAtUtc": "2026-11-17T10:25:15.866Z",
+          "status": 200,
+          "elapsedMs": 830
+        },
+        {
+          "path": "/v1/event-browse",
+          "startedAtUtc": "2026-11-17T10:25:16.696Z",
+          "status": 200,
+          "elapsedMs": 1710
+        },
+        {
+          "path": "/v1/event-browse/:browseId [ticketmaster]",
+          "startedAtUtc": "2026-11-17T10:25:18.406Z",
+          "status": 200,
+          "elapsedMs": 5223
+        },
+        {
+          "path": "/v1/events/:eventId [ticketmaster]",
+          "startedAtUtc": "2026-11-17T10:25:23.629Z",
+          "status": 200,
+          "elapsedMs": 3786
+        },
+        {
+          "path": "/v1/event-browse/:browseId [onepa]",
+          "startedAtUtc": "2026-11-17T10:25:27.416Z",
+          "status": 503,
+          "elapsedMs": 13519,
+          "errorCode": "SERVICE_UNAVAILABLE"
+        },
+        {
+          "path": "/v1/events/:eventId [onepa]",
+          "startedAtUtc": "2026-11-17T10:25:40.962Z",
+          "status": 503,
+          "elapsedMs": 13228,
+          "errorCode": "SERVICE_UNAVAILABLE"
+        },
+        {
+          "path": "/v1/admin/operations-status",
+          "startedAtUtc": "2026-11-17T10:25:54.190Z",
+          "status": 200,
+          "elapsedMs": 669
+        }
+      ],
+      "recommendations_all": {
+        "count": 0,
+        "formulaVersion": "event_recommendation_v3",
+        "sourceStatus": [
+          {
+            "provider": "ticketmaster",
+            "available": true
+          },
+          {
+            "provider": "onepa",
+            "available": true
+          }
+        ],
+        "sourceCoverage": [
+          {
+            "provider": "onepa",
+            "complete": false
+          }
+        ]
+      },
+      "recommendations_home": {
+        "count": 0,
+        "formulaVersion": "event_recommendation_v3",
+        "sourceStatus": [
+          {
+            "provider": "ticketmaster",
+            "available": true
+          },
+          {
+            "provider": "onepa",
+            "available": true
+          }
+        ],
+        "sourceCoverage": [
+          {
+            "provider": "onepa",
+            "complete": false
+          }
+        ]
+      },
+      "browse": {
+        "count": 25,
+        "sourceStatus": [
+          {
+            "provider": "ticketmaster",
+            "available": true
+          },
+          {
+            "provider": "onepa",
+            "available": true,
+            "coverageComplete": false
+          }
+        ]
+      },
+      "browseDetail_ticketmaster": {
+        "read": true,
+        "hasEventId": true
+      },
+      "eventDetail_ticketmaster": {
+        "read": true
+      },
+      "services": [
+        {
+          "service": "backend",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:25:54.719Z"
+        },
+        {
+          "service": "firebase",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:25:54.719Z",
+          "lastSucceededAt": "2026-11-17T10:25:54.719Z"
+        },
+        {
+          "service": "ai",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:25:54.719Z"
+        },
+        {
+          "service": "ticketmaster",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:25:17.931Z",
+          "lastSucceededAt": "2026-11-17T10:25:17.931Z"
+        },
+        {
+          "service": "onepa",
+          "configured": true,
+          "state": "unavailable",
+          "lastObservedAt": "2026-11-17T10:25:54.132Z",
+          "lastSucceededAt": "2026-11-17T10:25:13.193Z",
+          "reason": "dependency_unavailable"
+        }
+      ],
+      "completedAtUtc": "2026-11-17T10:25:54.859Z",
+      "allReads200": false
+    },
+    {
+      "sample": "4",
+      "atUtc": "2026-11-17T10:26:56.350Z",
+      "client": "operator-host authenticated HTTP; retained test account",
+      "productWrites": 0,
+      "modelCalls": 0,
+      "reads": [
+        {
+          "path": "/v1/me/profile",
+          "startedAtUtc": "2026-11-17T10:26:56.735Z",
+          "status": 200,
+          "elapsedMs": 766
+        },
+        {
+          "path": "/v1/recommendations/events?view=all",
+          "startedAtUtc": "2026-11-17T10:26:57.503Z",
+          "status": 200,
+          "elapsedMs": 3713
+        },
+        {
+          "path": "/v1/recommendations/events?view=home",
+          "startedAtUtc": "2026-11-17T10:27:01.216Z",
+          "status": 200,
+          "elapsedMs": 921
+        },
+        {
+          "path": "/v1/event-browse",
+          "startedAtUtc": "2026-11-17T10:27:02.137Z",
+          "status": 200,
+          "elapsedMs": 2151
+        },
+        {
+          "path": "/v1/event-browse/:browseId [ticketmaster]",
+          "startedAtUtc": "2026-11-17T10:27:04.289Z",
+          "status": 200,
+          "elapsedMs": 6042
+        },
+        {
+          "path": "/v1/events/:eventId [ticketmaster]",
+          "startedAtUtc": "2026-11-17T10:27:10.332Z",
+          "status": 200,
+          "elapsedMs": 7986
+        },
+        {
+          "path": "/v1/event-browse/:browseId [onepa]",
+          "startedAtUtc": "2026-11-17T10:27:18.319Z",
+          "status": 503,
+          "elapsedMs": 14538,
+          "errorCode": "SERVICE_UNAVAILABLE"
+        },
+        {
+          "path": "/v1/events/:eventId [onepa]",
+          "startedAtUtc": "2026-11-17T10:27:32.857Z",
+          "status": 200,
+          "elapsedMs": 1024
+        },
+        {
+          "path": "/v1/admin/operations-status",
+          "startedAtUtc": "2026-11-17T10:27:33.881Z",
+          "status": 200,
+          "elapsedMs": 614
+        }
+      ],
+      "recommendations_all": {
+        "count": 0,
+        "formulaVersion": "event_recommendation_v3",
+        "sourceStatus": [
+          {
+            "provider": "ticketmaster",
+            "available": true
+          },
+          {
+            "provider": "onepa",
+            "available": true
+          }
+        ],
+        "sourceCoverage": [
+          {
+            "provider": "onepa",
+            "complete": false
+          }
+        ]
+      },
+      "recommendations_home": {
+        "count": 0,
+        "formulaVersion": "event_recommendation_v3",
+        "sourceStatus": [
+          {
+            "provider": "ticketmaster",
+            "available": true
+          },
+          {
+            "provider": "onepa",
+            "available": true
+          }
+        ],
+        "sourceCoverage": [
+          {
+            "provider": "onepa",
+            "complete": false
+          }
+        ]
+      },
+      "browse": {
+        "count": 25,
+        "sourceStatus": [
+          {
+            "provider": "ticketmaster",
+            "available": true
+          },
+          {
+            "provider": "onepa",
+            "available": true,
+            "coverageComplete": false
+          }
+        ]
+      },
+      "selectedEventHashes": [
+        {
+          "provider": "ticketmaster",
+          "browseIdSha256": "f788cd03147bd00183b4e184d75c4650661a520e35d6aa08f45700e921e63a54"
+        },
+        {
+          "provider": "onepa",
+          "browseIdSha256": "02a24daceb3a702fe804b6e8f7bee70e2fcf6a13758cf8b26045ef01753c2ea6"
+        }
+      ],
+      "browseDetail_ticketmaster": {
+        "read": true,
+        "hasEventId": true
+      },
+      "eventDetail_ticketmaster": {
+        "read": true
+      },
+      "eventDetail_onepa": {
+        "read": true
+      },
+      "services": [
+        {
+          "service": "backend",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:27:34.414Z"
+        },
+        {
+          "service": "firebase",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:27:34.414Z",
+          "lastSucceededAt": "2026-11-17T10:27:34.414Z"
+        },
+        {
+          "service": "ai",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:27:34.414Z"
+        },
+        {
+          "service": "ticketmaster",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:27:03.837Z",
+          "lastSucceededAt": "2026-11-17T10:27:03.837Z"
+        },
+        {
+          "service": "onepa",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:27:33.600Z",
+          "lastSucceededAt": "2026-11-17T10:27:33.600Z"
+        }
+      ],
+      "completedAtUtc": "2026-11-17T10:27:34.495Z",
+      "allReads200": false
+    },
+    {
+      "sample": "detail-retry",
+      "atUtc": "2026-11-17T10:27:52.698Z",
+      "client": "operator-host authenticated HTTP; retained test account",
+      "productWrites": 0,
+      "modelCalls": 0,
+      "reads": [
+        {
+          "path": "/v1/event-browse/:browseId [onepa same as round4]",
+          "startedAtUtc": "2026-11-17T10:27:53.037Z",
+          "status": 200,
+          "elapsedMs": 1018
+        },
+        {
+          "path": "/v1/admin/operations-status",
+          "startedAtUtc": "2026-11-17T10:27:54.056Z",
+          "status": 200,
+          "elapsedMs": 717
+        }
+      ],
+      "browseIdSha256": "02a24daceb3a702fe804b6e8f7bee70e2fcf6a13758cf8b26045ef01753c2ea6",
+      "detailRecovered": true,
+      "services": [
+        {
+          "service": "backend",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:27:54.601Z"
+        },
+        {
+          "service": "firebase",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:27:54.601Z",
+          "lastSucceededAt": "2026-11-17T10:27:54.601Z"
+        },
+        {
+          "service": "ai",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:27:54.601Z"
+        },
+        {
+          "service": "ticketmaster",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:27:03.837Z",
+          "lastSucceededAt": "2026-11-17T10:27:03.837Z"
+        },
+        {
+          "service": "onepa",
+          "configured": true,
+          "state": "ready",
+          "lastObservedAt": "2026-11-17T10:27:33.600Z",
+          "lastSucceededAt": "2026-11-17T10:27:33.600Z"
+        }
+      ],
+      "completedAtUtc": "2026-11-17T10:27:54.772Z",
+      "allReads200": true
+    }
+  ],
+  "aiAdmission": {
+    "atUtc": "2026-11-17T10:25:26.041Z",
+    "serverReadAtUtc": "2026-11-17T10:25:26.320Z",
+    "grantSchemaVersion": "openai_cost_grant_v1",
+    "grantCurrent": true,
+    "effectiveExpiresAtUtc": "2026-11-17T16:00:00.000Z",
+    "creditExpiresAtUtc": "2026-11-17T16:00:00.000Z",
+    "balanceValidUntilUtc": "2026-11-17T16:00:00.000Z",
+    "priceValidUntilUtc": "2026-11-17T16:00:00.000Z",
+    "ownerMatchesFence": true,
+    "ownerEnabled": true,
+    "ownerLeaseCurrent": true,
+    "passed": true
+  },
+  "aiConfig": {
+    "observedAtUtc": "2026-11-17T10:25:25.735595+00:00",
+    "cloudAiEnabled": true,
+    "ownershipMode": "renewable_service_lease",
+    "matchesLiveLedgerGrant": true,
+    "comparison": "parsed structural equality"
+  },
+  "validation": {
+    "nodeVersion": "24.19.0",
+    "buildExitCode": 0,
+    "focusedSourceTests": 80,
+    "passed": 80,
+    "failed": 0,
+    "skipped": 0,
+    "buildLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "testLogSha256": "825f93c2163aca67d05510055aa705e481b9edac45cb9cfb28dc37445dec6208"
+  },
+  "operatorMutations": {
+    "service": 0,
+    "configuration": 0,
+    "productData": 0,
+    "ledger": 0,
+    "modelCalls": 0,
+    "notifications": 0
+  },
+  "onePaStaticStageProbe": {
+    "startedAtUtc": "20261117T103010Z",
+    "candidate": {
+      "kind": "same mounted onePA detail reader, one public URL, stage-only observation, stop on access refusal"
+    },
+    "probeSha256": "40d026cb7ecb31ac063b8a75ef29a4938bc065b2747bf1eb13e62596b64a8db7",
+    "events": [
+      {
+        "stage": "onepa-detail-stage-probe",
+        "passed": false,
+        "errorType": "Error",
+        "accessRefusalObserved": true,
+        "events": [
+          {
+            "stage": "static-response",
+            "elapsedMs": 369,
+            "status": 403,
+            "durationMs": 153
+          },
+          {
+            "stage": "static-failed",
+            "elapsedMs": 370,
+            "errorType": "DOMException",
+            "durationMs": 155
+          }
+        ],
+        "durationMs": 370,
+        "publicUrlSha256": "e60a33ad46583634c253880c0cc4cfed3e64e9b0b0aab84d97b0290a7cbf22a2",
+        "productWrites": 0,
+        "modelCalls": 0
+      },
+      {
+        "stage": "probe-watchdog",
+        "phase": "complete",
+        "code": 0,
+        "signal": null,
+        "deadlineHit": false,
+        "observedOwnedProcesses": 5,
+        "ownedRunningRemaining": 0,
+        "stderrBytes": 0
+      }
+    ],
+    "mutations": {
+      "service": false,
+      "settings": false,
+      "packageSelector": false,
+      "users": false,
+      "model": false,
+      "notifications": false
+    },
+    "completedAtUtc": "2026-11-17T10:30:21.101085+00:00",
+    "sshCompleted": true
+  },
+  "postFailureLogs": {
+    "atUtc": "2026-11-17T10:26:16.204738+00:00",
+    "serviceWrites": 0,
+    "configurationWrites": 0,
+    "productWrites": 0,
+    "modelCalls": 0,
+    "logs": [
+      {
+        "kind": "application",
+        "lastUpdated": "2026-11-17T10:25:26.699699Z",
+        "bytes": 10213,
+        "counts": {
+          "applicationListening": 2,
+          "containerTerminated": 0,
+          "siteStopped": 0,
+          "unhandled": 0
+        },
+        "eventTimes": {
+          "applicationListening": [
+            "2026-11-17T03:09:47.5826465Z",
+            "2026-11-17T05:02:53.3482705Z"
+          ],
+          "containerTerminated": [],
+          "siteStopped": [],
+          "unhandled": []
+        }
+      },
+      {
+        "kind": "platform",
+        "lastUpdated": "2026-11-17T05:02:54.5310199Z",
+        "bytes": 14120,
+        "counts": {
+          "applicationListening": 0,
+          "containerTerminated": 1,
+          "siteStopped": 8,
+          "unhandled": 0
+        },
+        "eventTimes": {
+          "applicationListening": [],
+          "containerTerminated": [
+            "2026-11-17T04:57:34.2239099Z"
+          ],
+          "siteStopped": [
+            "2026-11-17T02:31:09.4071256Z",
+            "2026-11-17T03:06:23.2623610Z",
+            "2026-11-17T03:06:25.0626726Z",
+            "2026-11-17T03:06:35.3451770Z",
+            "2026-11-17T04:57:34.6234865Z",
+            "2026-11-17T04:59:32.2464455Z",
+            "2026-11-17T04:59:33.9785019Z",
+            "2026-11-17T04:59:44.3345965Z"
+          ],
+          "unhandled": []
+        }
+      },
+      {
+        "kind": "application",
+        "lastUpdated": "2026-11-16T12:11:59.5217801Z",
+        "bytes": 6740,
+        "counts": {
+          "applicationListening": 1,
+          "containerTerminated": 0,
+          "siteStopped": 0,
+          "unhandled": 0
+        },
+        "eventTimes": {
+          "applicationListening": [
+            "2026-11-16T03:14:29.0790661Z"
+          ],
+          "containerTerminated": [],
+          "siteStopped": [],
+          "unhandled": []
+        }
+      },
+      {
+        "kind": "platform",
+        "lastUpdated": "2026-11-16T03:14:30.04609Z",
+        "bytes": 8797,
+        "counts": {
+          "applicationListening": 0,
+          "containerTerminated": 12,
+          "siteStopped": 4,
+          "unhandled": 0
+        },
+        "eventTimes": {
+          "applicationListening": [],
+          "containerTerminated": [
+            "2026-11-16T03:11:07.1702027Z",
+            "2026-11-16T03:11:07.3877795Z",
+            "2026-11-16T03:11:08.9202046Z",
+            "2026-11-16T03:11:09.5798262Z",
+            "2026-11-16T03:11:09.6659724Z",
+            "2026-11-16T03:11:09.6660074Z",
+            "2026-11-16T03:14:29.8055633Z",
+            "2026-11-16T03:14:30.0296352Z"
+          ],
+          "siteStopped": [
+            "2026-11-16T02:50:22.1512202Z",
+            "2026-11-16T03:10:55.6731867Z",
+            "2026-11-16T03:10:57.1863383Z",
+            "2026-11-16T03:11:07.1696828Z"
+          ],
+          "unhandled": []
+        }
+      }
+    ],
+    "completedAtUtc": "2026-11-17T10:26:18.914934+00:00",
+    "passed": true
+  },
+  "postFailureProcessSnapshot": {
+    "atUtc": "2026-11-17T10:27:39.375804+00:00",
+    "serviceWrites": 0,
+    "configurationWrites": 0,
+    "productWrites": 0,
+    "modelCalls": 0,
+    "process": {
+      "counts": {
+        "node": {
+          "count": 1,
+          "rssKiB": 275696
+        },
+        "chromium": {
+          "count": 0,
+          "rssKiB": 0
+        },
+        "other": {
+          "count": 9,
+          "rssKiB": 29684
+        }
+      },
+      "processNames": {
+        "startup.sh": 1,
+        "bash": 2,
+        "DiagServer": 1,
+        "cron": 1,
+        "xvfb-run": 1,
+        "sshd": 2,
+        "Xvfb": 1,
+        "MainThread": 1
+      },
+      "cgroup": {},
+      "uptimeSeconds": 66867.12,
+      "loadAverage": [
+        "4.79",
+        "4.53",
+        "4.07"
+      ]
+    },
+    "passed": true,
+    "completedAtUtc": "2026-11-17T10:27:46.383945+00:00"
+  },
+  "sourceValidationLimits": [
+    "focused backend suite only",
+    "not a full Emulator run",
+    "no physical APK observations",
+    "no long-term availability or success-rate claim",
+    "HTTP403 diagnostic stopped before browser fallback",
+    "current AI grant expiry requires a separate approved transition"
+  ],
+  "finalRuntimeIdentity": {
+    "atUtc": "2026-11-17T11:17:09.902997+00:00",
+    "purpose": "final v81 candidate backend identity recheck",
+    "verification": "Azure SCM selector before/after and actual application-container SSH mounted manifest",
+    "serviceWrites": 0,
+    "configurationWrites": 0,
+    "productWrites": 0,
+    "ledgerWrites": 0,
+    "publicEventSourceCalls": 0,
+    "modelCalls": 0,
+    "privateLogReads": 0,
+    "archiveBytesRehashed": false,
+    "selectorBefore": "2026111704554378.zip",
+    "mountedManifest": {
+      "sourceCommit": "9b305490ea199585852f369bc9d0b712e854de8a",
+      "demoVersion": 78,
+      "manifestSha256": "0890c5a5aeda4e21b4313aa3a4040b231c877135073eba86cfff67f97ccfb1a3"
+    },
+    "mountedManifestReadAtUtc": "2026-11-17T11:17:20.285479+00:00",
+    "selectorAfter": "2026111704554378.zip",
+    "selectorMatchesEarlierAudit": true,
+    "mountedManifestMatchesEarlierAudit": true,
+    "passed": true,
+    "completedAtUtc": "2026-11-17T11:17:20.740752+00:00"
+  },
+  "additionalRuntimeIdentityCheckpoints": [
+    {
+      "atUtc": "2026-11-17T12:12:21.039350+00:00",
+      "purpose": "backend identity checkpoint after root-reported v83 installation at 20:09 SGT",
+      "candidateVersion": 83,
+      "verification": "Azure SCM selector before/after and actual application-container SSH mounted manifest",
+      "serviceWrites": 0,
+      "configurationWrites": 0,
+      "productWrites": 0,
+      "ledgerWrites": 0,
+      "publicEventSourceCalls": 0,
+      "modelCalls": 0,
+      "privateLogReads": 0,
+      "deviceActions": 0,
+      "archiveBytesRehashed": false,
+      "selectorBefore": "2026111704554378.zip",
+      "mountedManifest": {
+        "sourceCommit": "9b305490ea199585852f369bc9d0b712e854de8a",
+        "demoVersion": 78,
+        "manifestSha256": "0890c5a5aeda4e21b4313aa3a4040b231c877135073eba86cfff67f97ccfb1a3"
+      },
+      "mountedManifestReadAtUtc": "2026-11-17T12:12:32.467663+00:00",
+      "selectorAfter": "2026111704554378.zip",
+      "selectorMatchesEarlierAudit": true,
+      "mountedManifestMatchesEarlierAudit": true,
+      "passed": true,
+      "completedAtUtc": "2026-11-17T12:12:32.880117+00:00"
+    }
+  ],
+  "modelCallScope": "Every modelCalls: 0 value in this receipt counts only this backend-review agent and its read-only probes/checkpoints. It excludes separate physical-phone acceptance. The root operator reports one ordinary synthetic AI send on each of v81, v82 and v83; phone generation, persistence, history readback and cleanup evidence belongs to the phone acceptance record, not these zero-call counters.",
+  "finalAcceptanceCheckpoints": [
+    {
+      "atUtc": "2026-11-17T12:35:28.335179+00:00",
+      "purpose": "final v83 runtime and AI authorization checkpoint after phone acceptance and root entry recovery",
+      "candidateVersion": 83,
+      "serviceWrites": 0,
+      "configurationWrites": 0,
+      "productWrites": 0,
+      "ledgerWrites": 0,
+      "publicEventSourceCalls": 0,
+      "modelCalls": 0,
+      "deviceActions": 0,
+      "archiveBytesRehashed": false,
+      "identity": {
+        "atUtc": "2026-11-17T12:35:29.077953+00:00",
+        "verification": "Azure SCM selector before/after and actual application-container SSH mounted manifest",
+        "selectorBefore": "2026111704554378.zip",
+        "mountedManifest": {
+          "sourceCommit": "9b305490ea199585852f369bc9d0b712e854de8a",
+          "demoVersion": 78,
+          "manifestSha256": "0890c5a5aeda4e21b4313aa3a4040b231c877135073eba86cfff67f97ccfb1a3"
+        },
+        "mountedManifestReadAtUtc": "2026-11-17T12:35:37.938519+00:00",
+        "selectorAfter": "2026111704554378.zip",
+        "selectorMatchesEarlierAudit": true,
+        "mountedManifestMatchesEarlierAudit": true,
+        "passed": true,
+        "completedAtUtc": "2026-11-17T12:35:38.698013+00:00"
+      },
+      "aiAuthorization": {
+        "atUtc": "2026-11-17T12:35:39.972Z",
+        "ledgerWrites": 0,
+        "modelCalls": 0,
+        "serverReadAtUtc": "2026-11-17T12:35:40.326Z",
+        "grantSchemaVersion": "openai_cost_grant_v1",
+        "grantCurrent": true,
+        "effectiveExpiresAtUtc": "2026-11-17T16:00:00.000Z",
+        "creditExpiresAtUtc": "2026-11-17T16:00:00.000Z",
+        "balanceValidUntilUtc": "2026-11-17T16:00:00.000Z",
+        "priceValidUntilUtc": "2026-11-17T16:00:00.000Z",
+        "configMatchesLiveLedgerGrant": true,
+        "ownerMatchesFence": true,
+        "ownerEnabled": true,
+        "ownerLeaseCurrent": true,
+        "passed": true,
+        "completedAtUtc": "2026-11-17T12:35:40.377Z",
+        "cloudAiEnabled": true,
+        "ownershipMode": "renewable_service_lease",
+        "comparison": "parsed structural equality"
+      },
+      "serviceLogWindow": {
+        "atUtc": "2026-11-17T12:35:40.389257+00:00",
+        "windowFromUtc": "2026-11-17T12:30:30Z",
+        "windowUntilUtc": "2026-11-17T12:32:00Z",
+        "rootObservation": "root operator observed Service unavailable at 20:30:53 SGT; Retry recovered by 20:31:40 SGT",
+        "maximumFiles": 2,
+        "maximumBytesPerFile": 65536,
+        "rawContentPersisted": false,
+        "files": [
+          {
+            "kind": "application",
+            "lastUpdated": "2026-11-17T11:57:48.4911554Z",
+            "tailRead": false,
+            "reason": "metadata older than observation window"
+          },
+          {
+            "kind": "platform",
+            "lastUpdated": "2026-11-17T05:02:54.5310199Z",
+            "tailRead": false,
+            "reason": "metadata older than observation window"
+          }
+        ],
+        "passed": true,
+        "completedAtUtc": "2026-11-17T12:35:40.657242+00:00"
+      },
+      "passed": true,
+      "completedAtUtc": "2026-11-17T12:35:40.657291+00:00"
+    }
+  ]
+}

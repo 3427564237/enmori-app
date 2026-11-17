@@ -1,0 +1,418 @@
+{
+  "date": "2026-11-17",
+  "timezone": "Asia/Singapore",
+  "baseline": "c6f138b90522f5d5131a55f190dffa8965cd3bda",
+  "kind": "source-widget-synthetic-render-review",
+  "phone_acceptance": "v83 installed according to main physical record. Independently reviewed listed English social content plus Chinese 2x settings, initial discovery loading, subsequent loaded discovery/action/card screenshots and English-restored settings. Limited static observations, not whole-app or all social-type acceptance.",
+  "runtime": "FVM Flutter 3.47.2; locked dependencies unchanged",
+  "batches": [
+    {
+      "name": "existing core task tests",
+      "passed": 223
+    },
+    {
+      "name": "core accessibility fixture",
+      "passed": 8
+    },
+    {
+      "name": "social focused regression",
+      "passed": 49
+    },
+    {
+      "name": "final social layout matrix",
+      "passed": 26
+    },
+    {
+      "name": "temporary v79/current avatar synthetic capture",
+      "passed": 2,
+      "temporary_fixtures_removed": true
+    },
+    {
+      "name": "social localization after legacy combined-label assertion update",
+      "passed": 3
+    }
+  ],
+  "count_note": "The listed focused batches were run during v80 preparation, overlap and are not a unique total. Later final-suite outcomes are owned by the main verification receipt.",
+  "logs": [
+    {
+      "name": "ui-existing-tests.log",
+      "location": "outside repository: local state audit directory",
+      "sha256": "88dcb599f1fee8ad6f60b73b62a9047191584959c400a50b1fb7a7f09a51cd65"
+    },
+    {
+      "name": "ui-accessibility-final.log",
+      "location": "outside repository: local state audit directory",
+      "sha256": "a0b1df72d938ba9fae8ccb08f34e88c55644f74b3fe5f99a5957f6b34027432d"
+    },
+    {
+      "name": "social-layout-before.log",
+      "location": "outside repository: local state audit directory",
+      "sha256": "576469e6a3a7d14fc8dacb9fdcca0f1813ed95c0c03619c975d368ec43cf4707"
+    },
+    {
+      "name": "social-layout-harness-failure.log",
+      "location": "outside repository: local state audit directory",
+      "sha256": "3bf4fd9c7d55fe135620403262e31e5b4ee710f1b3271e626f12d67735fa25b4"
+    },
+    {
+      "name": "social-focused.log",
+      "location": "outside repository: local state audit directory",
+      "sha256": "2307bc4c13627ac68fb6dde40fbb9f2661ecb93f4eb0480db12303bf83143c2b"
+    },
+    {
+      "name": "social-layout-final.log",
+      "location": "outside repository: local state audit directory",
+      "sha256": "902073d96b989dcbfe741f9288803f90fd0f1b231e878c4263ea959432a57f03"
+    },
+    {
+      "name": "social-v79-before-preview.log",
+      "location": "outside repository: local state audit directory",
+      "sha256": "a30cb5011cd3387a2f3250ca5ad4cd15d7f0ed9f71908fa6e8fc7b7e9a8cedd6"
+    },
+    {
+      "name": "ui-accessibility-analyze.log",
+      "location": "outside repository: local state audit directory",
+      "sha256": "265916899615772d0bb5e9930eecba35f592e0f97036bdcdaccc9658096a4d17"
+    },
+    {
+      "name": "social-analyze.log",
+      "location": "outside repository: local state audit directory",
+      "sha256": "de13cbb3d9524daa450b20f874a3865038e3c258224e9c1882db6c6aa207cc1a"
+    },
+    {
+      "name": "social-localization-final.log",
+      "location": "outside repository: local state audit directory",
+      "sha256": "d5ba284911d23f8d3aaf36a9b3fd7ee9db1513d077c8d045072901c7a07113a2"
+    }
+  ],
+  "source_checkpoint": [
+    {
+      "path": "lib/core/presentation/identity_avatar.dart",
+      "sha256": "7cb9d7443261dfaf86bd3a0af3b5c86eb6bc4cc7dfae59c9c36c5fdcff7a1df7"
+    },
+    {
+      "path": "lib/features/friends/presentation/discovery_card_page.dart",
+      "sha256": "6c31e598b945c9690385ca0cc979ccdf931ec1913cdff827ed332dfb7dd68d33"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_discovery_panel.dart",
+      "sha256": "4956dc2f97344b44876db7a19bd5052f4b099ddb65faab53cb616c8a2ca06cf2"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_activity_panel.dart",
+      "sha256": "924e72995c45f395cec1f044fde75a4faaf7f6dbde927d42da44c1f706ee80c0"
+    },
+    {
+      "path": "test/features/core_task_accessibility_test.dart",
+      "sha256": "e1e59a4ce22d09f8c569ea9eb00ce029739e6111ac0a1570c9cc949ba9d5e96e"
+    },
+    {
+      "path": "test/features/social_discovery_layout_test.dart",
+      "sha256": "1d077ccf280c80e6e38eb450e22526694a07c4503fa30338d09951a4c7b5c0e3"
+    },
+    {
+      "path": "test/features/social_localization_test.dart",
+      "sha256": "e8f7be28232951b5fcd4a37b9a40ea3f912fd0585dbdccd15feb1374582a88c8"
+    }
+  ],
+  "physical_visual_review": {
+    "source_commit_prefix": "82a6658",
+    "apk_sha256_prefix": "3f6cecd",
+    "apk_sha256_suffix": "88f7ab",
+    "binding": "Installed retained-data v80 recorded by main task in physical-acceptance.md. This visual subtask did not install or operate the device.",
+    "captures": [
+      {
+        "name": "v80-discover.png",
+        "sha256": "e238b27276eed6b78dbcfa116a26b3b8b3ae01e20b561c43b2c3f8aa0ffe9e8a",
+        "storage": "private file outside repository"
+      },
+      {
+        "name": "v80-card-initial.png",
+        "sha256": "2a362eef2bf21d2de74894adebc47f78a02dbdd826016c53b9598dc37473d80c",
+        "storage": "private file outside repository"
+      },
+      {
+        "name": "v79-discovery-card-ready.png",
+        "sha256": "433a55d8692a114f799104167d4019db1f81788fa635f2fdd312b0132bc44c8e",
+        "storage": "private file outside repository"
+      }
+    ],
+    "version_status": "v80 intermediate candidate; later v81 is also intermediate after a separate recovery defect",
+    "apk_sha256": "3f6cecd324efd584c745f1ac010d23c8586e0014150dd39bbc4a2395d588f7ab",
+    "scope": [
+      "Discovery list and discovery card placeholder avatars are visually circular.",
+      "Visible identity, disclosure and controls only; no action success inferred from screenshots.",
+      "No independent physical Activity image review in this subtask; root separately recorded a v80 Created-a-Check-in item, profile navigation and retained filter.",
+      "No claim of image-avatar upload/decoding, all activity states, or final-v81 acceptance."
+    ],
+    "dimensions_note": "v79 physical bounds: 320x40dp at 360dp viewport, reported by main task. Separate widget fixture: 335x40dp at 375dp viewport. No exact v80 dp measurement inferred from static screenshot."
+  },
+  "v81_visual_review": {
+    "version_status": "intermediate; not final acceptance",
+    "source_commit": "683f0a1a41d20936ffcf524ab5cdbb436bb5bbca",
+    "apk_sha256": "92f29670486115a8b3492a31ceed9f21d76372a759044db8c5129b3213f2f548",
+    "binding": "Main physical-acceptance.md records actual retained-data installation; this reviewer did not operate the phone.",
+    "visible_observations": [
+      "Discovery list/card placeholder avatar proportions and visible hierarchy retained.",
+      "AI input, caret and send action visible above the keyboard; no send/model-success conclusion.",
+      "Unknown-edit exit explanation and both actions fit current English portrait viewport.",
+      "After Leave, saved-detail screenshot shows only title/navigation/Return Home, without record/loading/error/reload; main operator confirms unknown-edit return context."
+    ],
+    "limits": [
+      "No Activity-item screenshot independently reviewed in this subtask.",
+      "No actual-image avatar decode/upload, Chinese/large-font/whole-app physical acceptance inferred.",
+      "Proposed v82 replacement remains unverified at this checkpoint."
+    ],
+    "captures": [
+      {
+        "name": "v81-discover-ready.png",
+        "sha256": "00920dfced21777920689f2d8bab5d25d2de0632638ae1bde474401f509ce4ca",
+        "storage": "private file outside repository"
+      },
+      {
+        "name": "v81-card.png",
+        "sha256": "57d1cb9f0d929de37f924d22deb534bb4e9b2f487671fbe470bcffa5e2925b3a",
+        "storage": "private file outside repository"
+      },
+      {
+        "name": "v81-ai-keyboard.png",
+        "sha256": "fcbd20e481c328df44cdfb79e75b51cb0c65bb27078b0e7e12d0c54e8c27be22",
+        "storage": "private file outside repository"
+      },
+      {
+        "name": "v81-edit-cut-back.png",
+        "sha256": "4aea56374e97c6eb2b6fcdd6b4a410cdabdfba7412bde3d6283d6c261247a4cd",
+        "storage": "private file outside repository"
+      },
+      {
+        "name": "v81-edit-left-ready.png",
+        "sha256": "d761b63e09342442916c5ac2f604c3989a27144b7d8bc673a9b9a5ff1688cec3",
+        "storage": "private file outside repository"
+      }
+    ]
+  },
+  "v82_visual_review": {
+    "version_status": "intermediate after separate recommendation failure-feedback component defect; v83 now installed, independent v83 visuals pending",
+    "apk_sha256": "9bd1e2a973c59962ed5fcd06b69c7ba5363118dabfaa915185ff16f56aa706ba",
+    "pid_reported_by_operator": 17380,
+    "binding": "Actual installed hash and navigation actions reported by root operator; this reviewer only viewed listed private images.",
+    "visible_observations": [
+      "Circular placeholder avatars in list/card/profile/Check-in activity, no horizontal stretching in these views.",
+      "Discovery/card/profile hierarchy and current controls legible.",
+      "profile-return image shows Discover selected plus loading bar, not completed reload.",
+      "Activity Check-in item is populated; after profile return the Created-a-Check-in filter remains selected and item is visible.",
+      "Going-filter image explicitly shows an empty state; no populated Going/Interested-card coverage inferred."
+    ],
+    "limits": [
+      "No photo-avatar upload/download/decode/crop validation.",
+      "No account identifiers or private content copied to repository.",
+      "This English batch uses original font size; a separate Chinese/font-scale-2.0 batch is recorded below.",
+      "No all-UI, all-state, TalkBack or final stable-release acceptance inferred."
+    ],
+    "captures": [
+      {
+        "name": "v82-discover-ready.png",
+        "sha256": "48e1eca9aa3f1061b7a933c2c1efb719cb0a58777acaa202338c958599b10448",
+        "storage": "private file outside repository"
+      },
+      {
+        "name": "v82-card-ready.png",
+        "sha256": "e5caa2666ea25567311fa7740b0e2537f2c401004ed7984d1712cb1a6b684abc",
+        "storage": "private file outside repository"
+      },
+      {
+        "name": "v82-profile-ready.png",
+        "sha256": "2cc296d048db560293a7c758d5ea796d3d657948dccc684d46fc08694b2c7de6",
+        "storage": "private file outside repository"
+      },
+      {
+        "name": "v82-profile-return.png",
+        "sha256": "585b04be2e474b63a02172c5238a127862a429cb6cb917e83472a9eb4c3f767e",
+        "storage": "private file outside repository"
+      },
+      {
+        "name": "v82-activity-checkin.png",
+        "sha256": "7f679be839897c34181987ea877787b1538ceafb1dc1623e792681327200b5b6",
+        "storage": "private file outside repository"
+      },
+      {
+        "name": "v82-activity-profile.png",
+        "sha256": "7f9a72bc6d1c0646dba4d5385493efca9d1e193ba36ca0158e055b2f8635610e",
+        "storage": "private file outside repository"
+      },
+      {
+        "name": "v82-activity-return.png",
+        "sha256": "19440c665bf502453ec64618c71ca27997bdf0dbf98a62fcecd1d3995be6c07a",
+        "storage": "private file outside repository"
+      },
+      {
+        "name": "v82-activity-going-ready.png",
+        "sha256": "cba17c827348ddfeeaad3972a290a078f8ec7063395c1f455c994e3fd483b6d4",
+        "storage": "private file outside repository"
+      }
+    ]
+  },
+  "v82_chinese_large_font_review": {
+    "version_status": "intermediate-v82 visual evidence only; not final-v83 acceptance",
+    "apk_sha256": "9bd1e2a973c59962ed5fcd06b69c7ba5363118dabfaa915185ff16f56aa706ba",
+    "configuration_reported_by_operator": {
+      "app_language": "zh",
+      "system_font_scale": 2.0
+    },
+    "visible_observations": [
+      "Settings text wraps and fixed saved-state/Save region is visible; full scroll reachability not established by a static image.",
+      "Home New Check-in/History and bottom navigation visible without evident horizontal overflow in this viewport.",
+      "Discovery/card identities wrap; placeholder avatars remain round; card entry and profile/request actions visible.",
+      "Fixed My friends tab text is partially clipped/faded at 2.0 font scale: deferred local navigation-label limitation.",
+      "Source reason and interest text remain in original language."
+    ],
+    "operator_reported_restoration": {
+      "time": "2026-11-17 20:00:20 Asia/Singapore (language/font restoration)",
+      "language": "English",
+      "font_scale": 1.0,
+      "night_mode": 4,
+      "wifi": 1,
+      "mobile_data": 1,
+      "screen_off_timeout_ms": 600000,
+      "provenance": "Main physical-acceptance.md separates language/font restoration from later device-settings receipt; this reviewer did not independently read raw private JSON.",
+      "device_settings_receipt_time": "2026-11-17 20:03:17 Asia/Singapore"
+    },
+    "operator_reported_settings_draft": "Private draft -> Stay -> Discard -> reopen original Public at 20:02:30; no privacy save, recorded by main operator, not inferred from images.",
+    "captures": [
+      {
+        "name": "v82-settings-zh-large.png",
+        "sha256": "da2f77824dd1b1e918c928aef0cf9b923c63c0869e14ab13ada3842b0622584a",
+        "storage": "private file outside repository"
+      },
+      {
+        "name": "v82-home-zh-large.png",
+        "sha256": "052862db323d1c54f54bb6e4d988fb92705853c5fc87e5530338c3b045556287",
+        "storage": "private file outside repository"
+      },
+      {
+        "name": "v82-discover-zh-large.png",
+        "sha256": "e05920b4d3190d219837e83c8389abce58566acf566d3d958a440fec4baa62aa",
+        "storage": "private file outside repository"
+      },
+      {
+        "name": "v82-card-zh-large-ready.png",
+        "sha256": "63d566df26b49ed0e132af1b7e921c2775f13e503271f50a0f22b898cf388fee",
+        "storage": "private file outside repository"
+      }
+    ]
+  },
+  "current_candidate_checkpoint": {
+    "version": "v83",
+    "installation_provenance": "Main physical-acceptance.md",
+    "source_commit": "abc072adfdae57e4cdd0fd7c9de4b2bbfe21a445",
+    "apk_sha256": "7dd81dfdc2783a58cd6acfbf5d446000b1c35312364f25e5975d4160270fc9b8",
+    "pid_reported_by_operator": 17953,
+    "independent_v83_visual_review": "English discovery/card/populated check-in activity/profile and Chinese 2x discovery content/scrolled action/card reviewed; initial loading images retained separately. English-restored settings visible; exact restoration values require operator receipt.",
+    "historical_evidence_note": "v80-v82 visual observations are not automatically transferred to v83. Earlier pending/proposed statements describe their historical checkpoints."
+  },
+  "v83_visual_review": {
+    "version_status": "current installed candidate; limited visual observations, not a whole-app pass",
+    "binding": "APK/source identity from main physical-acceptance.md; no device operation by this subtask",
+    "observations": [
+      "English discovery, discovery card, populated check-in Activity and friend profile show circular placeholder avatars without the old full-width ellipse.",
+      "Visible identity, reason/type/content and actions are grouped without observed overlap or clipped actions in these captured English viewports.",
+      "Activity shows Created-a-Check-in selected and one populated check-in item; its mood label describes that record, not current friend state.",
+      "Friend profile visibly includes identity and section controls plus explicit shared-interest/event empty states; static image does not establish the access-control or return-navigation behavior.",
+      "Chinese 2x-font settings text wraps and fixed Save remains visible. The screenshot does not establish all scrolled settings controls are reachable.",
+      "v83-discover-zh-large-settled.png still shows the loading bar without cards; filename settled is not evidence of successful completion.",
+      "Chinese 2x fixed My-friends tab has the same clipped/faded final character observed in v82; Discover and Activity remain legible.",
+      "End-of-list message still precedes the first English discovery card; existing minor information-order limitation."
+    ],
+    "limits": [
+      "Placeholders only: no real photo upload, decode or crop acceptance.",
+      "No populated Going/Interested Activity card or cross-account friendship completion established by these images.",
+      "No inference of latency, request success, navigation completion, TalkBack, dark-mode support or all UI success from static images.",
+      "Chinese 2x discovery content and card subsequently reviewed below; exact v83 device-setting restoration values require operator receipt."
+    ],
+    "captures": [
+      {
+        "name": "v83-discover-loaded.png",
+        "sha256": "2056f2cd91ff7f23603955d59a2e3384338931170b6afe88bfb95ef7814a765d",
+        "storage": "private file outside repository"
+      },
+      {
+        "name": "v83-discovery-card.png",
+        "sha256": "64f6e08732b4a543644bcad19fa7d909fa5e9195741c18043be439c4c23d5cc6",
+        "storage": "private file outside repository"
+      },
+      {
+        "name": "v83-activity-loaded.png",
+        "sha256": "474e2a26511d0c0892686f54bedab60504a066e0d0eabea6a169f50e66e7fab9",
+        "storage": "private file outside repository"
+      },
+      {
+        "name": "v83-activity-profile-loaded.png",
+        "sha256": "c008f2e5c62d6d6cd0583f126e577ff9450cd02005d7f97ae2b1653c6ecd59ea",
+        "storage": "private file outside repository"
+      },
+      {
+        "name": "v83-settings-zh-large.png",
+        "sha256": "d3f38e98d7a3fec1776acf2812299197b6f00077b56e4a583b8db49e9f20fa24",
+        "storage": "private file outside repository"
+      },
+      {
+        "name": "v83-discover-zh-large-settled.png",
+        "sha256": "7fe2c433e4db8e3d77540579a12d35919d4afac0ab18d7f98e6d55a5fd8e650b",
+        "storage": "private file outside repository"
+      }
+    ],
+    "followup_chinese_large_font": {
+      "operator_observation_times": "Approximate UI observations: loading around 20:34:58; still loading at20:35:15; content visible by20:35:31 SGT. Not precise HTTP duration.",
+      "observations": [
+        "Subsequent discovery image contains a result card; scrolled actions image makes the discovery-card action fully visible, with reachability reported by the operator.",
+        "Loaded Chinese discovery card wraps long identity over multiple lines; placeholder circle, disclosure and both actions remain visible without observed overlap.",
+        "Source reason remains original English; no translation contract inferred.",
+        "Fixed My-friends tab clipping and end-of-list message preceding content remain known limitations.",
+        "Settings-restored image visibly shows English and a smaller font. Exact font_scale and other device values are not inferred from pixels."
+      ],
+      "captures": [
+        {
+          "name": "v83-discover-zh-large-later.png",
+          "sha256": "edf7a694b303e0843a9715cfd4e8ad6c3397d1509f128803b0b5d669e7c4e65a",
+          "storage": "private file outside repository",
+          "captured_at": "2026-11-17T20:35:31.781010+08:00"
+        },
+        {
+          "name": "v83-discover-zh-large-actions.png",
+          "sha256": "e32ac041b57c46129b96931d716880ddf531ffcb2862cba1bd5bc880934b64ec",
+          "storage": "private file outside repository",
+          "captured_at": "2026-11-17T20:35:40.915711+08:00"
+        },
+        {
+          "name": "v83-card-zh-large-loaded.png",
+          "sha256": "956bff80a3f48023fc80dd1248bd51b1a5a84b69b5fe85f487abd18217668819",
+          "storage": "private file outside repository",
+          "captured_at": "2026-11-17T20:36:03.723738+08:00"
+        },
+        {
+          "name": "v83-settings-restored.png",
+          "sha256": "2af031691a02710425beaa20481278588cd1d958037841af85dd0ef18e855233",
+          "storage": "private file outside repository",
+          "captured_at": "2026-11-17T20:36:19.042390+08:00"
+        }
+      ]
+    }
+  },
+  "v83_final_device_restoration": {
+    "receipt": "v83-restored-device-settings.json",
+    "sha256": "fe9275bf3b8acce55806ccfe96689bee1ed7c17b47c8aed62236a5bce0693768",
+    "at": "2026-11-17T20:45:01.015079+08:00",
+    "values": {
+      "font_scale": "1.0",
+      "wifi_on": "1",
+      "mobile_data": "1",
+      "ui_night_mode": "4",
+      "screen_off_timeout": "600000",
+      "window_animation_scale": "1.0",
+      "transition_animation_scale": "1.0",
+      "animator_duration_scale": "1.0"
+    },
+    "language": "English observed separately in v83-settings-restored.png",
+    "provenance": "root read actual device settings; not inferred from screenshots"
+  }
+}
