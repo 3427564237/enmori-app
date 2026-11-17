@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../../core/presentation/refresh_on_return.dart';
 import '../../../core/presentation/event_source_coverage_notice.dart';
 import 'recommendation_reason.dart';
@@ -132,11 +134,21 @@ final class _EventRecommendationsSectionState
       }
     });
     final state = ref.watch(eventRecommendationsControllerProvider);
+    final operation = _controller.operation;
     return RefreshOnReturn(
       onRefresh: _load,
       child: _RecommendationContent(
         key: ValueKey(ref.watch(currentAuthSubjectProvider)),
         state: state,
+        waitingOperation: operation,
+        onStopWaiting: () {
+          if (!_visibleForInteraction(context)) return;
+          _refreshIds = null;
+          _controller.stopWaiting(
+            operation,
+            view: EventRecommendationView.home,
+          );
+        },
         onRetry: () => _load(userInitiated: true),
         onSeeAll: widget.onSeeAll,
         home: true,
@@ -308,6 +320,7 @@ final class _EventRecommendationsPageState
       }
     });
     final state = ref.watch(eventRecommendationsControllerProvider);
+    final operation = _controller.operation;
     final response = state.asData?.value;
     _preparePosition(response);
     final currentIndex =
@@ -329,6 +342,14 @@ final class _EventRecommendationsPageState
           children: [
             _RecommendationContent(
               state: state,
+              waitingOperation: operation,
+              onStopWaiting: () {
+                if (!_visibleForInteraction(context)) return;
+                _controller.stopWaiting(
+                  operation,
+                  view: EventRecommendationView.all,
+                );
+              },
               onRetry: _load,
               onOpenEvent: widget.onOpenEvent,
               recommendationCardBuilder: widget.recommendationCardBuilder,
@@ -372,6 +393,8 @@ final class _RecommendationContent extends StatefulWidget {
   const _RecommendationContent({
     required this.state,
     required this.onRetry,
+    required this.waitingOperation,
+    required this.onStopWaiting,
     this.onSeeAll,
     this.home = false,
     this.heading,
@@ -388,6 +411,8 @@ final class _RecommendationContent extends StatefulWidget {
 
   final AsyncValue<EventRecommendationResponse> state;
   final VoidCallback onRetry;
+  final int waitingOperation;
+  final VoidCallback onStopWaiting;
   final VoidCallback? onSeeAll;
   final bool home;
   final String? heading;
@@ -407,7 +432,6 @@ final class _RecommendationContent extends StatefulWidget {
 final class _RecommendationContentState extends State<_RecommendationContent> {
   final _contentKey = GlobalKey();
   double? _loadingHeight;
-  int _slots = 0;
   (double, double, Locale)? _layout;
 
   @override
@@ -420,7 +444,6 @@ final class _RecommendationContentState extends State<_RecommendationContent> {
     );
     if (_layout != layout) {
       _loadingHeight = null;
-      _slots = 0;
       _layout = layout;
     }
   }
@@ -433,7 +456,6 @@ final class _RecommendationContentState extends State<_RecommendationContent> {
       if (box is RenderBox && box.hasSize) {
         // Keep layout geometry only; refreshed cards/authorization are never cached.
         _loadingHeight = box.size.height;
-        _slots = oldWidget.state.requireValue.items.length.clamp(1, 2);
       }
     }
   }
@@ -510,7 +532,8 @@ final class _RecommendationContentState extends State<_RecommendationContent> {
                     ),
                   if (action != null &&
                       (!inlineHeader ||
-                          key == const Key('event-recommendations-empty')))
+                          key == const Key('event-recommendations-empty') ||
+                          key == const Key('event-recommendations-stopped')))
                     action,
                 ],
               ),
@@ -521,19 +544,31 @@ final class _RecommendationContentState extends State<_RecommendationContent> {
     }
 
     final content = switch (state) {
-      AsyncLoading<EventRecommendationResponse>()
-          when home && _loadingHeight != null =>
-        _RecommendationLoadingSpace(height: _loadingHeight!, slots: _slots),
-      AsyncLoading<EventRecommendationResponse>() => status(
-        key: const Key('event-recommendations-loading'),
-        title: context.tr('Loading event recommendations', '正在加载活动推荐'),
-        loading: true,
-        body: context.tr(
-          'Checking for upcoming events that match your interests.',
-          '正在查找符合你兴趣的近期活动。',
-        ),
-        icon: Icons.hourglass_top,
+      AsyncLoading<EventRecommendationResponse>() => _RecommendationWait(
+        key: ValueKey(widget.waitingOperation),
+        home: home,
+        reservedHeight: home ? _loadingHeight : null,
+        onStop: widget.onStopWaiting,
+        onBrowse: home ? null : onBrowseAll,
       ),
+      AsyncError<EventRecommendationResponse>(
+        error: EventRecommendationsStopped(),
+      ) =>
+        status(
+          key: const Key('event-recommendations-stopped'),
+          title: context.tr('Stopped waiting for recommendations', '已停止等待推荐'),
+          body: context.tr(
+            'Recommendations are paused here. Reload when you are ready.',
+            '本页已停止等待推荐；准备好后可重新加载。',
+          ),
+          icon: Icons.pause_circle_outline,
+          action: OutlinedButton.icon(
+            key: const Key('event-recommendations-reload'),
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh),
+            label: Text(context.tr('Reload', '重新加载')),
+          ),
+        ),
       AsyncError<EventRecommendationResponse>(
         error: EventRecommendationsRefreshRequired(),
       ) =>
@@ -629,7 +664,7 @@ final class _RecommendationContentState extends State<_RecommendationContent> {
                   icon: const Icon(Icons.arrow_forward),
                   label: Text(context.tr('Next group', '下一组')),
                 )
-              else
+              else if (state.error is! EventRecommendationsStopped)
                 IconButton(
                   key: Key(
                     state.hasError &&
@@ -765,93 +800,113 @@ class _SourceAvailabilityNotice extends StatelessWidget {
   }
 }
 
-/// Neutral placeholders replace old content while the required fresh read runs.
-final class _RecommendationLoadingSpace extends StatelessWidget {
-  const _RecommendationLoadingSpace({
-    required this.height,
-    required this.slots,
+bool _visibleForInteraction(BuildContext context) =>
+    context.mounted &&
+    ModalRoute.of(context)?.isCurrent != false &&
+    TickerMode.valuesOf(context).enabled;
+
+/// Waiting time is feedback only, never an estimate of provider progress.
+final class _RecommendationWait extends StatefulWidget {
+  const _RecommendationWait({
+    required this.home,
+    required this.onStop,
+    this.reservedHeight,
+    this.onBrowse,
+    super.key,
   });
-  final double height;
-  final int slots;
+  final bool home;
+  final double? reservedHeight;
+  final VoidCallback onStop;
+  final VoidCallback? onBrowse;
+
+  @override
+  State<_RecommendationWait> createState() => _RecommendationWaitState();
+}
+
+final class _RecommendationWaitState extends State<_RecommendationWait> {
+  Timer? _timer;
+  bool _longWait = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer(const Duration(seconds: 10), () {
+      if (mounted) setState(() => _longWait = true);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final label = context.tr('Updating recommendations…', '正在更新推荐…');
-    final minimumSlot = 100 + MediaQuery.textScalerOf(context).scale(12) * 3;
-    final compact = slots == 0 || height / slots < minimumSlot;
-    return Semantics(
-      key: const Key('event-recommendations-loading'),
-      liveRegion: true,
-      label: label,
-      child: ExcludeSemantics(
-        child: SizedBox(
-          height: height,
-          child: compact
-              ? const Center(child: LinearProgressIndicator())
-              : Column(
-                  children: [
-                    for (var index = 0; index < slots; index++)
-                      Expanded(
-                        child: Card(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Text(
-                                  label,
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                                const SizedBox(height: 8),
-                                Expanded(
-                                  child: LayoutBuilder(
-                                    builder: (context, constraints) {
-                                      final rows = (constraints.maxHeight / 80)
-                                          .ceil()
-                                          .clamp(1, 100);
-                                      return Column(
-                                        children: [
-                                          for (var row = 0; row < rows; row++)
-                                            Expanded(
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.stretch,
-                                                children: [
-                                                  FractionallySizedBox(
-                                                    alignment:
-                                                        Alignment.centerLeft,
-                                                    widthFactor: row.isEven
-                                                        ? .75
-                                                        : .45,
-                                                    child: Container(
-                                                      height: 10,
-                                                      color: Theme.of(context)
-                                                          .colorScheme
-                                                          .surfaceContainerHighest,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 8),
-                                                  const LinearProgressIndicator(),
-                                                ],
-                                              ),
-                                            ),
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-        ),
+    final feedback = Padding(
+      padding: EdgeInsets.symmetric(
+        vertical: widget.home ? 8 : 16,
+        horizontal: widget.home ? 0 : 16,
       ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          LinearProgressIndicator(
+            semanticsLabel: context.tr(
+              'Loading event recommendations',
+              '正在加载活动推荐',
+            ),
+          ),
+          const SizedBox(height: 8),
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              _longWait
+                  ? context.tr('Still waiting for event sources…', '仍在等待活动来源…')
+                  : context.tr('Loading event recommendations', '正在加载活动推荐'),
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            context.tr(
+              'Some sources can take a few minutes. You can stop waiting and reload later, or use another part of the app.',
+              '部分来源可能需要几分钟。你可以停止等待、稍后重新加载，也可以先使用其他功能。',
+            ),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              TextButton(
+                key: const Key('event-recommendations-stop-waiting'),
+                onPressed: widget.onStop,
+                child: Text(context.tr('Stop waiting', '停止等待')),
+              ),
+              if (widget.onBrowse != null)
+                TextButton.icon(
+                  key: const Key('event-recommendations-browse-waiting'),
+                  onPressed: widget.onBrowse,
+                  icon: const Icon(Icons.explore_outlined),
+                  label: Text(context.tr('Browse activities', '浏览活动')),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+    final height = widget.reservedHeight;
+    return SizedBox(
+      key: const Key('event-recommendations-loading'),
+      height: height,
+      child: height != null
+          // Preserve Home geometry without retaining old cards. Large text can
+          // scroll the feedback; its buttons remain in the semantics tree.
+          ? SingleChildScrollView(primary: false, child: feedback)
+          : widget.home
+          ? feedback
+          : Card(margin: EdgeInsets.zero, child: feedback),
     );
   }
 }

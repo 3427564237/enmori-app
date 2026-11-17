@@ -17,6 +17,11 @@ final class EventRecommendationsRefreshRequired {
   const EventRecommendationsRefreshRequired();
 }
 
+/// The user retired this local wait; the underlying read may still complete.
+final class EventRecommendationsStopped {
+  const EventRecommendationsStopped();
+}
+
 final eventRecommendationsControllerProvider =
     NotifierProvider<
       EventRecommendationsController,
@@ -30,12 +35,21 @@ final class EventRecommendationsController
   Timer? _expiry;
   EventRecommendationView? _view;
   int? _profileRevision;
+  int get operation => _operation;
+
+  @override
+  bool updateShouldNotify(
+    AsyncValue<EventRecommendationResponse> previous,
+    AsyncValue<EventRecommendationResponse> next,
+  ) => next.isLoading || super.updateShouldNotify(previous, next);
+
   void _refreshContext() {
-    _operation++;
+    final operation = ++_operation;
     final view = _view;
     if (view != null) {
       scheduleMicrotask(() {
-        if (ref.mounted) load(view: view);
+        // A route change or explicit command supersedes this queued refresh.
+        if (ref.mounted && operation == _operation) load(view: view);
       });
     }
   }
@@ -114,6 +128,13 @@ final class EventRecommendationsController
       const EventRecommendationsRefreshRequired(),
       StackTrace.current,
     );
+  }
+
+  void stopWaiting(int operation, {required EventRecommendationView view}) {
+    if (operation != _operation || view != _view || !state.isLoading) return;
+    _operation++;
+    _expiry?.cancel();
+    state = AsyncError(const EventRecommendationsStopped(), StackTrace.current);
   }
 
   void abandon(int operation) {
