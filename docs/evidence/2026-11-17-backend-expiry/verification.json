@@ -1,0 +1,134 @@
+{
+  "sourceCommit": "9fb0e7c9bfc27ca860da66c83e39d9f6245564f4",
+  "node": "24.19.0",
+  "productionFilesChanged": 1,
+  "newPermanentTests": 32,
+  "red": {
+    "passed": 24,
+    "failed": 8
+  },
+  "backendTests": {
+    "passed": 2048,
+    "failed": 0,
+    "skipped": 0
+  },
+  "firebaseEmulatorTests": {
+    "passed": 21,
+    "failed": 0,
+    "project": "demo-enmori-rmvp01a-r10",
+    "ports": [
+      18080,
+      19099,
+      14400,
+      14500,
+      19150
+    ],
+    "scope": [
+      "s2-event-recommendations",
+      "jin-recommendation-v2",
+      "event-browse-composition",
+      "event-participation"
+    ]
+  },
+  "azureEntryTests": {
+    "passed": 9,
+    "failed": 0,
+    "moduleMocksEnabled": true
+  },
+  "focusedTests": 63,
+  "independentTests": 57,
+  "startupOfflineCases": 8,
+  "onepaOfflineCases": 9,
+  "commands": [
+    "node node_modules/typescript/bin/tsc --project backend/tsconfig.json",
+    "node --test --test-concurrency=4 backend/dist/test/**/*.test.js",
+    "node --experimental-test-module-mocks --test tool/azure_backend.test.mjs",
+    "node /home/miku/.local/state/enmori-backend-expiry-20261117/firebase-emulator-check.mjs"
+  ],
+  "logs": {
+    "red.log": {
+      "privatePath": "/home/miku/.local/state/enmori-backend-expiry-20261117/red.log",
+      "sha256": "06e2e6d89ead15ddf5defd5b135ca2d8374f7ee1a99c8730165229d48c0a8735"
+    },
+    "focused-green.log": {
+      "privatePath": "/home/miku/.local/state/enmori-backend-expiry-20261117/focused-green.log",
+      "sha256": "69ef42d669e501adae121ac80592328a6ef6a42c5fbe6f0cbdad7021142cb5dd"
+    },
+    "full-build-direct.log": {
+      "privatePath": "/home/miku/.local/state/enmori-backend-expiry-20261117/full-build-direct.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "full-backend-tests.log": {
+      "privatePath": "/home/miku/.local/state/enmori-backend-expiry-20261117/full-backend-tests.log",
+      "sha256": "221733ec6b57dc59b3fb586cfcdf1e2a55bd2d7c71263922572058be3f5d205b"
+    },
+    "firebase-emulator-check.log": {
+      "privatePath": "/home/miku/.local/state/enmori-backend-expiry-20261117/firebase-emulator-check.log",
+      "sha256": "df60a4c9cb14e24d50709fbc7c687ff339a4eae322a7418ed508a382b87a9782"
+    },
+    "azure-entry-tests.log": {
+      "privatePath": "/home/miku/.local/state/enmori-backend-expiry-20261117/azure-entry-tests.log",
+      "sha256": "2119c45615e0854629a02d8ce108cf579269af7d11193bc75cdc9cb563c9adbc"
+    },
+    "azure-entry-tests-with-mocks.log": {
+      "privatePath": "/home/miku/.local/state/enmori-backend-expiry-20261117/azure-entry-tests-with-mocks.log",
+      "sha256": "f976478687d16058c7ced1039b72fa6bace1be651aa28340baa36d00041afafa"
+    },
+    "full-build.log": {
+      "privatePath": "/home/miku/.local/state/enmori-backend-expiry-20261117/full-build.log",
+      "sha256": "93ccab0031a1e5e688df3f3594200f71ae207855ba201319957e6591dc2ac35c"
+    },
+    "package-compile.log": {
+      "privatePath": "/home/miku/.local/state/enmori-backend-expiry-20261117/package-compile.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "package-first-failure.txt": {
+      "privatePath": "/home/miku/.local/state/enmori-backend-expiry-20261117/package-first-failure.txt",
+      "sha256": "bb01666af550278959382d80889348bf98ce4db4aebae157924db16d68098e4e"
+    },
+    "startup-offline-diagnosis.log": {
+      "privatePath": "/home/miku/.local/state/enmori-backend-expiry-20261117/startup-offline-diagnosis.log",
+      "sha256": "dcfe5541ac073ee1e0a03568ac9063ff728bfca1a9d919764bb2f5e04e1f4599"
+    },
+    "onepa-offline-diagnosis.log": {
+      "privatePath": "/home/miku/.local/state/enmori-backend-expiry-20261117/onepa-offline-diagnosis.log",
+      "sha256": "7b48a587d786eb84e60a6852772349d244aa9297c1a0aefc445eca4e79cd5a95"
+    },
+    "onepa-independent-regression.log": {
+      "privatePath": "/home/miku/.local/state/enmori-backend-expiry-20261117/onepa-independent-regression.log",
+      "sha256": "6681139cda4d2045c78deaacc7ac822c3c8a72dce4c69ce6d6c2de0b53576a62"
+    }
+  },
+  "toolingFailuresPreserved": [
+    "pnpm backend:build attempted implicit install and refused module removal without TTY; direct existing compiler used; no package/lock changes",
+    "Azure entry test first invocation omitted experimental module-mock flag; corrected invocation passed all nine",
+    "First packaging verifier reused mutable ZipInfo; unverified artifact retained privately; builder corrected to copy metadata before writing and final archive verified entry by entry"
+  ],
+  "clientProductionChangesThisTurn": 0,
+  "apkRebuiltThisTurn": false,
+  "deploymentPerformed": false,
+  "aiRenewed": false,
+  "modelCalls": 0,
+  "physicalPhoneOperated": false,
+  "releaseReady": false,
+  "independentPackageReview": {
+    "passed": true,
+    "atUtc": "2026-11-17T13:45:25.975Z",
+    "entriesCompared": 8570,
+    "unchangedEntries": 8567,
+    "unchangedDependencyEntries": 7619,
+    "metadataPreserved": true,
+    "changedEntries": 3,
+    "sourceAndEmittedBytesMatch": true,
+    "reviewer": "separate backend reviewer"
+  },
+  "runtimeIdentityReceipt": "runtime-identity.json",
+  "runtimeStillBaseline": true,
+  "sourceHashes": {
+    "backend/src/event-browse/infrastructure/controlled-source-projection.ts": "e6c253e428307edd16de3f4a4be7941b9bd032f14d297bfbe2767df228a6e89a",
+    "backend/test/event-browse/stable-detail-expiry.test.ts": "1d5c5b70fedbfbb6f4ccd87eb78dac39ec2bbb9439ecfb1f47d228b5fbbc3cf4",
+    "package.json": "df0e9faf947a783bc81b19182ddaa8b0ac2d1036b42534daa43e2ea1f3b4c8a8",
+    "pnpm-lock.yaml": "2a7cc845a23e71e35ccfff6d6808a40aad91bae68b08c59ca972079470e84365",
+    "pubspec.lock": "523dfbacd19c0d6e3c33fe9e6e46606ec62f8939bc78f7013810a01d5feb8a96"
+  }
+}

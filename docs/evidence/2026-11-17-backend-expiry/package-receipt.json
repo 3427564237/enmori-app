@@ -1,0 +1,50 @@
+{
+  "createdAtUtc": "2026-11-17T13:43:54.384160+00:00",
+  "sourceCommit": "9fb0e7c9bfc27ca860da66c83e39d9f6245564f4",
+  "backendVersion": 85,
+  "clientVersion": 84,
+  "path": "/home/miku/Downloads/ENMORI-backend-v85-candidate.zip",
+  "sha256": "7b2ffcccbf6c129ccaa839de1fced57125e2c41e33a5f746dc444189fcbe4140",
+  "bytes": 68086152,
+  "baseline": {
+    "atUtc": "2026-11-17T13:35:08.450559+00:00",
+    "name": "2026111704554378.zip",
+    "sha256": "6005380c4e663bfaebfee898dc1fae56c66c0910b9b4485f0da7ea000070d230",
+    "bytes": 68085970,
+    "sourceCommit": "9b305490ea199585852f369bc9d0b712e854de8a",
+    "selectorBeforeAfterMatched": true,
+    "remoteWrites": 0
+  },
+  "entries": 8570,
+  "everyEntryVerified": true,
+  "changedEntries": [
+    {
+      "path": "backend/dist/src/event-browse/infrastructure/controlled-source-projection.js",
+      "beforeSha256": "947902ce1965c93551f254096810ddb77322d2db24557f1cdf5246a6fba55787",
+      "afterSha256": "abe3c805f953345096e10ac9dd7a49f2de1eb3f0e47b0641bbcbf2b1e13f29ce",
+      "bytes": 22304
+    },
+    {
+      "path": "backend/dist/src/event-browse/infrastructure/controlled-source-projection.js.map",
+      "beforeSha256": "c4b3a1605c571110b0f01a890c8930af33b12da6063166287ca327e4d86b783a",
+      "afterSha256": "4162a94c6202c4276645bd19237ef4cf3bda67c7f32321f8957457956b9d8abf",
+      "bytes": 19449
+    },
+    {
+      "path": "deployment-manifest.json",
+      "beforeSha256": "0890c5a5aeda4e21b4313aa3a4040b231c877135073eba86cfff67f97ccfb1a3",
+      "afterSha256": "b3a07766fb2cfbbc011683f0d1fd2b909ab609ab48b82aa8225912ba75bc4246",
+      "bytes": 502
+    }
+  ],
+  "unchangedMapsRetainedAfterSourcePathOnlyComparison": 313,
+  "runtimeDependenciesAndEntrypointUnchanged": true,
+  "manifestChangedFields": [
+    "sourceCommit",
+    "demoVersion"
+  ],
+  "configurationIncluded": false,
+  "uploaded": false,
+  "deployed": false,
+  "aiRenewed": false
+}

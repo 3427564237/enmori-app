@@ -1,0 +1,43 @@
+{
+  "device": "emulator-5556",
+  "candidateVersion": 84,
+  "physicalDeviceOperated": false,
+  "observations": [
+    {
+      "label": "emulator-cycle2-offline",
+      "atUtc": "2026-11-17T13:41:41.314434+00:00",
+      "home": false,
+      "unavailable": true,
+      "opening": false,
+      "retry": true
+    },
+    {
+      "label": "emulator-cycle2-recovered",
+      "atUtc": "2026-11-17T13:41:49.481724+00:00",
+      "home": true,
+      "unavailable": false,
+      "opening": false,
+      "retry": false
+    },
+    {
+      "label": "emulator-back-reopen",
+      "atUtc": "2026-11-17T13:41:54.556274+00:00",
+      "home": false,
+      "unavailable": false,
+      "opening": true,
+      "retry": false
+    },
+    {
+      "label": "emulator-back-reopen",
+      "atUtc": "2026-11-17T13:41:58.529728+00:00",
+      "home": true,
+      "unavailable": false,
+      "opening": false,
+      "retry": false
+    }
+  ],
+  "networkRestored": true,
+  "pidBeforeBack": "5092",
+  "pidAfterReopen": "5092",
+  "passed": true
+}

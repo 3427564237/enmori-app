@@ -1,0 +1,109 @@
+{
+  "atUtc": "2026-11-17T13:33:34.818381+00:00",
+  "serviceWrites": 0,
+  "configurationWrites": 0,
+  "productWrites": 0,
+  "modelCalls": 0,
+  "logs": [
+    {
+      "kind": "application",
+      "lastUpdated": "2026-11-17T13:07:05.4881394Z",
+      "bytes": 12391,
+      "counts": {
+        "applicationListening": 2,
+        "containerTerminated": 0,
+        "siteStopped": 0,
+        "unhandled": 0
+      },
+      "eventTimes": {
+        "applicationListening": [
+          "2026-11-17T03:09:47.5826465Z",
+          "2026-11-17T05:02:53.3482705Z"
+        ],
+        "containerTerminated": [],
+        "siteStopped": [],
+        "unhandled": []
+      }
+    },
+    {
+      "kind": "platform",
+      "lastUpdated": "2026-11-17T05:02:54.5310199Z",
+      "bytes": 14120,
+      "counts": {
+        "applicationListening": 0,
+        "containerTerminated": 1,
+        "siteStopped": 8,
+        "unhandled": 0
+      },
+      "eventTimes": {
+        "applicationListening": [],
+        "containerTerminated": [
+          "2026-11-17T04:57:34.2239099Z"
+        ],
+        "siteStopped": [
+          "2026-11-17T02:31:09.4071256Z",
+          "2026-11-17T03:06:23.2623610Z",
+          "2026-11-17T03:06:25.0626726Z",
+          "2026-11-17T03:06:35.3451770Z",
+          "2026-11-17T04:57:34.6234865Z",
+          "2026-11-17T04:59:32.2464455Z",
+          "2026-11-17T04:59:33.9785019Z",
+          "2026-11-17T04:59:44.3345965Z"
+        ],
+        "unhandled": []
+      }
+    },
+    {
+      "kind": "application",
+      "lastUpdated": "2026-11-16T12:11:59.5217801Z",
+      "bytes": 6740,
+      "counts": {
+        "applicationListening": 1,
+        "containerTerminated": 0,
+        "siteStopped": 0,
+        "unhandled": 0
+      },
+      "eventTimes": {
+        "applicationListening": [
+          "2026-11-16T03:14:29.0790661Z"
+        ],
+        "containerTerminated": [],
+        "siteStopped": [],
+        "unhandled": []
+      }
+    },
+    {
+      "kind": "platform",
+      "lastUpdated": "2026-11-16T03:14:30.04609Z",
+      "bytes": 8797,
+      "counts": {
+        "applicationListening": 0,
+        "containerTerminated": 12,
+        "siteStopped": 4,
+        "unhandled": 0
+      },
+      "eventTimes": {
+        "applicationListening": [],
+        "containerTerminated": [
+          "2026-11-16T03:11:07.1702027Z",
+          "2026-11-16T03:11:07.3877795Z",
+          "2026-11-16T03:11:08.9202046Z",
+          "2026-11-16T03:11:09.5798262Z",
+          "2026-11-16T03:11:09.6659724Z",
+          "2026-11-16T03:11:09.6660074Z",
+          "2026-11-16T03:14:29.8055633Z",
+          "2026-11-16T03:14:30.0296352Z"
+        ],
+        "siteStopped": [
+          "2026-11-16T02:50:22.1512202Z",
+          "2026-11-16T03:10:55.6731867Z",
+          "2026-11-16T03:10:57.1863383Z",
+          "2026-11-16T03:11:07.1696828Z"
+        ],
+        "unhandled": []
+      }
+    }
+  ],
+  "completedAtUtc": "2026-11-17T13:33:39.761120+00:00",
+  "passed": true
+}

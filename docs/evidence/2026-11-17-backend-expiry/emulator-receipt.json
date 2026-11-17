@@ -1,0 +1,22 @@
+{
+  "verifiedAtUtc": "2026-11-17T13:43:16.657489+00:00",
+  "kind": "Android emulator",
+  "avd": "enmori_s2_api36",
+  "serial": "emulator-5556",
+  "api": "36",
+  "abi": "x86_64",
+  "apkSha256": "b544dde5ba9060b5fb20ce822ec19a6f44e6e96c9c268e3664122afed0a581d0",
+  "installedVersion": 84,
+  "backendVersion": 78,
+  "physicalDeviceUsed": false,
+  "aiSends": 0,
+  "candidateBackendDeployed": false,
+  "readOnlyAvdSession": true,
+  "secondCycle": "emulator-cycle-two.json",
+  "firstCycle": "startup-diagnosis.md",
+  "networkSettingsAtEnd": {
+    "wifi_on": "1",
+    "mobile_data": "1"
+  },
+  "ownedEmulatorStopped": true
+}
