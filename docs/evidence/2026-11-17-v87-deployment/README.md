@@ -1,5 +1,7 @@
 # v87 后端部署与 v86／v88 稳定候选验收
 
+> 2026-11-18 后续决定：LI 已将 onePA 间歇来源故障降为可延期调查项，并要求已充值后的 AI 续接两个月。见[新决定](../../decisions/2026-11-18-li-onepa-priority-and-ai-continuation.md)。下文保留上一轮验收时点；它不表示后续续期已经执行，也不删除失败证据或其他门槛。
+
 本阶段于 2026-11-17 SGT 开始，跨至 11 月 18 日。**精确 v87 后端已部署；指定 v86 APK 的重点模拟器回归已完成。随后修复首页跨午夜日期展示，生成并安装 v88，仍不定版。** v86 与 v88 的设备证据分别记录。
 
 依据：[本次部署批准](../../decisions/2026-11-17-li-v87-deployment.md)、[已审阅部署／回滚方案](../2026-11-17-stability-continuation/deployment-review.md)、[继续修复授权](../../decisions/2026-11-17-li-stable-candidate-continuation.md)。此前[源码、候选包及离线回归记录](../2026-11-17-stability-continuation/README.md)保留历史版本边界。

@@ -1,0 +1,63 @@
+{
+  "status": "proposal_only",
+  "aiRenewalExecuted": false,
+  "approvedAdditionalAllowanceNanoUsd": 3400000000,
+  "longWindowImplementationApproved": false,
+  "proposedWindowDays": 61,
+  "proposedCutoffUtc": "2027-01-17T23:42:00.000Z",
+  "proposedCutoffSgt": "2027-01-18T07:42:00+08:00",
+  "proposedCutoffDerivation": "Funding verification minute rounded down, plus two calendar months. Proposed, not a quoted user timestamp.",
+  "liveRuntimeVersion": 87,
+  "clientVersion": 88,
+  "newPurchasedCreditAndPaidInvoiceObserved": true,
+  "autoReloadObservedOff": true,
+  "retainedInventoryRead": {
+    "passed": true,
+    "expiredGrantObserved": true,
+    "snapshotIsPreliminaryNotFencedForInstall": true,
+    "attemptCount": 122,
+    "reconciledCount": 120
+  },
+  "modelRead": {
+    "httpStatus": 200,
+    "model": "gpt-6.1-sol",
+    "source": "current Azure-selected credential",
+    "generationPerformed": false,
+    "responsesCreatePermissionProven": false
+  },
+  "billingScope": {
+    "oneVisibleActiveKeyMaskedSuffixMatchesLiveCredential": true,
+    "futureExternalSpendingExcluded": false
+  },
+  "officialPricesMatchPriorRates": true,
+  "productionSourceChanged": false,
+  "liveConfigOrFinancialWrites": 0,
+  "modelGenerationRequests": 0,
+  "phoneOperated": false,
+  "onepaInvestigationPriority": "deferred_external_limitation",
+  "onepaCauseClosed": false,
+  "onepaUiOrRuntimeChanged": false,
+  "unappliedPatch": {
+    "file": "paid-credit-61-day-envelope.unapplied.patch",
+    "sha256": "fe5697ff595df00e4e873b8d51d4705eac239b7ced62f0ca4baeef61ec5b8292",
+    "gitApplyCheckPassed": true,
+    "appliedToWorkingTree": false
+  },
+  "offlineEvidence": {
+    "syntheticCopiedModuleDemonstration": 9,
+    "demonstrationPassed": 9,
+    "fullBackendRegressionRunThisStage": false,
+    "permanentProposedTestsRunAsFullRepositorySuite": false,
+    "proposedNewPermanentTests": 6
+  },
+  "evidenceHashes": {
+    "billing-observation.json": "bf49793c176281715e006564099ae104b6a61147e2172e5aec77c139fbc96bc3",
+    "retained-money-read-private.json": "8a5cb8f3573025497c2c7c99fd8fd27be54fa800aec5d9ca5df3b84309a7075f",
+    "live-model-read.json": "2001804ae21de4bb4c9843fb29aadf992430224009241eb32069b39d440330d3",
+    "live-model-read-v2.json": "a2a0d0753fb3bd9481890208ed46d0810cf0df2ef8f81689ed9e258762028b6b",
+    "credential-scope-review.json": "b00f458c0d6ce5add8e421c8df5daa7fa2879cda0a44145e5a51fac97e3889fe",
+    "model-price-evidence.json": "260fa08c2f251fc54004fedadfea7f814edb00f5f6d6ccd0ba7ceefd4d60affa",
+    "long-window-proposal/decoder-demonstration.log": "8d898d3ca2bb0586ffa33a8d736219752e9d7890f61db3acef186ddad34cd169"
+  },
+  "privateDataCommitted": false
+}
