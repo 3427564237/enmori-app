@@ -59,13 +59,15 @@ function fake(provide:(query:string,offset:number)=>readonly Emission[],options:
 }
 const emptyQueries=(query:string,offset:number):readonly Emission[]=>[{grid:query?grid(0,0):grid(offset)}];
 
-test('default pages and every fixed public search complete on four reused pages, with a 190-record raw bound',async()=>{
+test('the entire required default group precedes all fixed searches on four pages, with a 190-record raw bound',async()=>{
   const f=fake((query,offset)=>[{grid:grid(offset,query?100:100,query?20000000+ONEPA_INTEREST_RULES.findIndex(r=>r.query===query)*100:10000000)}]);
   let receipt:OnePaCatalogueDiagnostics|undefined;
   const {items:rows,complete}=await readOnePaCatalogue(new AbortController().signal,f.launch,value=>{receipt=value;});
   assert.equal(complete,true);
   assert.equal(rows.length,190);assert.equal(f.state().pages,4);assert.equal(f.state().next,4);assert.equal(f.state().closed,1);
   assert.equal(f.state().requests.filter(r=>r.query==='').length,5);
+  assert.deepEqual(f.state().requests.slice(0,5),Array.from({length:5},(_,page)=>({query:'',offset:page*10})));
+  assert.ok(f.state().requests.slice(5).every(request=>request.query!==''));
   assert.deepEqual(f.state().requests.filter(r=>r.query).map(r=>r.query).sort(),ONEPA_INTEREST_RULES.map(r=>r.query).sort());
   assert.ok(f.state().requests.filter(r=>r.query).every(r=>r.offset===0));
   assert.equal(receipt?.completedTasks,15);assert.equal(receipt?.rawRecords,190);assert.equal(receipt?.uniqueRecords,190);
@@ -90,7 +92,8 @@ test('required default failure discards every other task; supplemental refusal i
   for(const status of [403,429,503]){
     const denied=fake(emptyQueries,{documentStatus:status});
     await assert.rejects(readOnePaCatalogue(new AbortController().signal,denied.launch),/Source unavailable/);
-    assert.equal(denied.state().closed,1);
+    assert.equal(denied.state().closed,1);assert.equal(denied.state().pages,1);
+    assert.equal(denied.state().requests.filter(request=>request.query).length,0);
     const failed=fake((query,offset)=>[{grid:query?grid(0,0):grid(offset),...(query==='cooking'?{status}:{})}]);
     let receipt:OnePaCatalogueDiagnostics|undefined;
     const catalogue=await readOnePaCatalogue(new AbortController().signal,failed.launch,value=>{receipt=value;});
@@ -147,12 +150,25 @@ test('a supplemental stage timeout is isolated and its page is closed before ano
   assert.equal(f.state().pageClosures,1);assert.equal(f.state().maxActivePages,4);
 });
 
-test('a later required default page failure cannot publish otherwise successful supplementary groups',async()=>{
+test('a later required default page failure prevents every supplemental group from starting',async()=>{
   const f=fake((query,offset)=>[{grid:query?grid(0,7,20000000):grid(offset),...(!query&&offset===10?{status:503}:{})}]);
   let receipt:OnePaCatalogueDiagnostics|undefined;
   await assert.rejects(readOnePaCatalogue(new AbortController().signal,f.launch,value=>{receipt=value;}),/Source unavailable/);
   assert.equal(receipt?.outcome,'unavailable');assert.equal(receipt?.uniqueRecords,0);
   assert.equal(receipt?.tasks[0]?.status,'failed');
+  assert.equal(receipt?.unstartedTasks,14);assert.equal(f.state().pages,1);
+  assert.equal(f.state().requests.filter(request=>request.query).length,0);
+});
+
+test('supplemental workers are not created while the required default group is still pending',async()=>{
+  let release!:()=>void;
+  const pending=new Promise<void>(resolve=>{release=resolve;});
+  const f=fake((query,offset)=>[{grid:query?grid(0,0):grid(offset),...(!query&&offset===10?{delay:pending}:{})}]);
+  const caller=new AbortController(),work=readOnePaCatalogue(caller.signal,f.launch);
+  while(f.state().next===0)await setImmediate();
+  try{assert.equal(f.state().pages,1);assert.deepEqual(f.state().requests,[{query:'',offset:0},{query:'',offset:10}]);}
+  finally{release();await work;}
+  assert.equal(f.state().pages,4);assert.equal(f.state().requests.filter(request=>request.query).length,14);
 });
 
 test('malformed, truncated and uncorrelated current pages fail rather than becoming partial success',async()=>{
@@ -190,6 +206,7 @@ test('cancellation during a waiting page retires all partial work and prevents l
   const work=readOnePaCatalogue(caller.signal,f.launch);
   while(f.state().next===0)await setImmediate();caller.abort();
   await assert.rejects(work,/Source unavailable/);assert.equal(f.state().closed,1);
+  assert.equal(f.state().pages,1);assert.equal(f.state().requests.filter(request=>request.query).length,0);
 });
 
 test('the shared 180-second timer starts before browser launch and closes a late launcher',async t=>{
@@ -199,6 +216,18 @@ test('the shared 180-second timer starts before browser launch and closes a late
   const work=readOnePaCatalogue(new AbortController().signal,()=>launched);await Promise.resolve();
   const rejected=assert.rejects(work,/Source unavailable/);t.mock.timers.tick(180000);await rejected;
   release(f.browser);await setImmediate();assert.equal(f.state().closed,1);assert.equal(f.state().pages,0);
+});
+
+test('the supplemental phase inherits the default phase elapsed budget instead of restarting 180 seconds',async t=>{
+  t.mock.timers.enable({apis:['setTimeout']});
+  let release!:()=>void;const heldDefault=new Promise<void>(resolve=>{release=resolve;});
+  const f=fake((query,offset)=>query==='cooking'?[]:[{grid:query?grid(0,0):grid(offset),...(!query&&offset===10?{delay:heldDefault}:{})}]);
+  const work=readOnePaCatalogue(new AbortController().signal,f.launch);
+  while(f.state().next===0)await setImmediate();
+  t.mock.timers.tick(170000);assert.equal(f.state().pages,1);release();
+  while(f.state().requests.length<16)await setImmediate();
+  const rejected=assert.rejects(work,/Source unavailable/);
+  t.mock.timers.tick(10000);await rejected;assert.equal(f.state().closed,1);
 });
 
 for(const cancellation of ['deadline','caller'] as const)test(`a completed default group cannot publish before every query settles or after ${cancellation}`,async t=>{

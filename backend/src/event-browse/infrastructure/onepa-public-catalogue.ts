@@ -79,7 +79,8 @@ export function mergeOnePaCatalogue(batches: readonly (readonly OnePaListItem[])
 
 /** One anonymous browser, four pages, default five pages plus fourteen fixed
  * first-page searches. All work including launch shares one 180-second budget.
- * The default group is required. Supplemental groups may fail independently,
+ * The required default group runs first, before the three supplemental workers.
+ * Supplemental groups may fail independently,
  * but all groups must settle before the same deadline. No failed group is used. */
 export async function readOnePaCatalogue(
   signal: AbortSignal,
@@ -122,7 +123,7 @@ export async function readOnePaCatalogue(
       return !permittedBrowserResource(request.url(),request.isNavigationRequest()&&request.frame().parentFrame()===null)||
         ['image','media','font'].includes(request.resourceType())?route.abort():route.continue();
     }));
-    const pages=await within(Promise.all(Array.from({length:4},()=>context.newPage())));
+    const defaultPage=await within(context.newPage());
 
     const readTask=async(page:Page,query:string,taskIndex:number,maxPages:number):Promise<readonly OnePaListItem[]>=>{
       const result:OnePaListItem[]=[],completed=new Map<number,SearchGrid>();
@@ -199,9 +200,14 @@ export async function readOnePaCatalogue(
     };
 
     const results:(readonly OnePaListItem[])[]=Array.from({length:15},()=>[]);
-    running.push(recordedTask(pages[0]!,'',0,5).then(rows=>{results[0]=rows;}));
+    const required=recordedTask(defaultPage,'',0,5).then(rows=>{results[0]=rows;});
+    running.push(required);
+    // Protect the required five-page group from supplemental browser traffic.
+    // Its elapsed time still consumes the same shared 180-second deadline.
+    await within(required);
+    const pages=await within(Promise.all(Array.from({length:3},()=>context.newPage())));
     let nextQuery=0;
-    for(const initialPage of pages.slice(1))running.push((async()=>{
+    for(const initialPage of pages)running.push((async()=>{
       let page=initialPage;
       while(nextQuery<ONEPA_INTEREST_RULES.length){
         current();const index=nextQuery++,query=ONEPA_INTEREST_RULES[index]!.query;
