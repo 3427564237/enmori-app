@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:enmori/app/enmori_theme.dart';
+import 'package:enmori/app/home_introduction.dart';
 import 'package:enmori/app/home_today_provider.dart';
 import 'package:enmori/app/home_today_section.dart';
 import 'package:enmori/core/result/result.dart';
@@ -290,6 +291,78 @@ void main() {
   });
 
   testWidgets(
+    'Home date header and native-day records refresh independently at midnight',
+    (tester) async {
+      // The display clock and scheduling clock share this fixture time. The
+      // native date port still independently supplies the queried civil day.
+      final now = DateTime(2026, 11, 17, 23, 59, 58);
+      final initialDay = DateTime(now.year, now.month, now.day);
+      final nextDay = DateTime(now.year, now.month, now.day + 1);
+      var clock = DateTime(now.year, now.month, now.day, 23, 59, 58);
+      final device = _Device()..today = initialDay;
+      final repository = _Repository()
+        ..result = _page([
+          CheckIn(
+            checkInId: 'initial-day',
+            note: 'Saved initial local day',
+            createdAt: DateTime.utc(now.year, now.month, now.day, 2),
+          ),
+        ]);
+      await _mount(
+        tester,
+        repository,
+        device,
+        clock: () => clock,
+        showIntroduction: true,
+      );
+      final introduction = find.byType(HomeIntroduction);
+      final localizations = MaterialLocalizations.of(
+        tester.element(introduction),
+      );
+      Finder headerDate(DateTime date) => find.descendant(
+        of: introduction,
+        matching: find.text(localizations.formatFullDate(date)),
+      );
+      expect(headerDate(initialDay), findsOneWidget);
+      expect(find.text('Saved initial local day'), findsOneWidget);
+
+      clock = nextDay;
+      device.today = nextDay;
+      repository.result = _page([
+        CheckIn(
+          checkInId: 'next-day',
+          note: 'Saved next local day',
+          createdAt: DateTime.utc(
+            nextDay.year,
+            nextDay.month,
+            nextDay.day,
+          ).subtract(const Duration(hours: 8)),
+        ),
+      ]);
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+      expect(repository.calls, hasLength(2));
+      expect(repository.calls.last, (
+        date:
+            '${nextDay.year.toString().padLeft(4, '0')}-'
+            '${nextDay.month.toString().padLeft(2, '0')}-'
+            '${nextDay.day.toString().padLeft(2, '0')}',
+        zone: 'Asia/Singapore',
+        cursor: null,
+      ));
+      expect(find.text('Saved next local day'), findsOneWidget);
+      expect(find.text('Saved initial local day'), findsNothing);
+      expect(
+        headerDate(nextDay),
+        findsOneWidget,
+        reason:
+            'Today must not label the new native-day records with yesterday',
+      );
+      expect(headerDate(initialDay), findsNothing);
+    },
+  );
+
+  testWidgets(
     'a rendered callback cannot navigate after foreground authority changes',
     (tester) async {
       var opened = 0;
@@ -380,6 +453,7 @@ Future<ProviderContainer> _mount(
   Future<void> Function(String)? onOpen,
   Future<void> Function()? onHistory,
   DateTime Function()? clock,
+  bool showIntroduction = false,
   String locale = 'en',
   double scale = 1,
 }) async {
@@ -410,6 +484,8 @@ Future<ProviderContainer> _mount(
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                if (showIntroduction)
+                  HomeIntroduction(onStartCheckIn: () {}, displayNow: clock),
                 HomeTodaySection(
                   onOpenCheckIn: onOpen ?? (_) async {},
                   onOpenHistory: onHistory ?? () async {},

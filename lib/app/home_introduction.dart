@@ -1,20 +1,76 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../core/presentation/enmori_localizations.dart';
 
 /// Keep the primary action before asynchronous weather content. Its position
 /// must not change when a weather lookup completes, fails or is cleared.
-final class HomeIntroduction extends StatelessWidget {
+final class HomeIntroduction extends StatefulWidget {
   const HomeIntroduction({
     required this.onStartCheckIn,
     this.greeting,
     this.weather,
+    this.displayNow,
     super.key,
   });
 
   final VoidCallback onStartCheckIn;
   final Widget? greeting;
   final Widget? weather;
+
+  /// Optional display-only clock; native date queries remain independently owned.
+  final DateTime Function()? displayNow;
+
+  @override
+  State<HomeIntroduction> createState() => _HomeIntroductionState();
+}
+
+final class _HomeIntroductionState extends State<HomeIntroduction>
+    with WidgetsBindingObserver {
+  Timer? _midnight;
+  late DateTime _date;
+
+  DateTime _now() => widget.displayNow?.call() ?? DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _date = _now();
+    _scheduleMidnight();
+  }
+
+  void _scheduleMidnight() {
+    _midnight?.cancel();
+    final next = DateTime(_date.year, _date.month, _date.day + 1);
+    _midnight = Timer(next.difference(_date), _refreshDate);
+  }
+
+  void _refreshDate() {
+    if (!mounted) return;
+    setState(() => _date = _now());
+    _scheduleMidnight();
+  }
+
+  @override
+  void didUpdateWidget(HomeIntroduction oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _date = _now();
+    _scheduleMidnight();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _refreshDate();
+  }
+
+  @override
+  void dispose() {
+    _midnight?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +85,7 @@ final class HomeIntroduction extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          greeting ??
+          widget.greeting ??
               Text(
                 context.tr('Welcome back', '欢迎回来'),
                 style: theme.textTheme.bodyMedium,
@@ -49,8 +105,7 @@ final class HomeIntroduction extends StatelessWidget {
                 ),
               ),
               Text(
-                MaterialLocalizations.of(context)
-                    .formatFullDate(DateTime.now()),
+                MaterialLocalizations.of(context).formatFullDate(_date),
                 style: theme.textTheme.bodySmall,
               ),
             ],
@@ -58,11 +113,14 @@ final class HomeIntroduction extends StatelessWidget {
           const SizedBox(height: 12),
           FilledButton.icon(
             key: const Key('r6-new-check-in-button'),
-            onPressed: onStartCheckIn,
+            onPressed: widget.onStartCheckIn,
             icon: const Icon(Icons.edit_note),
             label: Text(context.tr('New Check-in', '新建签到')),
           ),
-          if (weather != null) ...[const Divider(height: 16), weather!],
+          if (widget.weather != null) ...[
+            const Divider(height: 16),
+            widget.weather!,
+          ],
         ],
       ),
     );
