@@ -147,14 +147,24 @@ void main() {
           try {
             await decodeTile(second, layer);
             expect(requests, 1);
+            final staleAt = DateTime.utc(2000);
             await cache.putTile(
               url: url,
               metadata: CachedMapTileMetadata(
-                staleAt: DateTime.utc(2000),
+                staleAt: staleAt,
                 etag: 'fixture-etag',
                 lastModified: modified,
               ),
             );
+            // putTile only queues the worker write; wait for the stale metadata
+            // to reach disk before testing conditional revalidation.
+            CachedMapTile? stale;
+            for (var i = 0; i < 100; i++) {
+              stale = await cache.getTile(url);
+              if (stale?.metadata.staleAt == staleAt) break;
+              await Future<void>.delayed(const Duration(milliseconds: 10));
+            }
+            expect(stale?.metadata.staleAt, staleAt);
             await decodeTile(second, layer);
             expect(requests, 2);
           } finally {
