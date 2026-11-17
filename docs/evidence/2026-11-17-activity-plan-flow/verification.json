@@ -1,0 +1,63 @@
+{
+  "recordedAt": "2026-11-17T14:04:03.314523+08:00",
+  "baseCommit": "d544ce6cae63e77a00cd02358effcee11269bc52",
+  "implementationCommit": "2925a7f",
+  "verification": {
+    "staticAnalysis": "no issues",
+    "focusedTests": 93,
+    "fullFlutterTests": 1930,
+    "newFlowTests": 13
+  },
+  "logs": {
+    "analyze": {
+      "path": "/tmp/enmori-v79-analyze-final.log",
+      "sha256": "7575b9cf1aaa54ecbe84b0f544b5a6988e5e9662ff6416b96f44e897a4552d79"
+    },
+    "focused": {
+      "path": "/tmp/enmori-v79-focused-final.log",
+      "sha256": "b470e955f852f60cd0d445151e4b6fadbefe5440533acdecab36abd3b418b18c"
+    },
+    "full": {
+      "path": "/tmp/enmori-v79-full.log",
+      "sha256": "f170ad6e6be6456278447d27258b6a444de7c868a1f003716a7af59384586007"
+    },
+    "releaseBuild": {
+      "path": "/tmp/enmori-v79-build-azure.log",
+      "sha256": "734ed1e58ba0c7434132c6d89030191f45c1f38b630557ca2a04e3cf1b10de68"
+    }
+  },
+  "apk": {
+    "path": "/home/miku/Downloads/ENMORI-plans-v79-release.apk",
+    "package": "com.enmori.app.group",
+    "versionCode": 79,
+    "versionName": "1.0.0-plans20261117",
+    "sizeBytes": 70838176,
+    "sha256": "fbcdd650234f3899d0ea980aa5b6cce97ad4ead2e746acd550a500a07ecfa090",
+    "certificateSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+    "debuggable": false,
+    "configSha256": "eff899f2578b9023f3d2d6a9b4d2b5351153c5b3ea98bd09d38c8611b9805404",
+    "compiledAzureEndpointVerified": true,
+    "companionEnabled": true,
+    "openAiTestAppEnabled": true
+  },
+  "supersededCandidate": {
+    "sha256": "0414d431b5f09b36a70c98355cdcb00a12af318e19ef93bd003da06b2ad6de9b",
+    "reason": "obsolete local service configuration; not the deliverable"
+  },
+  "phone": {
+    "model": "V2405A",
+    "priorVersionCode": 77,
+    "observedVersionCode": 79,
+    "observedLastUpdateDeviceTime": "2026-11-17 14:00:07",
+    "installCommandResult": "INSTALL_FAILED_ABORTED: User rejected permissions",
+    "actualInstalledApkMatchesFinal": true,
+    "actualInstalledApkSha256": "fbcdd650234f3899d0ea980aa5b6cce97ad4ead2e746acd550a500a07ecfa090",
+    "signedInHomeObserved": true,
+    "originalInterestSelectionObserved": true,
+    "newConditionsSummaryObserved": true,
+    "fullFeatureAcceptance": "not run; user selected keep APK and no further install",
+    "networkChanges": false,
+    "noFurtherInstallAfterUserChoice": true
+  },
+  "noBackendOrDependencyChanges": true
+}
