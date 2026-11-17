@@ -1,0 +1,202 @@
+{
+  "baseClientVersion": 83,
+  "backendIdentity": "v78 selector and actual mounted manifest matched at 2026-11-17T21:12:42+08:00; see runtime-identity.json",
+  "evidenceKind": "operator-host live authenticated HTTP, retained dedicated test account; not phone evidence or backend-runtime tracing",
+  "hostNodeVersion": "24.22.3 (HTTP probe only, not repository build/test runtime)",
+  "rounds": [
+    {
+      "startedAt": "2026-11-17T13:04:55.285Z",
+      "scope": "operator-host HTTPS; dedicated retained test account; sequential existing public IDs, no new Browse refresh",
+      "productWrites": 0,
+      "modelCalls": 0,
+      "reads": [
+        {
+          "label": "profile-before",
+          "startedAt": "2026-11-17T13:04:55.712Z",
+          "status": 200,
+          "requestId": null,
+          "elapsedMs": 1362,
+          "responseSha256": "c8f26daff2c45d32014cc726b4dcec5009dc79c609bcba40bd5620934517d99a",
+          "topKeys": [
+            "profile"
+          ]
+        },
+        {
+          "label": "ticketmaster-stable-detail",
+          "startedAt": "2026-11-17T13:04:57.084Z",
+          "status": 503,
+          "requestId": null,
+          "elapsedMs": 493,
+          "errorCode": "SERVICE_UNAVAILABLE"
+        },
+        {
+          "label": "ticketmaster-browse-detail",
+          "startedAt": "2026-11-17T13:04:57.577Z",
+          "status": 404,
+          "requestId": null,
+          "elapsedMs": 12607,
+          "errorCode": "EVENT_UNAVAILABLE"
+        },
+        {
+          "label": "onepa-stable-detail",
+          "startedAt": "2026-11-17T13:05:10.185Z",
+          "status": 503,
+          "requestId": null,
+          "elapsedMs": 14275,
+          "errorCode": "SERVICE_UNAVAILABLE"
+        },
+        {
+          "label": "onepa-browse-detail",
+          "startedAt": "2026-11-17T13:05:24.460Z",
+          "status": 503,
+          "requestId": null,
+          "elapsedMs": 12742,
+          "errorCode": "SERVICE_UNAVAILABLE"
+        },
+        {
+          "label": "profile-after",
+          "startedAt": "2026-11-17T13:05:37.202Z",
+          "status": 200,
+          "requestId": null,
+          "elapsedMs": 713,
+          "responseSha256": "c8f26daff2c45d32014cc726b4dcec5009dc79c609bcba40bd5620934517d99a",
+          "topKeys": [
+            "profile"
+          ]
+        }
+      ],
+      "ticketmasterIdHash": "f788cd03147bd00183b4e184d75c4650661a520e35d6aa08f45700e921e63a54",
+      "onepaIdHash": "02a24daceb3a702fe804b6e8f7bee70e2fcf6a13758cf8b26045ef01753c2ea6",
+      "completedAt": "2026-11-17T13:05:37.916Z"
+    },
+    {
+      "startedAt": "2026-11-17T13:06:49.101Z",
+      "scope": "operator-host HTTPS; dedicated retained test account; one fresh Browse then sequential current public detail IDs",
+      "productWrites": 0,
+      "modelCalls": 0,
+      "reads": [
+        {
+          "label": "fresh-browse",
+          "startedAt": "2026-11-17T13:06:49.508Z",
+          "status": 200,
+          "elapsedMs": 1979,
+          "responseSha256": "9489d8c413cb267d8151c040d69b23cf2a9bf4e6d8c46caa6b39bd6d3f9dc46d",
+          "topKeys": [
+            "asOf",
+            "scope",
+            "items",
+            "sourceStatus",
+            "nextCursor"
+          ],
+          "itemCount": 25,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": true,
+              "coverageComplete": false
+            }
+          ]
+        },
+        {
+          "label": "fresh-ticketmaster-stable-detail",
+          "startedAt": "2026-11-17T13:06:51.491Z",
+          "status": 200,
+          "elapsedMs": 4522,
+          "responseSha256": "c9160e95bdb20d51d866d108cbb420f72d26052f321114d854bac48aa1893030",
+          "topKeys": [
+            "event"
+          ],
+          "detailsStatus": "unavailable"
+        },
+        {
+          "label": "fresh-ticketmaster-browse-detail",
+          "startedAt": "2026-11-17T13:06:56.014Z",
+          "status": 200,
+          "elapsedMs": 5561,
+          "responseSha256": "36ddacbae76024cb849df1e575c20e153ecc4c344d38190867d1229a98169af9",
+          "topKeys": [
+            "browseId",
+            "title",
+            "startAt",
+            "externalSourceUrl",
+            "locationLabel",
+            "coverImageUrl",
+            "content",
+            "eventId",
+            "categoryLabel"
+          ]
+        },
+        {
+          "label": "fresh-onepa-stable-detail",
+          "startedAt": "2026-11-17T13:07:01.576Z",
+          "status": 503,
+          "requestId": "req-2bj",
+          "elapsedMs": 13273,
+          "errorCode": "SERVICE_UNAVAILABLE"
+        },
+        {
+          "label": "fresh-onepa-browse-detail",
+          "startedAt": "2026-11-17T13:07:14.850Z",
+          "status": 503,
+          "requestId": "req-2bk",
+          "elapsedMs": 14412,
+          "errorCode": "SERVICE_UNAVAILABLE"
+        }
+      ],
+      "ticketmasterIdHash": "06382dbe71738c0540463ddba2dc891016f0f1e1ab15bef6cee5ebdb6262c3f8",
+      "onepaIdHash": "02a24daceb3a702fe804b6e8f7bee70e2fcf6a13758cf8b26045ef01753c2ea6",
+      "completedAt": "2026-11-17T13:07:29.262Z"
+    },
+    {
+      "startedAt": "2026-11-17T13:07:58.816Z",
+      "scope": "operator-host HTTPS; dedicated retained test account; two sequential onboarding GETs, no event source requests",
+      "productWrites": 0,
+      "modelCalls": 0,
+      "reads": [
+        {
+          "label": "onboarding-first",
+          "startedAt": "2026-11-17T13:07:59.207Z",
+          "status": 200,
+          "requestId": null,
+          "elapsedMs": 2111,
+          "responseSha256": "29c82ea89fedb3a0c8d176fccf2757a7044292e4a72adf241aa9f6a3f170b4cb",
+          "topKeys": [
+            "status",
+            "account"
+          ]
+        },
+        {
+          "label": "onboarding-repeat",
+          "startedAt": "2026-11-17T13:08:01.318Z",
+          "status": 200,
+          "requestId": null,
+          "elapsedMs": 1572,
+          "responseSha256": "29c82ea89fedb3a0c8d176fccf2757a7044292e4a72adf241aa9f6a3f170b4cb",
+          "topKeys": [
+            "status",
+            "account"
+          ]
+        }
+      ],
+      "completedAt": "2026-11-17T13:08:02.891Z"
+    }
+  ],
+  "sameIdComparison": {
+    "ticketmaster": false,
+    "onepa": true
+  },
+  "limitations": [
+    "Old TM ID versus fresh TM ID differ; not same-ID recovery.",
+    "No correlated runtime stage trace for these failures.",
+    "Normal API source reads can replace shared projection; calls were sequential.",
+    "No repeated direct provider request after prior access refusal; no bypass used.",
+    "Successful onboarding samples do not explain earlier phone startup failure."
+  ],
+  "totalAuthenticatedGetReads": 13,
+  "productWrites": 0,
+  "modelCalls": 0
+}

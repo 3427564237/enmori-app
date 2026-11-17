@@ -1,0 +1,107 @@
+{
+  "sourceCommit": "f605cd2f65d6c0b41da5d204cf6e916d2ec4ec75",
+  "baselineProductionCommit": "abc072adfdae57e4cdd0fd7c9de4b2bbfe21a445",
+  "baselineAuditCommit": "6cad8527e1df108c1bd7663b1455a1cac8855cb8",
+  "clientChanges": [
+    "Startup explicit Retry shows existing waiting surface and prevents repeated pending activation",
+    "Event detail refresh retires the cleared old snapshot timer; replacement retains its own expiry"
+  ],
+  "tests": {
+    "fullFlutter": 1994,
+    "fullFlutterResult": "passed",
+    "staticAnalysis": "No issues found",
+    "eventFocused": 77,
+    "startupFocused": 20,
+    "newPermanentTests": 10,
+    "realPublicDtoReplay": 1,
+    "backendSyntheticDiagnostic": 5
+  },
+  "logs": {
+    "flutter-full-v84.log": {
+      "privatePath": "/home/miku/.local/state/enmori-stable-followup-20261117/flutter-full-v84.log",
+      "sha256": "bfc5cd0b359df154393c374c3e9059e531af245c6cef694372dbed6c463450b5"
+    },
+    "analyze-v84.log": {
+      "privatePath": "/home/miku/.local/state/enmori-stable-followup-20261117/analyze-v84.log",
+      "sha256": "f55b896b92cba8035e92d192387113cad34eabef3a998104952e1580e208c547"
+    },
+    "event-client-regression.log": {
+      "privatePath": "/home/miku/.local/state/enmori-stable-followup-20261117/event-client-regression.log",
+      "sha256": "0567cd0b54f4a1ab03f4ebe3ec828b14e498bffda627db9931c2fb9ae98ed7bf"
+    },
+    "event-client-analyze.log": {
+      "privatePath": "/home/miku/.local/state/enmori-stable-followup-20261117/event-client-analyze.log",
+      "sha256": "f8fadd8ff40cfaa5ed62227ce84cde0f0423bbfabcbd4b61a03849b8716574c9"
+    },
+    "startup-retry-loading-before.log": {
+      "privatePath": "/home/miku/.local/state/enmori-stable-audit-20261117/startup-retry-loading-before.log",
+      "sha256": "e9b6ae3459e31dcbe84edd45c8dfc69222489efe6f9119c3a24a0eefb0d0c3c2"
+    },
+    "startup-retry-loading-regression.log": {
+      "privatePath": "/home/miku/.local/state/enmori-stable-audit-20261117/startup-retry-loading-regression.log",
+      "sha256": "0f96ced09b297dde0996a8cb179be67b8ff51e02e3edec35e2e690e6b71b9b6c"
+    },
+    "build-v84-no-pub-failed.log": {
+      "privatePath": "/home/miku/.local/state/enmori-stable-followup-20261117/build-v84-no-pub-failed.log",
+      "sha256": "04f2039eadfdd9f3298e3fde96df1cc9fbe7162270e1d8b3893c1c1302a2d212"
+    },
+    "build-v84.log": {
+      "privatePath": "/home/miku/.local/state/enmori-stable-followup-20261117/build-v84.log",
+      "sha256": "34867ca80d7509e9c62bbed3543fd1295504438c3d6e66beaa427917fea7adda"
+    },
+    "v84-apk-badging.txt": {
+      "privatePath": "/home/miku/.local/state/enmori-stable-followup-20261117/v84-apk-badging.txt",
+      "sha256": "4a992bb41b2c88162104b9875be6134795e174819768656d932e5f139cdce9d3"
+    },
+    "v84-apk-cert.txt": {
+      "privatePath": "/home/miku/.local/state/enmori-stable-followup-20261117/v84-apk-cert.txt",
+      "sha256": "a3a28911b90628c4abb6b3731f6f6ab2436e70b5c16767d37fc4b17751bdd8a8"
+    },
+    "v84-build-lock-before.json": {
+      "privatePath": "/home/miku/.local/state/enmori-stable-followup-20261117/v84-build-lock-before.json",
+      "sha256": "1b128c3f63a63bc602a695cce0f0968f805f6373bc01bb1c09b11ba2f184df65"
+    }
+  },
+  "backend": {
+    "version": 78,
+    "sourceCommit": "9b305490ea199585852f369bc9d0b712e854de8a",
+    "changed": false,
+    "checkpoint": "2026-11-17T21:12:42+08:00",
+    "receipt": "runtime-identity.json"
+  },
+  "candidate": {
+    "path": "/home/miku/Downloads/ENMORI-stable-candidate-v84-release.apk",
+    "sizeBytes": 70838172,
+    "sha256": "b544dde5ba9060b5fb20ce822ec19a6f44e6e96c9c268e3664122afed0a581d0",
+    "package": "com.enmori.app.group",
+    "versionCode": 84,
+    "versionName": "1.0.0-rc20261117",
+    "debuggable": false,
+    "certificateSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+    "configSha256": "eff899f2578b9023f3d2d6a9b4d2b5351153c5b3ea98bd09d38c8611b9805404",
+    "compiledAzureEndpointVerified": true,
+    "companionEnabled": "true",
+    "openAiTestAppEnabled": "true",
+    "buildStatus": "passed",
+    "phoneInstall": "not performed; user explicitly deferred: 先交付 APK 和方案，真机稍后",
+    "phoneAcceptance": "not run; v83 physical observations are not inherited"
+  },
+  "releaseReady": false,
+  "buildHistory": {
+    "firstAttempt": "failed: --no-pub skipped release-mode tooling regeneration; generated registrant still included dev-only integration_test",
+    "recovery": "normal Flutter release build regenerated platform files with release filtering; no production code/dependency change",
+    "pubspecLockUnchanged": true,
+    "pubspecLockSha256": "523dfbacd19c0d6e3c33fe9e6e46606ec62f8939bc78f7013810a01d5feb8a96"
+  },
+  "unresolved": [
+    "SC-03 recurrent external detail failures; onePA still503 after fresh list",
+    "SC-04 AI v1 expires2026-11-18T00:00:00+08:00; no renewal",
+    "SC-09 historical Home reset cause",
+    "SC-15 initial startup read failure cause",
+    "Expired backend projection fix proposed, not implemented",
+    "Final-v84 physical acceptance deferred by user",
+    "Other v83 limitations retained"
+  ],
+  "privacy": "No credentials, raw account/phone content or sensitive logs stored in Git; only safe operational metadata and fingerprints",
+  "updatedAt": "2026-11-17T21:21:08.112765+08:00"
+}

@@ -24,3 +24,11 @@ Do not reset the unrelated main checkout or include private evidence in Git.
 This extends the investigation under the [original audit decision](2026-11-17-li-stable-candidate-review.md),
 not a release approval or supersession of any product/backend contract. The
 candidate remains not frozen until its remaining conditions are satisfied.
+
+## Follow-up phone deferral
+
+After v84 was built and verified, ADB did not expose a connected device. Asked
+whether to continue physical testing, LI selected **“先交付 APK 和方案，真机稍后”**.
+Deliver this candidate and the concrete proposals now. Do not install or operate
+the phone further in this continuation. Final-v84 physical acceptance remains
+not run; v83 phone observations cannot be inherited as v84 passes.

@@ -1,0 +1,25 @@
+{
+  "atUtc": "2026-11-17T13:12:31.602704+00:00",
+  "purpose": "v84 follow-up candidate backend identity recheck",
+  "verification": "Azure SCM selector before/after and actual application-container SSH mounted manifest",
+  "serviceWrites": 0,
+  "configurationWrites": 0,
+  "productWrites": 0,
+  "ledgerWrites": 0,
+  "publicEventSourceCalls": 0,
+  "modelCalls": 0,
+  "privateLogReads": 0,
+  "archiveBytesRehashed": false,
+  "selectorBefore": "2026111704554378.zip",
+  "mountedManifest": {
+    "sourceCommit": "9b305490ea199585852f369bc9d0b712e854de8a",
+    "demoVersion": 78,
+    "manifestSha256": "0890c5a5aeda4e21b4313aa3a4040b231c877135073eba86cfff67f97ccfb1a3"
+  },
+  "mountedManifestReadAtUtc": "2026-11-17T13:12:42.571981+00:00",
+  "selectorAfter": "2026111704554378.zip",
+  "selectorMatchesEarlierAudit": true,
+  "mountedManifestMatchesEarlierAudit": true,
+  "passed": true,
+  "completedAtUtc": "2026-11-17T13:12:42.980573+00:00"
+}
