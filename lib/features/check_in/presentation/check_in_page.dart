@@ -924,6 +924,10 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
                 tooltip: context.tr('Edit Check-in', '编辑签到'),
                 icon: const Icon(Icons.edit_outlined),
                 onPressed: () async {
+                  final editSession = ref
+                      .read(authSessionProvider)
+                      .asData
+                      ?.value;
                   final result = await Navigator.of(context)
                       .push<CheckInEditResult>(
                         MaterialPageRoute(
@@ -952,6 +956,17 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
                         ),
                       ),
                     );
+                    _readPersisted();
+                  } else if (editSession != null &&
+                      identical(
+                        editSession,
+                        ref.read(authSessionProvider).asData?.value,
+                      ) &&
+                      ModalRoute.of(context)?.isCurrent == true &&
+                      ref.read(checkInControllerProvider)
+                          is CommandIdle<CheckIn>) {
+                    // Unknown mutations invalidate covered details too. Leaving
+                    // the editor is not a success receipt; recover by reading.
                     _readPersisted();
                   }
                 },

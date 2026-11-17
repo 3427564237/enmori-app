@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/account/domain/account_repository.dart';
+import 'package:enmori/features/account/content_access.dart';
 import 'package:enmori/features/auth/auth_providers.dart';
 import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/check_in/check_in_providers.dart';
 import 'package:enmori/features/check_in/domain/check_in_repository.dart';
 import 'package:enmori/features/check_in/domain/check_in_mutations.dart';
 import 'package:enmori/features/check_in/presentation/check_in_edit_page.dart';
+import 'package:enmori/features/check_in/presentation/check_in_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -21,9 +23,12 @@ class _Repository implements CheckInRepository, CheckInMutations {
     checkInVisibility: CheckInVisibility.private,
   );
   int updates = 0, deletes = 0;
+  int reads = 0;
   Completer<Result<CheckIn>>? delayed;
+  Completer<Result<CheckIn>>? delayedRead;
   bool conflict = false;
   AppFailure? mutationFailure;
+  bool commitBeforeFailure = false;
   @override
   Future<Result<CheckIn>> update({
     bool Function()? isEligible,
@@ -37,7 +42,9 @@ class _Repository implements CheckInRepository, CheckInMutations {
   }) async {
     updates++;
     if (delayed != null) return delayed!.future;
-    if (mutationFailure case final failure?) return Failure(failure);
+    if (mutationFailure case final failure? when !commitBeforeFailure) {
+      return Failure(failure);
+    }
     if (conflict) {
       return const Failure(
         AppFailure(
@@ -56,7 +63,9 @@ class _Repository implements CheckInRepository, CheckInMutations {
       checkInVisibility: visibility,
       revision: expectedRevision + 1,
     );
-    return Success(current!);
+    return mutationFailure == null
+        ? Success(current!)
+        : Failure(mutationFailure!);
   }
 
   @override
@@ -66,14 +75,29 @@ class _Repository implements CheckInRepository, CheckInMutations {
     required int expectedRevision,
   }) async {
     deletes++;
-    if (mutationFailure case final failure?) return Failure(failure);
+    if (mutationFailure case final failure? when !commitBeforeFailure) {
+      return Failure(failure);
+    }
     current = null;
-    return const Success(null);
+    return mutationFailure == null
+        ? const Success(null)
+        : Failure(mutationFailure!);
   }
 
   @override
-  Future<Result<CheckIn>> readOwned({required String checkInId}) async =>
-      Success(current!);
+  Future<Result<CheckIn>> readOwned({required String checkInId}) async {
+    reads++;
+    if (delayedRead case final pending?) return pending.future;
+    return current == null
+        ? const Failure(
+            AppFailure(
+              kind: AppFailureKind.checkInUnavailable,
+              message: 'Synthetic record unavailable',
+            ),
+          )
+        : Success(current!);
+  }
+
   @override
   Future<Result<CheckIn>> create({
     String? locationLabel,
@@ -95,6 +119,8 @@ Future<void> _mount(
   WidgetTester tester,
   _Repository repository, {
   String locale = 'en',
+  bool savedPage = false,
+  Stream<AuthSession>? sessions,
 }) async {
   await tester.pumpWidget(
     ProviderScope(
@@ -102,6 +128,7 @@ Future<void> _mount(
         checkInRepositoryProvider.overrideWithValue(repository),
         authSessionProvider.overrideWith(
           (ref) =>
+              sessions ??
               Stream.value(const AuthSessionAuthenticated(subject: 'owner')),
         ),
       ],
@@ -114,7 +141,12 @@ Future<void> _mount(
             body: TextButton(
               onPressed: () => Navigator.of(context).push<CheckInEditResult>(
                 MaterialPageRoute(
-                  builder: (_) => CheckInEditPage(checkIn: repository.current!),
+                  builder: (context) => savedPage
+                      ? SavedCheckInPage(
+                          checkInId: repository.current!.checkInId,
+                          onReturnHome: () => Navigator.pop(context),
+                        )
+                      : CheckInEditPage(checkIn: repository.current!),
                 ),
               ),
               child: const Text('Open record'),
@@ -124,12 +156,181 @@ Future<void> _mount(
       ),
     ),
   );
+  if (savedPage) {
+    // The real router resolves authentication before opening saved records.
+    final scope = ProviderScope.containerOf(
+      tester.element(find.byType(MaterialApp)),
+    );
+    final session = scope.listen(authSessionProvider, (_, _) {});
+    addTearDown(session.close);
+    scope.read(contentAccessProvider);
+  }
   await tester.pumpAndSettle();
   await tester.tap(find.text('Open record'));
   await tester.pumpAndSettle();
 }
 
 void main() {
+  testWidgets('replaced session cannot reread old details on edit return', (
+    tester,
+  ) async {
+    final sessions = StreamController<AuthSession>();
+    addTearDown(sessions.close);
+    sessions.add(AuthSessionAuthenticated(subject: 'owner'));
+    final repo = _Repository()
+      ..mutationFailure = const AppFailure(
+        kind: AppFailureKind.serviceUnavailable,
+        message: 'Synthetic lost response',
+      );
+    await _mount(tester, repo, savedPage: true, sessions: sessions.stream);
+    await tester.tap(find.byKey(const Key('saved-check-in-edit')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('check-in-edit-note')),
+      'Old session edit',
+    );
+    await tester.ensureVisible(find.byKey(const Key('check-in-edit-save')));
+    await tester.tap(find.byKey(const Key('check-in-edit-save')));
+    await tester.pumpAndSettle();
+    sessions.add(AuthSessionAuthenticated(subject: 'owner'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Session changed.'), findsOneWidget);
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expect(repo.reads, 1, reason: 'The new session must reopen its own route.');
+    expect(repo.updates, 1);
+  });
+
+  for (final committed in [false, true]) {
+    testWidgets(
+      'leaving unknown edit rereads saved page and recovers offline (committed=$committed)',
+      (tester) async {
+        final repo = _Repository()
+          ..commitBeforeFailure = committed
+          ..mutationFailure = const AppFailure(
+            kind: AppFailureKind.serviceUnavailable,
+            message: 'Synthetic lost response',
+          );
+        await _mount(tester, repo, savedPage: true);
+        expect(repo.reads, 1);
+        await tester.tap(find.byKey(const Key('saved-check-in-edit')));
+        await tester.pumpAndSettle();
+        await tester.enterText(
+          find.byKey(const Key('check-in-edit-note')),
+          'Unconfirmed edit',
+        );
+        await tester.ensureVisible(find.byKey(const Key('check-in-edit-save')));
+        await tester.tap(find.byKey(const Key('check-in-edit-save')));
+        await tester.pumpAndSettle();
+        expect(repo.updates, 1);
+        expect(repo.reads, 1, reason: 'Covered details must not reload.');
+        repo.delayedRead = Completer<Result<CheckIn>>();
+        await tester.tap(find.byType(BackButton));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Leave'));
+        await tester.pumpAndSettle();
+        expect(find.byType(CheckInEditPage), findsNothing);
+        expect(repo.reads, 2);
+        expect(
+          find.byKey(const Key('r6-saved-check-in-confirming')),
+          findsOneWidget,
+        );
+        repo.delayedRead!.complete(
+          const Failure(
+            AppFailure(
+              kind: AppFailureKind.serviceUnavailable,
+              message: 'Synthetic offline read',
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const Key('r6-saved-check-in-unavailable')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('r6-saved-check-in-confirmed')),
+          findsNothing,
+        );
+        repo.delayedRead = null;
+        await tester.tap(
+          find.byKey(const Key('r6-saved-check-in-retry-confirmation')),
+        );
+        await tester.pumpAndSettle();
+        expect(repo.reads, 3);
+        expect(
+          find.text(committed ? 'Unconfirmed edit' : 'Original'),
+          findsOneWidget,
+        );
+        expect(find.text('Check-in updated.'), findsNothing);
+        expect(
+          repo.updates,
+          1,
+          reason: 'Read recovery never replays the write.',
+        );
+        expect(repo.deletes, 0);
+      },
+    );
+  }
+
+  testWidgets('unknown delete return shows unavailable saved record', (
+    tester,
+  ) async {
+    final repo = _Repository()
+      ..commitBeforeFailure = true
+      ..mutationFailure = const AppFailure(
+        kind: AppFailureKind.serviceUnavailable,
+        message: 'Synthetic lost delete response',
+      );
+    await _mount(tester, repo, savedPage: true);
+    await tester.tap(find.byKey(const Key('saved-check-in-edit')));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const Key('check-in-edit-delete')));
+    await tester.tap(find.byKey(const Key('check-in-edit-delete')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Leave'));
+    await tester.pumpAndSettle();
+    expect(repo.reads, 2);
+    expect(find.text('This Check-in is unavailable.'), findsOneWidget);
+    expect(find.text('Check-in deleted.'), findsNothing);
+    expect(
+      find.byKey(const Key('r6-saved-check-in-retry-confirmation')),
+      findsOneWidget,
+    );
+    expect(repo.deletes, 1);
+    expect(repo.updates, 0);
+  });
+
+  testWidgets(
+    'discarding local edit keeps valid saved details without reread',
+    (tester) async {
+      final repo = _Repository();
+      await _mount(tester, repo, savedPage: true);
+      await tester.tap(find.byKey(const Key('saved-check-in-edit')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('check-in-edit-note')),
+        'Local draft',
+      );
+      await tester.pump();
+      await tester.tap(find.byType(BackButton));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Discard'));
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('r6-saved-check-in-confirmed')),
+        findsOneWidget,
+      );
+      expect(find.text('Original'), findsOneWidget);
+      expect(repo.reads, 1);
+      expect(repo.updates + repo.deletes, 0);
+    },
+  );
+
   for (final locale in ['en', 'zh']) {
     for (final deleting in [false, true]) {
       testWidgets(
