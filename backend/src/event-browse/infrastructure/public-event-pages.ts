@@ -57,6 +57,10 @@ export function permittedPublicPage(raw: string): boolean {
     return false;
   }
 }
+/** Explicit access/rate-limit refusals cannot enter a rendering fallback. */
+export class PublicPageAccessDenied extends Error {
+  constructor() { super("Source unavailable"); }
+}
 export async function publicText(
   url: string,
   signal: AbortSignal,
@@ -73,7 +77,9 @@ export async function publicText(
     },
   });
   if (!r.ok || !r.body) {
-    await r.body?.cancel();
+    try { await r.body?.cancel(); } finally {
+      if (r.status === 403 || r.status === 429) throw new PublicPageAccessDenied();
+    }
     throw Error("Source unavailable");
   }
   const reader = r.body.getReader();

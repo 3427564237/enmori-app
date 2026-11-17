@@ -1,6 +1,7 @@
 /// <reference lib="dom" />
 import { chromium, type Browser, type BrowserContext } from "playwright";
 import {
+  PublicPageAccessDenied,
   permittedBrowserResource,
   permittedPublicPage,
   publicText,
@@ -40,7 +41,8 @@ export class OnePaPublicReader {
         ? /<loc>[^<]+<\/loc>/.test(value)
         : /<script id="__NEXT_DATA__"[^>]*>/.test(value);
       if (expected && !signal.aborted) return value;
-    } catch {
+    } catch (error) {
+      if (error instanceof PublicPageAccessDenied) throw error;
       /* A bounded normal-rendering attempt follows below. */
     }
     if (signal.aborted || this.active >= 4 || this.closing)
@@ -94,7 +96,9 @@ export class OnePaPublicReader {
           : route.continue();
       });
       const page = await context.newPage();
-      await page.goto(url, { waitUntil: "domcontentloaded", timeout: 8000 });
+      const response = await page.goto(url, { waitUntil: "domcontentloaded", timeout: 8000 });
+      if (response?.status() === 403 || response?.status() === 429)
+        throw new PublicPageAccessDenied();
       const xml = new URL(url).pathname.endsWith(".xml");
       // Several headed pages may be occluded. Readiness cannot depend on
       // animation frames, which Chromium may suspend for those pages.

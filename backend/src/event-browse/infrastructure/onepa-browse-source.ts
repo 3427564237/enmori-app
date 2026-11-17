@@ -360,18 +360,23 @@ export class OnePaBrowseSource implements BrowseSource {
       ...((page + 1) * 20 < urls.length ? { nextPage: page + 1 } : {}),
     };
   }
+  /** A public URL can return another product; never relabel it as the requested occurrence. */
+  private async loadExact(url: string, asOf: string, signal: AbortSignal, eventId: string) {
+    const row = await this.load(url, asOf, signal);
+    return row && sourceEventId(row.browseId) === eventId ? row : undefined;
+  }
   async detail(id: string, asOf: string, signal: AbortSignal) {
     if (!this.enabled() || signal.aborted) throw Error("Source unavailable");
     if (this.readCatalogue) await this.list(signal);
     const known = this.catalogue?.value.items.find(
       (item) => browseId((item.product as any)?.ID, "pa") === id,
     );
-    if (known) return this.load(known.url, asOf, signal);
+    if (known) return this.loadExact(known.url, asOf, signal, sourceEventId(id));
     const urls = await this.urls(signal);
     for (const url of urls) {
       const match = url.match(/(\d+)$/);
       if (match && browseId("PA-Event-" + match[1], "pa") === id)
-        return this.load(url, asOf, signal);
+        return this.loadExact(url, asOf, signal, sourceEventId(id));
     }
     return undefined;
   }
@@ -382,14 +387,14 @@ export class OnePaBrowseSource implements BrowseSource {
       const browse = browseId((item.product as any)?.ID, "pa");
       return browse && sourceEventId(browse) === id;
     });
-    if (known) return this.load(known.url, asOf, signal);
+    if (known) return this.loadExact(known.url, asOf, signal, id);
     // Stable saved identity can be resolved after process/cache restart without
     // fetching every detail or requiring the user to browse it first.
     for (const url of await this.urls(signal)) {
       const match = url.match(/(\d+)$/),
         browse = match && browseId("PA-Event-" + match[1], "pa");
       if (browse && sourceEventId(browse) === id)
-        return this.load(url, asOf, signal);
+        return this.loadExact(url, asOf, signal, id);
     }
     return undefined;
   }
