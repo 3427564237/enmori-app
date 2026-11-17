@@ -1050,17 +1050,37 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.unavailable,
-        builder: (context, state) => UnavailablePage(
-          onRetry: () {
-            if (ref.read(authSessionProvider).hasError) {
-              // Retry observation; the SDK still supplies the actual identity.
-              ref.invalidate(authSessionProvider);
-              return;
+        builder: (context, state) => Consumer(
+          builder: (context, widgetRef, child) {
+            final auth = widgetRef.watch(authSessionProvider);
+            final subject = widgetRef.watch(currentAuthSubjectProvider);
+            final account = subject == null
+                ? null
+                : widgetRef.watch(onboardingStatusProvider(subject));
+            // Refresh retains the previous failure, so the gate can remain
+            // unavailable while Retry is pending. Show the existing waiting
+            // surface locally without changing the route or auth authority.
+            if (auth.isLoading || account?.isLoading == true) {
+              return const StartupPage();
             }
-            final subject = ref.read(currentAuthSubjectProvider);
-            if (subject != null) {
-              ref.invalidate(onboardingStatusProvider(subject));
-            }
+            return UnavailablePage(
+              onRetry: () {
+                final currentAuth = widgetRef.read(authSessionProvider);
+                if (currentAuth.isLoading) return;
+                if (currentAuth.hasError) {
+                  // Retry observation; the SDK still supplies the identity.
+                  widgetRef.invalidate(authSessionProvider);
+                  return;
+                }
+                final subject = widgetRef.read(currentAuthSubjectProvider);
+                if (subject != null &&
+                    !widgetRef
+                        .read(onboardingStatusProvider(subject))
+                        .isLoading) {
+                  widgetRef.invalidate(onboardingStatusProvider(subject));
+                }
+              },
+            );
           },
         ),
       ),

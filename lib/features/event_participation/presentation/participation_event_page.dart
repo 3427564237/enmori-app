@@ -109,6 +109,9 @@ final class _ParticipationEventPageState
 
   Future<void> _load() async {
     if (_loading || _session == null) return;
+    // The old snapshot is cleared below; its timer must not retire this read.
+    _expiry?.cancel();
+    _expiry = null;
     final generation = ++_generation, session = _session;
     final repository = ref.read(eventDetailRepositoryProvider);
     setState(() {
