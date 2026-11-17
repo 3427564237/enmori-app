@@ -869,10 +869,15 @@ final class _RecommendationWaitState extends State<_RecommendationWait> {
           ),
           const SizedBox(height: 4),
           Text(
-            context.tr(
-              'Some sources can take a few minutes. You can stop waiting and reload later, or use another part of the app.',
-              '部分来源可能需要几分钟。你可以停止等待、稍后重新加载，也可以先使用其他功能。',
-            ),
+            _longWait
+                ? context.tr(
+                    'Some sources can take a few minutes. You can stop waiting and reload later, or use another part of the app.',
+                    '部分来源可能需要几分钟。你可以停止等待、稍后重新加载，也可以先使用其他功能。',
+                  )
+                : context.tr(
+                    'Checking available activities. You can use another part of the app while you wait.',
+                    '正在获取可用活动，等待时可以先使用其他功能。',
+                  ),
             style: Theme.of(context).textTheme.bodySmall,
           ),
           Wrap(
@@ -901,9 +906,38 @@ final class _RecommendationWaitState extends State<_RecommendationWait> {
       key: const Key('event-recommendations-loading'),
       height: height,
       child: height != null
-          // Preserve Home geometry without retaining old cards. Large text can
-          // scroll the feedback; its buttons remain in the semantics tree.
-          ? SingleChildScrollView(primary: false, child: feedback)
+          // A tall retained card area may begin above the visible viewport.
+          // Neutral progress remains visible throughout it; the single set of
+          // controls stays accessible above, without retaining old card data.
+          ? Stack(
+              children: [
+                Positioned.fill(
+                  child: ExcludeSemantics(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) => Column(
+                        children: [
+                          for (
+                            var row = 0;
+                            row < (constraints.maxHeight / 80).ceil();
+                            row++
+                          )
+                            const Expanded(
+                              child: Center(child: LinearProgressIndicator()),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                SingleChildScrollView(
+                  primary: false,
+                  child: ColoredBox(
+                    color: Theme.of(context).colorScheme.surface,
+                    child: feedback,
+                  ),
+                ),
+              ],
+            )
           : widget.home
           ? feedback
           : Card(margin: EdgeInsets.zero, child: feedback),

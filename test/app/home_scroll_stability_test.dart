@@ -100,6 +100,107 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     });
   }
+  testWidgets('scrolled Home return can reach Stop and ignore late refill', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final repository = _DelayedHomeRepository();
+    final container = ProviderContainer(
+      overrides: [
+        authSessionProvider.overrideWithValue(
+          const AsyncData(AuthSessionAuthenticated(subject: 'scroll-owner')),
+        ),
+        currentAuthSubjectProvider.overrideWithValue('scroll-owner'),
+        eventRecommendationRepositoryProvider.overrideWithValue(repository),
+      ],
+    );
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          home: Builder(
+            builder: (context) => HomeShellPage(
+              socialStyle: true,
+              onStartCheckIn: () {},
+              onSeeAllEvents: () {},
+              onBrowseActivities: () {},
+              onContinueDiscovery: () {},
+              onOpenEvent: (_) => Navigator.of(context).push<void>(
+                MaterialPageRoute(
+                  builder: (_) => Scaffold(
+                    appBar: AppBar(title: const Text('Event detail')),
+                  ),
+                ),
+              ),
+              recommendationCardBuilder: (context, event, onOpen) => SizedBox(
+                height: 600,
+                child: TextButton(
+                  onPressed: () => onOpen!(event.eventId),
+                  child: Text(event.title),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final second = find.text('First-ranked event');
+    await tester.scrollUntilVisible(second, 200);
+    await tester.ensureVisible(second);
+    await tester.pumpAndSettle();
+    final outer = find.byType(Scrollable).first;
+    final position = tester.state<ScrollableState>(outer).position;
+    final offset = position.pixels;
+    await tester.tap(second);
+    await tester.pumpAndSettle();
+    repository.pending = Completer<Result<EventRecommendationResponse>>();
+    await tester.pageBack();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(position.pixels, closeTo(offset, 1));
+    final viewport = tester.getRect(outer);
+    expect(
+      find
+          .byType(LinearProgressIndicator)
+          .evaluate()
+          .any(
+            (element) => viewport.contains(
+              tester
+                  .getRect(
+                    find.byElementPredicate(
+                      (candidate) => identical(candidate, element),
+                    ),
+                  )
+                  .center,
+            ),
+          ),
+      isTrue,
+    );
+    final stop = find.byKey(const Key('event-recommendations-stop-waiting'));
+    await tester.ensureVisible(stop);
+    await tester.pump();
+    expect(stop.hitTestable(), findsOneWidget);
+    await tester.tap(stop);
+    await tester.pumpAndSettle();
+    expect(repository.pending!.isCompleted, isFalse);
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+    expect(
+      find.byKey(const Key('event-recommendations-stopped')),
+      findsOneWidget,
+    );
+    repository.pending!.complete(Success(testEventRecommendations()));
+    await tester.pumpAndSettle();
+    expect(find.text('First-ranked event'), findsNothing);
+    expect(repository.reads, 2);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets(
     'returning from Home bottom keeps loaded events and scroll extent',
     (tester) async {
