@@ -22,5 +22,6 @@
   "phoneAcceptance": false,
   "backendReleaseGateAtPackaging": "not passed; candidate onePA full cloud acquisition timed out, diagnosis ongoing",
   "backendReleaseGateAtFinalVerification": "not passed; onePA Gaming/game HTTP403; existing v71 backend retained",
-  "liveInterestMappingDeployed": false
+  "liveInterestMappingDeployed": false,
+  "confirmedDeliveryDisposition": "Retain all-or-nothing source policy; defer backend release; deliver v76 UI candidate first."
 }

@@ -36,5 +36,6 @@
   "connectedAdbDevices": 0,
   "installed": false,
   "phoneAcceptance": false,
-  "sourceGateBlockedBy": "onePA Gaming/game HTTP403"
+  "sourceGateBlockedBy": "onePA Gaming/game HTTP403",
+  "confirmedDeliveryDisposition": "Retain all-or-nothing source policy; defer backend release; deliver v76 UI candidate first."
 }
