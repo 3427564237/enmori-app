@@ -19,6 +19,7 @@ final class EventInformation extends StatelessWidget {
   const EventInformation({
     required this.event,
     this.syntheticPreview = false,
+    this.summaryActions,
     super.key,
   });
   factory EventInformation.activity({
@@ -44,6 +45,7 @@ final class EventInformation extends StatelessWidget {
   );
   final EventDetail event;
   final bool syntheticPreview;
+  final Widget? summaryActions;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -63,12 +65,13 @@ final class EventInformation extends StatelessWidget {
                 '来源：${event.content?.sourceName ?? 'Ticketmaster'}',
               ),
       ),
-      const SizedBox(height: 8),
-      const SizedBox(height: 16),
-      EventCover(
-        key: ObjectKey(event),
-        url: syntheticPreview ? null : event.coverImageUrl,
-      ),
+      if (summaryActions == null) ...[
+        const SizedBox(height: 24),
+        EventCover(
+          key: ObjectKey(event),
+          url: syntheticPreview ? null : event.coverImageUrl,
+        ),
+      ],
       const SizedBox(height: 24),
       _Heading(context.tr('When', '活动时间')),
       Text(
@@ -116,6 +119,15 @@ final class EventInformation extends StatelessWidget {
               '分类已停用，保留已有活动关联。',
             ),
           ),
+      ],
+      if (summaryActions != null) ...[
+        const SizedBox(height: 16),
+        summaryActions!,
+        const SizedBox(height: 24),
+        EventCover(
+          key: ObjectKey(event),
+          url: syntheticPreview ? null : event.coverImageUrl,
+        ),
       ],
       const SizedBox(height: 24),
       _Heading(context.tr('About this event', '活动简介')),

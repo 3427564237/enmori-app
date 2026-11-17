@@ -186,7 +186,7 @@ final class _OwnParticipationSectionState
                     }
                     for (final id
                         in visible.map((row) => row.eventId).toSet()) {
-                      ref.invalidate(authorizedEventTitleProvider(id));
+                      ref.invalidate(authorizedEventDetailsProvider(id));
                     }
                     controller.load();
                   },
@@ -243,6 +243,7 @@ final class _OwnParticipationSectionState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    AuthorizedEventSchedule(row.eventId),
                     Text(switch (row.status) {
                       ParticipationStatus.interested => context.tr(
                         'Interested',

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/presentation/enmori_motion.dart';
+import '../../../core/result/result.dart';
 import '../../auth/auth_providers.dart';
 import '../participation_providers.dart';
 import '../domain/participation_repository.dart';
@@ -46,14 +47,68 @@ final class _ParticipationControlsState
     );
     final enabled =
         value != null && entry?.busy != true && entry?.uncertain != true;
-    void change(ParticipationStatus status, bool ignored) {
+    Future<void> change(ParticipationStatus status, bool ignored) async {
       if (value == null) return;
-      controller.changeRendered(
-        widget.eventId,
+      final id = widget.eventId;
+      final hiding = ignored && !value.ignored;
+      // The recommendation card can unmount as soon as the hide is confirmed.
+      // The page messenger and session-bound controller own this short recovery.
+      final messenger = ScaffoldMessenger.of(context);
+      final container = ProviderScope.containerOf(context, listen: false);
+      final route = ModalRoute.of(context);
+      final hiddenLabel = context.tr('Hidden from recommendations', '已从推荐中隐藏');
+      final undoLabel = context.tr('Undo', '撤销');
+      final restoredLabel = context.tr('Recommendation restored.', '已恢复推荐。');
+      final failedLabel = context.tr(
+        'Restoration not confirmed. Open My plans → Hidden and check your participation status.',
+        '恢复尚未确认。请到“我的计划 → 已隐藏”核对参与状态。',
+      );
+      bool current() =>
+          messenger.mounted &&
+          route?.isCurrent != false &&
+          identical(
+            participationSession(container.read(authSessionProvider)),
+            renderedSession,
+          );
+      final result = await controller.changeRendered(
+        id,
         status,
         ignored,
         renderedSession: renderedSession,
         expected: value,
+      );
+      if (!hiding || result is! Success<void> || !current()) return;
+      final confirmed = container
+          .read(participationControllerProvider)[id]
+          ?.value;
+      if (confirmed == null || !confirmed.ignored) return;
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(hiddenLabel),
+          duration: const Duration(seconds: 8),
+          action: SnackBarAction(
+            label: undoLabel,
+            onPressed: () async {
+              if (!current()) return;
+              final restored = await controller.changeRendered(
+                id,
+                confirmed.status,
+                false,
+                renderedSession: renderedSession,
+                expected: confirmed,
+              );
+              if (!current()) return;
+              messenger.showSnackBar(
+                SnackBar(
+                  content: Text(
+                    restored is Success<void> ? restoredLabel : failedLabel,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       );
     }
 

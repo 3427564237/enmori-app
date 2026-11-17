@@ -92,7 +92,8 @@ List<GoRoute> eventParticipationRoutes({
     builder: (context, state) => ParticipationEventPage(
       key: ValueKey(state.pathParameters['eventId']),
       eventId: state.pathParameters['eventId'] ?? '',
-      detailBuilder: (context, event) => EventInformation(event: event),
+      detailBuilder: (context, event, plans) =>
+          EventInformation(event: event, summaryActions: plans),
       adminCategoryBuilder: (event, refresh) => AdminEventCategoryEntry(
         eventId: event.eventId,
         title: event.title,

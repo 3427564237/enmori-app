@@ -172,6 +172,7 @@ final class EventRecommendationsPage extends ConsumerStatefulWidget {
     this.syntheticPreview = false,
     this.initialEventIndex = 0,
     this.embedded = false,
+    this.contextControls,
     this.onBrowseAll,
     this.onEditInterests,
     super.key,
@@ -181,6 +182,7 @@ final class EventRecommendationsPage extends ConsumerStatefulWidget {
   final bool syntheticPreview;
   final int initialEventIndex;
   final bool embedded;
+  final Widget? contextControls;
   final VoidCallback? onBrowseAll;
   final VoidCallback? onEditInterests;
 
@@ -254,6 +256,11 @@ final class _EventRecommendationsPageState
       index = widget.initialEventIndex < response.items.length
           ? widget.initialEventIndex
           : response.items.length - 1;
+      if (index == 0) {
+        _currentEventId = response.items.first.eventId;
+        _positioned = true;
+        return;
+      }
     }
     final generation = _positionGeneration;
     _moving = true;
@@ -351,6 +358,7 @@ final class _EventRecommendationsPageState
                 );
               },
               onRetry: _load,
+              contextControls: widget.contextControls,
               onOpenEvent: widget.onOpenEvent,
               recommendationCardBuilder: widget.recommendationCardBuilder,
               syntheticPreview: widget.syntheticPreview,

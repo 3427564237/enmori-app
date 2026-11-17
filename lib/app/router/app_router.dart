@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/presentation/enmori_localizations.dart';
 import "../../features/recommendation_profile/presentation/recommendation_profile_page.dart";
-import "../../features/recommendation_profile/presentation/activity_area_bar.dart";
+import '../recommendation_conditions.dart';
 import '../../features/weather/presentation/home_weather_card.dart';
 import '../remote_social_composition.dart';
 import '../../features/friends/presentation/friend_module_page.dart';
@@ -205,6 +205,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ref.read(remoteGroupFeaturesEnabledProvider)) &&
       GoRouter.of(context).state.uri.path == sourcePath;
 
+  void editRecommendationInterests(BuildContext context) {
+    if (context.mounted &&
+        ref.mounted &&
+        ref.read(routerGateProvider) == RouterGateState.authenticated &&
+        (routeSession == null ||
+            identical(
+              ref.read(authSessionProvider).asData?.value,
+              routeSession,
+            ))) {
+      context.push<bool>(AppRoutes.interests);
+    }
+  }
+
   void openShared(BuildContext context, String sourcePath, String destination) {
     if (canNavigateShared(context, sourcePath)) {
       context.push<void>(destination);
@@ -296,6 +309,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           plansPath: AppRoutes.eventPlans,
           recommendationsBuilder: (context, browse) => EventRecommendationsPage(
             embedded: true,
+            contextControls: RecommendationConditions(
+              showArea: remoteGroup,
+              onEditInterests: () => editRecommendationInterests(context),
+            ),
             onBrowseAll: browse,
             onEditInterests: () {
               if (context.mounted && canNavigateActivity()) {
@@ -618,7 +635,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'root-home',
         builder: (context, state) => HomeShellPage(
           greeting: remoteGroup ? const ConnectedHomeGreeting() : null,
-          recommendationControls: remoteGroup ? const ActivityAreaBar() : null,
+          recommendationControls: RecommendationConditions(
+            showArea: remoteGroup,
+            onEditInterests: () => editRecommendationInterests(context),
+          ),
           onContinueDiscovery: () async {
             if (!canNavigateShared(context, AppRoutes.home)) return;
             await context.push<void>(
@@ -896,6 +916,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.eventRecommendations,
         builder: (context, state) => EventRecommendationsPage(
+          contextControls: RecommendationConditions(
+            showArea: remoteGroup,
+            onEditInterests: () => editRecommendationInterests(context),
+          ),
           onBrowseAll: () {
             if (context.mounted && canNavigateActivity()) {
               context.push<void>('${AppRoutes.activities}?tab=browse');

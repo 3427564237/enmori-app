@@ -35,7 +35,7 @@ final class ParticipationEventPage extends ConsumerStatefulWidget {
   final String eventId;
   final ExternalActivityOpener opener;
   final ValueChanged<ParticipantSelection> onParticipants;
-  final Widget Function(BuildContext, EventDetail)? detailBuilder;
+  final Widget Function(BuildContext, EventDetail, Widget)? detailBuilder;
   final Widget Function(EventDetail, VoidCallback)? adminCategoryBuilder;
   final Widget Function(BuildContext, EventDetail, bool Function())?
   actionsBuilder;
@@ -174,6 +174,27 @@ final class _ParticipationEventPageState
     }
     final controller = ref.read(participationControllerProvider.notifier);
     final details = _detail;
+    final plans = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context.tr('Your plans', '你的计划'),
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        Text(
+          context.tr(
+            'Save your interest in ENMORI. This does not book a place.',
+            '在 ENMORI 保存你的意向，不代表预约名额。',
+          ),
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 8),
+        ParticipationControls(
+          key: ValueKey('participation-${widget.eventId}'),
+          eventId: widget.eventId,
+        ),
+      ],
+    );
     final registration = _returnUrl == null
         ? null
         : ExternalRegistrationAction(
@@ -241,8 +262,8 @@ final class _ParticipationEventPageState
                 label: Text(context.tr('Official event details', '官网活动详情')),
               ),
             if (details != null)
-              widget.detailBuilder?.call(context, details) ??
-                  EventInformation(event: details)
+              widget.detailBuilder?.call(context, details, plans) ??
+                  EventInformation(event: details, summaryActions: plans)
             else if (!_loading)
               Text(
                 context.tr(
@@ -265,22 +286,7 @@ final class _ParticipationEventPageState
                     (_expiry?.isActive ?? false),
               ),
             const SizedBox(height: 16),
-            Text(
-              context.tr('Your plans', '你的计划'),
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            Text(
-              context.tr(
-                'Save your interest in ENMORI. This does not book a place.',
-                '在 ENMORI 保存你的意向，不代表预约名额。',
-              ),
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 8),
-            ParticipationControls(
-              key: ValueKey('participation-${widget.eventId}'),
-              eventId: widget.eventId,
-            ),
+            if (details == null) plans,
             const Divider(height: 32),
             if (!_registrationAtDetailsLink && registration != null)
               registration,
