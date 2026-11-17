@@ -154,7 +154,20 @@ void main() {
       );
       expect(find.text('Interested'), findsOneWidget);
       expect(find.text('Going'), findsOneWidget);
-      expect(find.text('@member_a · 将参加活动'), findsOneWidget);
+      final goingContent = find.byWidgetPredicate(
+        (widget) =>
+            widget is FriendActivityContent &&
+            widget.item.type == FriendActivityType.going,
+      );
+      expect(goingContent, findsOneWidget);
+      expect(
+        find.descendant(of: goingContent, matching: find.text('@member_a')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: goingContent, matching: find.text('将参加活动')),
+        findsOneWidget,
+      );
       expect(find.text('Original note'), findsOneWidget);
       expect(find.text('这次签到的心情：Calm'), findsOneWidget);
     },

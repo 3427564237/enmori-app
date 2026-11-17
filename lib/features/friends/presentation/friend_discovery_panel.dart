@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/presentation/section_heading.dart';
 import 'friend_discovery_controller.dart';
+import '../domain/friend_discovery_repository.dart';
 import '../../auth/auth_providers.dart';
 import '../../auth/domain/auth_repository.dart';
 import 'friend_ignore_controller.dart';
@@ -382,88 +383,136 @@ final class _FriendDiscoveryPanelState
             in widget.home
                 ? state.suggestions
                 : state.suggestions.skip(_groupStart).take(2))
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: IdentityAvatar(username: person.username),
-                    title: Text(person.displayName ?? person.username),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '@${person.username}',
-                          style: Theme.of(context).textTheme.bodySmall,
+          _DiscoverySuggestionCard(
+            person: person,
+            onOpen: () => _openDiscovery(person.username, session),
+            onIgnore: locked
+                ? null
+                : () async {
+                    final undo = await preferences.ignore(
+                      person.username,
+                      person.ignoreVersion,
+                      expectedEpoch: renderedEpoch,
+                    );
+                    if (!mounted ||
+                        !context.mounted ||
+                        undo == null ||
+                        !preferences.canUndo(undo)) {
+                      return;
+                    }
+                    _closeSnack();
+                    final snack = ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        // Keep the normal SnackBar duration, while
+                        // accessible navigation retains the action.
+                        persist: MediaQuery.accessibleNavigationOf(context),
+                        content: Text(
+                          context.tr('Recommendation ignored', '已忽略此推荐'),
                         ),
-                        const SizedBox(height: 4),
-                        Text(person.reason),
-                        if (person.sharedInterests.isNotEmpty)
-                          Text(
-                            person.sharedInterests.join(' · '),
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                      ],
-                    ),
-                    onTap: () => _openDiscovery(person.username, session),
-                  ),
-                ),
-                IconButton(
-                  tooltip: context.tr(
-                    'Ignore @${person.username}',
-                    '忽略 @${person.username}',
-                  ),
-                  icon: const Icon(Icons.person_remove_outlined),
-                  onPressed: locked
-                      ? null
-                      : () async {
-                          final undo = await preferences.ignore(
-                            person.username,
-                            person.ignoreVersion,
-                            expectedEpoch: renderedEpoch,
-                          );
-                          if (!mounted ||
-                              !context.mounted ||
-                              undo == null ||
-                              !preferences.canUndo(undo)) {
-                            return;
-                          }
-                          _closeSnack();
-                          final snack = ScaffoldMessenger.of(context)
-                              .showSnackBar(
-                                SnackBar(
-                                  // Keep the normal SnackBar duration, while
-                                  // accessible navigation retains the action.
-                                  persist: MediaQuery.accessibleNavigationOf(
-                                    context,
-                                  ),
-                                  content: Text(
-                                    context.tr(
-                                      'Recommendation ignored',
-                                      '已忽略此推荐',
-                                    ),
-                                  ),
-                                  action: SnackBarAction(
-                                    label: context.tr('Undo', '撤销'),
-                                    onPressed: () {
-                                      if (mounted) preferences.undo(undo);
-                                    },
-                                  ),
-                                ),
-                              );
-                          _snack = snack;
-                          snack.closed.then((_) {
-                            if (identical(_snack, snack)) _snack = null;
-                          });
-                        },
-                ),
-              ],
-            ),
+                        action: SnackBarAction(
+                          label: context.tr('Undo', '撤销'),
+                          onPressed: () {
+                            if (mounted) preferences.undo(undo);
+                          },
+                        ),
+                      ),
+                    );
+                    _snack = snack;
+                    snack.closed.then((_) {
+                      if (identical(_snack, snack)) _snack = null;
+                    });
+                  },
           ),
       ],
     );
   }
+}
+
+final class _DiscoverySuggestionCard extends StatelessWidget {
+  const _DiscoverySuggestionCard({
+    required this.person,
+    required this.onOpen,
+    required this.onIgnore,
+  });
+  final FriendSuggestion person;
+  final VoidCallback onOpen;
+  final VoidCallback? onIgnore;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    key: ValueKey('friend-suggestion-${person.username}'),
+    margin: const EdgeInsets.only(top: 8, bottom: 4),
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: IdentityAvatar(username: person.username, size: 48),
+                  title: Text(
+                    person.displayName ?? person.username,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  subtitle: Text(
+                    '@${person.username}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  onTap: onOpen,
+                ),
+              ),
+              IconButton(
+                tooltip: context.tr(
+                  'Ignore @${person.username}',
+                  '忽略 @${person.username}',
+                ),
+                icon: const Icon(Icons.person_remove_outlined),
+                onPressed: onIgnore,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer
+                  .withValues(alpha: .4),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    person.reason,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  if (person.sharedInterests.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      person.sharedInterests.join(' · '),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton.icon(
+              onPressed: onOpen,
+              icon: const Icon(Icons.person_outline, size: 18),
+              label: Text(context.tr('View discovery card', '查看发现名片')),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }

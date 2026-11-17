@@ -47,20 +47,64 @@ class DiscoveryCardPage extends ConsumerWidget {
           card['username'] == username &&
           (card['displayName'] == null || card['displayName'] is String)) {
         body = ListView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(16),
           children: [
-            IdentityAvatar(username: username),
-            const SizedBox(height: 16),
-            Text(
-              card['displayName'] as String? ?? username,
-              style: Theme.of(context).textTheme.headlineSmall,
+            Card(
+              margin: EdgeInsets.zero,
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    IdentityAvatar(username: username, size: 64),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            card['displayName'] as String? ?? username,
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '@$username',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            Text('@$username'),
             const SizedBox(height: 16),
-            Text(
-              context.tr(
-                'This discovery card does not grant access to private profile information.',
-                '发现名片不开放对方的私密资料。',
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.privacy_tip_outlined,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      context.tr(
+                        'This discovery card does not grant access to private profile information.',
+                        '发现名片不开放对方的私密资料。',
+                      ),
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 16),
@@ -105,7 +149,15 @@ class DiscoveryCardPage extends ConsumerWidget {
     }
     return Scaffold(
       appBar: AppBar(title: Text(context.tr('Discovery card', '发现名片'))),
-      body: body,
+      body: SafeArea(
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: body,
+          ),
+        ),
+      ),
     );
   }
 }

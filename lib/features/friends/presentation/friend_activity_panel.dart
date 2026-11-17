@@ -313,21 +313,24 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
               ),
             ),
           for (final item in value)
-            DecoratedBox(
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: Theme.of(context).colorScheme.outlineVariant,
-                  ),
-                ),
-              ),
+            Card(
+              key: ValueKey((
+                'friend-activity',
+                item.username,
+                item.type,
+                item.sourceRecordId,
+              )),
+              margin: const EdgeInsets.only(top: 12),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     FriendActivityContent(item: item),
-                    const SizedBox(height: 8),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 12, bottom: 4),
+                      child: Divider(height: 1),
+                    ),
                     Wrap(
                       spacing: 8,
                       runSpacing: 4,
@@ -445,25 +448,61 @@ final class FriendActivityContent extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      Align(
-        alignment: Alignment.centerLeft,
-        child: IdentityAvatar(username: item.username),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          IdentityAvatar(username: item.username, size: 44),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.displayName ?? item.username,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                Text(
+                  '@${item.username}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  localTimeLabel(context, item.occurredAt),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
-      const SizedBox(height: 8),
-      Text(
-        item.displayName ?? item.username,
-        style: Theme.of(context).textTheme.titleMedium,
+      const SizedBox(height: 12),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            switch (item.type) {
+              FriendActivityType.checkIn => Icons.edit_note_outlined,
+              FriendActivityType.interested => Icons.bookmark_border,
+              FriendActivityType.going => Icons.event_available_outlined,
+            },
+            size: 20,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              _activityLabel(context, item.type),
+              style: Theme.of(context).textTheme.labelLarge
+                  ?.copyWith(color: Theme.of(context).colorScheme.primary),
+            ),
+          ),
+        ],
       ),
-      Text(
-        '@${item.username} · ${_activityLabel(context, item.type)}',
-        style: Theme.of(context).textTheme.bodySmall,
-      ),
-      const SizedBox(height: 4),
-      Text(
-        localTimeLabel(context, item.occurredAt),
-        style: Theme.of(context).textTheme.bodySmall,
-      ),
-      const SizedBox(height: 8),
+      const SizedBox(height: 12),
       if (item.eventTitle case final title?)
         Text(title, style: Theme.of(context).textTheme.titleMedium),
       if (item.note case final note?)

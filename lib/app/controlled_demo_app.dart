@@ -16,6 +16,7 @@ import '../features/event_participation/participation_providers.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 
@@ -112,6 +113,7 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
   late BackendApiClient _api;
   late AiWireRepository _ai;
   late BackendPersonaPreviewRepository _personaPreview;
+  List<Override>? _overrides;
   @override
   void initState() {
     super.initState();
@@ -124,7 +126,15 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
     if (widget.baseUri != oldWidget.baseUri ||
         widget.auth != oldWidget.auth ||
         widget.client != oldWidget.client ||
-        widget.aiProcessing != oldWidget.aiProcessing) {
+        widget.aiProcessing != oldWidget.aiProcessing ||
+        widget.dualAccounts != oldWidget.dualAccounts ||
+        widget.eventParticipationEnabled !=
+            oldWidget.eventParticipationEnabled ||
+        widget.remoteGroupEnabled != oldWidget.remoteGroupEnabled ||
+        widget.companionFirstFlowEnabled !=
+            oldWidget.companionFirstFlowEnabled ||
+        widget.companionInstallationRef != oldWidget.companionInstallationRef ||
+        widget.companionMessagingPort != oldWidget.companionMessagingPort) {
       _compose();
     }
   }
@@ -145,6 +155,10 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       tokenProvider: widget.auth.getIdToken,
       client: widget.client,
     );
+    // Keep repositories and route builders for the lifetime of this connection.
+    // Recreating overrideWithValue objects during an ordinary parent rebuild
+    // invalidates the router and loses the active route and unsaved editors.
+    _overrides = null;
   }
 
   Widget _buildAiPage(
@@ -255,7 +269,7 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
   @override
   Widget build(BuildContext context) => ProviderScope(
     key: ObjectKey(_api),
-    overrides: [
+    overrides: _overrides ??= [
       eventActionsProvider.overrideWithValue(const PlatformEventActions()),
       authRepositoryProvider.overrideWithValue(widget.auth),
       backendBaseUriProvider.overrideWithValue(widget.baseUri),

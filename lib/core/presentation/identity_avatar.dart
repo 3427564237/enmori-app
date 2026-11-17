@@ -20,6 +20,13 @@ final class IdentityAvatar extends ConsumerWidget {
   final String username;
   final double size;
   @override
-  Widget build(BuildContext context, WidgetRef ref) =>
-      ref.watch(identityAvatarBuilderProvider)(username, size);
+  Widget build(BuildContext context, WidgetRef ref) => Align(
+    alignment: AlignmentDirectional.centerStart,
+    widthFactor: 1,
+    heightFactor: 1,
+    child: SizedBox.square(
+      dimension: size,
+      child: ref.watch(identityAvatarBuilderProvider)(username, size),
+    ),
+  );
 }
