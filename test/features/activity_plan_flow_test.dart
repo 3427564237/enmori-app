@@ -66,7 +66,8 @@ EventRecommendation get _event => EventRecommendation(
 Future<void> _pump(
   WidgetTester tester,
   WidgetBuilder builder, {
-  PlansRepo? plans,
+  ParticipationRepository? plans,
+  EventRecommendationRepository? recommendations,
   _Details? details,
   FakeInterestRepository? interests,
   Stream<AuthSession>? sessions,
@@ -89,7 +90,7 @@ Future<void> _pump(
           interests ?? FakeInterestRepository(),
         ),
         eventRecommendationRepositoryProvider.overrideWithValue(
-          FakeEventRecommendationRepository(),
+          recommendations ?? FakeEventRecommendationRepository(),
         ),
       ],
       child: ContentAccessBoundary(
@@ -115,12 +116,208 @@ Future<void> _pump(
   await tester.pumpAndSettle();
 }
 
+final class _HeldPageRecommendations implements EventRecommendationRepository {
+  int reads = 0;
+  bool hold = false;
+  final pending = Completer<Result<EventRecommendationResponse>>();
+  @override
+  Future<Result<EventRecommendationResponse>> read({
+    required EventRecommendationView view,
+  }) async {
+    reads++;
+    if (hold) return pending.future;
+    return Success(
+      EventRecommendationResponse(
+        asOf: DateTime.utc(2026, 11, 17),
+        formulaVersion: 'synthetic',
+        items: [_event],
+      ),
+    );
+  }
+}
+
+final class _HeldPlanWrite implements ParticipationRepository {
+  final plans = PlansRepo();
+  final pending = Completer<void>();
+  bool fail = false;
+  int attempts = 0;
+  @override
+  Future<Result<EventParticipation>> read(String id, bool Function() current) =>
+      plans.read(id, current);
+  @override
+  Future<Result<EventParticipation>> save(
+    EventParticipation previous,
+    ParticipationStatus status,
+    bool ignored,
+    bool Function() current,
+  ) async {
+    attempts++;
+    await pending.future;
+    if (fail) return const Failure(participationUnavailable);
+    return plans.save(previous, status, ignored, current);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw StateError('Unexpected synthetic ${invocation.memberName}');
+}
+
 Future<void> _hide(WidgetTester tester) async {
   await tap(tester, find.byTooltip('More event options'));
   await tap(tester, find.text('Ignore recommendation'));
 }
 
 void main() {
+  for (final locale in ['en', 'zh']) {
+    for (final success in [true, false]) {
+      testWidgets(
+        'full recommendation page retains hide outcome during menu return refresh (success=$success, $locale)',
+        (tester) async {
+          final plans = _HeldPlanWrite()..fail = !success;
+          final recommendations = _HeldPageRecommendations();
+          await _pump(
+            tester,
+            (_) => EventRecommendationsPage(
+              recommendationCardBuilder: (_, event, open) =>
+                  ConnectedRecommendationCard(event: event, onOpen: open),
+            ),
+            plans: plans,
+            recommendations: recommendations,
+            locale: Locale(locale),
+          );
+          final container = ProviderScope.containerOf(
+            tester.element(find.byType(EventRecommendationsPage)),
+          );
+          expect(recommendations.reads, 1);
+          recommendations.hold = true;
+          await tap(
+            tester,
+            find.byTooltip(locale == 'en' ? 'More event options' : '更多活动选项'),
+          );
+          await tester.tap(
+            find.text(locale == 'en' ? 'Ignore recommendation' : '忽略推荐'),
+          );
+          await tester.pump(const Duration(milliseconds: 400));
+          await tester.pump();
+          expect(plans.attempts, 1);
+          expect(
+            recommendations.reads,
+            2,
+            reason: 'Closing the popup currently refreshes the whole page.',
+          );
+          expect(find.text('Community cooking workshop'), findsNothing);
+          plans.pending.complete();
+          await tester.pump(const Duration(milliseconds: 400));
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 400));
+          if (success) {
+            expect(plans.plans.facts['a']!.ignored, isTrue);
+            final undo = find.text(locale == 'en' ? 'Undo' : '撤销');
+            expect(undo, findsOneWidget);
+            await tester.tap(undo);
+            await tester.pump(const Duration(milliseconds: 400));
+            await tester.pump();
+            await tester.pump(const Duration(milliseconds: 400));
+            expect(plans.attempts, 2);
+            expect(plans.plans.facts['a']!.ignored, isFalse);
+            expect(
+              plans.plans.facts['a']!.status,
+              ParticipationStatus.interested,
+            );
+            expect(
+              find.text(locale == 'en' ? 'Recommendation restored.' : '已恢复推荐。'),
+              findsOneWidget,
+            );
+          } else {
+            expect(plans.plans.facts['a']!.ignored, isFalse);
+            expect(
+              container.read(participationControllerProvider)['a']!.uncertain,
+              isTrue,
+            );
+            expect(
+              find.textContaining(
+                locale == 'en' ? 'Change not confirmed.' : '修改尚未确认',
+              ),
+              findsOneWidget,
+            );
+            expect(find.text(locale == 'en' ? 'Undo' : '撤销'), findsNothing);
+            await tester.pump(const Duration(seconds: 20));
+            expect(plans.attempts, 1);
+          }
+          await tester.pumpWidget(const SizedBox());
+          await tester.pump();
+        },
+      );
+    }
+  }
+
+  for (final replaceSession in [true, false]) {
+    testWidgets(
+      'late hide failure cannot show feedback after ${replaceSession ? 'same-subject session replacement' : 'leaving the page'}',
+      (tester) async {
+        final sessions = StreamController<AuthSession>();
+        addTearDown(sessions.close);
+        sessions.add(AuthSessionAuthenticated(subject: 'owner'));
+        final plans = _HeldPlanWrite()..fail = true;
+        final recommendations = _HeldPageRecommendations();
+        await _pump(
+          tester,
+          (_) => Consumer(
+            builder: (context, ref, _) {
+              // The actual router resolves the session before creating this page.
+              if (participationSession(ref.watch(authSessionProvider)) ==
+                  null) {
+                return const Scaffold();
+              }
+              return EventRecommendationsPage(
+                recommendationCardBuilder: (_, event, open) =>
+                    ConnectedRecommendationCard(event: event, onOpen: open),
+              );
+            },
+          ),
+          plans: plans,
+          recommendations: recommendations,
+          sessions: sessions.stream,
+        );
+        final page = tester.element(find.byType(EventRecommendationsPage));
+        final container = ProviderScope.containerOf(page);
+        await container
+            .read(participationControllerProvider.notifier)
+            .load('a');
+        await tester.pumpAndSettle();
+        recommendations.hold = true;
+        await tap(tester, find.byTooltip('More event options'));
+        await tester.tap(find.text('Ignore recommendation'));
+        await tester.pump(const Duration(milliseconds: 400));
+        await tester.pump();
+        expect(plans.attempts, 1);
+        if (replaceSession) {
+          sessions.add(AuthSessionAuthenticated(subject: 'owner'));
+        } else {
+          unawaited(
+            Navigator.of(page).push<void>(
+              MaterialPageRoute(
+                builder: (_) => const Scaffold(body: Text('Another page')),
+              ),
+            ),
+          );
+        }
+        await tester.pump(const Duration(milliseconds: 400));
+        plans.pending.complete();
+        await tester.pump(const Duration(milliseconds: 400));
+        await tester.pump();
+        expect(
+          find.textContaining('Change not confirmed.', skipOffstage: false),
+          findsNothing,
+        );
+        expect(find.text('Undo', skipOffstage: false), findsNothing);
+        expect(plans.attempts, 1);
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump();
+      },
+    );
+  }
+
   testWidgets(
     'plan card shares one authorized detail read for title, SGT range and venue',
     (tester) async {

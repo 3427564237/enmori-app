@@ -63,6 +63,10 @@ final class _ParticipationControlsState
         'Restoration not confirmed. Open My plans → Hidden and check your participation status.',
         '恢复尚未确认。请到“我的计划 → 已隐藏”核对参与状态。',
       );
+      final unconfirmedLabel = context.tr(
+        'Change not confirmed. Check your plans before making another change.',
+        '修改尚未确认，请先核对计划再继续修改。',
+      );
       bool current() =>
           messenger.mounted &&
           route?.isCurrent != false &&
@@ -77,7 +81,14 @@ final class _ParticipationControlsState
         renderedSession: renderedSession,
         expected: value,
       );
-      if (!hiding || result is! Success<void> || !current()) return;
+      if (!hiding || !current()) return;
+      if (result is! Success<void>) {
+        // A menu-return refresh can remove the card before its write settles.
+        messenger
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(unconfirmedLabel)));
+        return;
+      }
       final confirmed = container
           .read(participationControllerProvider)[id]
           ?.value;
