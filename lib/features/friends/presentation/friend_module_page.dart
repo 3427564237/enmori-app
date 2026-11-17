@@ -200,6 +200,8 @@ final class _FriendModulePageState extends ConsumerState<FriendModulePage> {
           child: Column(
             children: [
               TabBar(
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
                 onTap: (index) {
                   FocusManager.instance.primaryFocus?.unfocus();
                   setState(() {

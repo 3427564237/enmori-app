@@ -185,16 +185,11 @@ void main() {
               find.byKey(const Key('my-friends-search-query')),
               'Alex',
             );
-            await tester.tap(find.text('Activity'));
-            await tester.pumpAndSettle();
+            await _selectFriendTab(tester, 'Activity', 1);
             expect(find.text('No friends activity to show.'), findsOneWidget);
-            await tester.tap(
-              find.widgetWithText(Tab, 'Discover'),
-            );
-            await tester.pumpAndSettle();
+            await _selectFriendTab(tester, 'Discover', 2);
             expect(find.byTooltip('Recommendation options'), findsOneWidget);
-            await tester.tap(find.widgetWithText(Tab, 'My friends'));
-            await tester.pumpAndSettle();
+            await _selectFriendTab(tester, 'My friends', 0);
             expect(find.text('Alex'), findsOneWidget);
             expect(tester.takeException(), isNull);
           } else if (page == 'home') {
@@ -253,6 +248,21 @@ void main() {
       },
     );
   }
+}
+
+Future<void> _selectFriendTab(
+  WidgetTester tester,
+  String label,
+  int index,
+) async {
+  final tab = find.widgetWithText(Tab, label);
+  // Large labels can scroll a previously selected tab out of the viewport.
+  await tester.ensureVisible(tab);
+  await tester.pumpAndSettle();
+  expect(tab.hitTestable(), findsOneWidget);
+  await tester.tap(tab);
+  await tester.pumpAndSettle();
+  expect(DefaultTabController.of(tester.element(tab)).index, index);
 }
 
 final _snapshot = WeatherSnapshot(

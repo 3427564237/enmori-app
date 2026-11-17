@@ -249,7 +249,11 @@ class AiOwnedSourcesController extends Notifier<AiOwnedSourcesState> {
   }
 
   Future<void> checkReadState() async {
-    if (_readBusy || !_current(_epoch)) return;
+    if (_readBusy ||
+        !_current(_epoch) ||
+        !ref.read(aiConversationControllerProvider).conversationEstablished) {
+      return;
+    }
     final epoch = _epoch;
     final topic = _topic!;
     _readBusy = true;

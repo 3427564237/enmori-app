@@ -59,6 +59,7 @@ final class AiReferenceRig {
     WidgetTester tester, {
     bool enabled = true,
     List<AiMessage>? messages,
+    bool selectExistingConversation = true,
   }) async {
     final r = AiReferenceRig._();
     if (messages != null) r.repo.messages = messages;
@@ -93,8 +94,10 @@ final class AiReferenceRig {
     // Initialize this authority epoch before the fresh transcript observation.
     // A lazily rebuilt observer must never accept an earlier cached read.
     r.container.read(aiOwnedSourcesControllerProvider);
-    await r.conversation.loadConversations();
-    await r.conversation.selectConversation(referenceTopic);
+    if (selectExistingConversation) {
+      await r.conversation.loadConversations();
+      await r.conversation.selectConversation(referenceTopic);
+    }
     await tester.pump();
     return r;
   }
@@ -148,6 +151,7 @@ final class ReferenceRepository
   Future<Result<AiReadback>>? nextOperation;
   Future<Result<AiSourceTarget>>? nextResolve;
   Future<Result<AiTopicReadState>>? nextRead, nextMark;
+  String newConversationId = referenceTopic;
   AiTopicReadState readState = const AiTopicReadState(
     revision: 0,
     readThroughSequence: 0,
@@ -278,7 +282,7 @@ final class ReferenceRepository
       AiTicket(
         operationId: 'fixture-operation',
         operationKey: 'fixture-key',
-        conversationId: conversationId ?? referenceTopic,
+        conversationId: conversationId ?? newConversationId,
         preparationExpiresAt: referenceDate.add(const Duration(hours: 2)),
       ),
     );

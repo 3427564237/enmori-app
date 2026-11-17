@@ -369,13 +369,6 @@ final class _FriendDiscoveryPanelState
                           }
                         },
                   child: Text(context.tr('Next group', '下一组')),
-                )
-              else
-                Text(
-                  context.tr(
-                    'You have reached the end of this list.',
-                    '已浏览到本次推荐列表的末尾。',
-                  ),
                 ),
             ],
           ),
@@ -422,6 +415,19 @@ final class _FriendDiscoveryPanelState
                       if (identical(_snack, snack)) _snack = null;
                     });
                   },
+          ),
+        if (!widget.home &&
+            state.loaded &&
+            state.suggestions.isNotEmpty &&
+            _groupStart + 2 >= state.suggestions.length)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              context.tr(
+                'You have reached the end of this list.',
+                '已浏览到本次推荐列表的末尾。',
+              ),
+            ),
           ),
       ],
     );

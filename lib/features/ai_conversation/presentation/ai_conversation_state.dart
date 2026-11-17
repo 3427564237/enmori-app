@@ -26,6 +26,7 @@ final class AiConversationState {
     this.phase = AiConversationPhase.idle,
     Iterable<AiMessage> messages = const [],
     this.conversationId,
+    this.conversationEstablished = false,
     this.contextScopeKey,
     this.localOutgoingText,
     this.localOutgoingKey,
@@ -69,6 +70,9 @@ final class AiConversationState {
   final Object? localOutgoingKey;
   final String? outgoingMessageId;
   final String? conversationId;
+
+  /// A prepared conversation ID alone does not establish a persisted topic.
+  final bool conversationEstablished;
 
   /// Changes on an explicit topic switch, not on a reserved operation's ID.
   final Object? contextScopeKey;

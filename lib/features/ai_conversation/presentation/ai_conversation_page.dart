@@ -1079,6 +1079,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
             key: const Key('ai-read-unconfirmed'),
           ),
         if (conversation.conversationId != null &&
+            conversation.conversationEstablished &&
             (sources.readState == null || sources.readUnconfirmed))
           OutlinedButton(
             key: const Key('ai-check-read-state'),
@@ -1516,7 +1517,10 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       }
       if (previous?.conversationId != next.conversationId) _messageKeys.clear();
       if (ref.read(aiCompanionReferencesEnabledProvider) &&
-          previous?.conversationId != next.conversationId &&
+          (previous?.conversationId != next.conversationId ||
+              previous?.conversationEstablished !=
+                  next.conversationEstablished) &&
+          next.conversationEstablished &&
           next.conversationId != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (_ownsCurrentSession) {

@@ -296,6 +296,7 @@ class AiConversationController extends Notifier<AiConversationState> {
       localOutgoingKey: _localOutgoingKey,
       outgoingMessageId: _outgoingMessageId,
       conversationId: _memory.conversationId,
+      conversationEstablished: _memory.established,
       contextScopeKey: _contextScopeKey,
       nextCursor: nextCursor,
       statusMessage: statusMessage,
