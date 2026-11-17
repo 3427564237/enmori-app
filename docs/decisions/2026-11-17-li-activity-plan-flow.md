@@ -41,3 +41,16 @@ infrastructure changes are selected.
 
 Only the listed presentation and recovery-entry changes supersede the older
 placement. No whole-project or physical acceptance is implied by this record.
+
+## Same-day continuation: physical acceptance and branch push
+
+LI subsequently confirmed that the phone already has final v79 and instructed:
+“不用再安装了，继续完成真机验收，检查兴趣匹配、计划往返、隐藏撤销、切后台和断网恢复，保留现有数据。最后推送”.
+
+This resumes the five named physical checks and authorizes pushing this task's
+code and sanitized evidence on its existing branch. No further installation is
+requested. Retain the signed-in account and existing records; record original
+interest/participation/network choices and restore any temporary test changes.
+Keep the earlier installation command discrepancy and deferred acceptance as
+historical evidence. This does not authorize a main-branch merge, new backend
+deployment, data reset, or changes to the subsequent Admin proposal.

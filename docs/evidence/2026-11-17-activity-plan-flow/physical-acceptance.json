@@ -1,0 +1,384 @@
+{
+  "recordedAt": "2026-11-17T15:33:29.542187+08:00",
+  "scope": "Five requested physical checks on the already installed final v79; no new application code or install",
+  "authority": "../../decisions/2026-11-17-li-activity-plan-flow.md#same-day-continuation-physical-acceptance-and-branch-push",
+  "implementationCommit": "2925a7fc0595256ea7d8a429721fc0640ee0b5c3",
+  "previousReceipt": "verification.json",
+  "device": {
+    "model": "V2405A",
+    "package": "com.enmori.app.group",
+    "versionCode": 79,
+    "versionName": "1.0.0-plans20261117",
+    "apkSha256": "fbcdd650234f3899d0ea980aa5b6cce97ad4ead2e746acd550a500a07ecfa090"
+  },
+  "method": "Physical release UI through ADB input, UIAutomator and screenshots; no instrumentation APK",
+  "scenarioResults": {
+    "realInterestMatching": {
+      "result": "passed for sampled positive matches",
+      "temporarySelections": [
+        "Dance",
+        "Food"
+      ],
+      "originalSelectionReadBack": true,
+      "captures": [
+        "05-recommendations-baseline",
+        "18-interest-save-result",
+        "20-dance-food-recommendations",
+        "21-dance-food-next",
+        "57-final-source-result"
+      ]
+    },
+    "planRoundTrip": {
+      "result": "passed for an existing record; earlier detail read failures retained",
+      "transition": "interested -> going -> reopen through Going filter -> interested",
+      "captures": [
+        "08-plan-interested",
+        "10-plan-detail-ready",
+        "12-detail-retry-result",
+        "40-plan-detail-final",
+        "42-going-return",
+        "44-going-card-ready",
+        "45-restored-interested-detail",
+        "54-plan-resumed-loaded"
+      ]
+    },
+    "hideUndo": {
+      "result": "passed from event detail",
+      "recommendationCardDisposalPhysicallyRetested": false,
+      "captures": [
+        "47-hidden-with-undo",
+        "49-menu-after-undo",
+        "54-plan-resumed-loaded"
+      ]
+    },
+    "backgroundReturn": {
+      "result": "passed with recovery qualification",
+      "recommendationReturn": "tab and conditions retained; service error; explicit Retry recovered",
+      "plansReturn": "route/filter retained; reload restored original counts",
+      "captures": [
+        "23-resumed",
+        "25-resume-recovered",
+        "52-plan-recents",
+        "53-plan-resumed",
+        "54-plan-resumed-loaded"
+      ]
+    },
+    "offlineReadRecovery": {
+      "result": "passed in continuous repeat",
+      "networkBefore": {
+        "wifi_on": "0",
+        "mobile_data": "1"
+      },
+      "networkOffline": {
+        "wifi_on": "0",
+        "mobile_data": "0"
+      },
+      "networkAfter": {
+        "wifi_on": "0",
+        "mobile_data": "1"
+      },
+      "manualRetry": true,
+      "savedSelectionReloaded": true,
+      "interruptedWritesTested": false,
+      "captures": [
+        "28-offline-read-repeat",
+        "29-network-restored",
+        "30-network-retry-result"
+      ]
+    }
+  },
+  "restoration": {
+    "originalInterestSelectionConfirmed": true,
+    "activityAreaUnchanged": true,
+    "signedInAccountRetained": true,
+    "planCountsBeforeAndAfter": {
+      "all": 9,
+      "interested": 1,
+      "going": 2,
+      "none": 6,
+      "hidden": 0
+    },
+    "recordsAdded": 0,
+    "recordsDeleted": 0,
+    "testedPlanStatusAndIgnoredFlagRestored": true,
+    "testedPlanRevisionAndUpdatedAtAdvancedByRealActions": true,
+    "networkRestored": true,
+    "noInstallUninstallDataClearOrSignOut": true
+  },
+  "exceptions": [
+    "Temporary detail read errors before later success",
+    "Recommendation error on first background return; explicit retry recovered",
+    "Incomplete onePA searches and one intermediate unavailable-source notice",
+    "Some older plan source details unavailable",
+    "After two long automatic-review timeout pauses, next capture was Home instead of interest editor; cause not isolated; not counted as successful editor recovery"
+  ],
+  "latestObservedState": "Events For you with original interests and a Music match; incomplete onePA notice remains",
+  "rawEvidence": {
+    "localDirectory": "/tmp/enmori-v79-acceptance-20261117",
+    "privateRawFilesExcludedFromGit": true,
+    "captures": [
+      {
+        "id": "05-recommendations-baseline",
+        "capturedAt": "2026-11-17T14:53:14.018809+08:00",
+        "sha256": {
+          "json": "d194ff9a4711aee7b1fba74117636611f6440994427e5abb5fc38e59ea721867",
+          "xml": "5d33eb898469337add29365a288f2afd59f1b4be52471846953d348af000f626",
+          "png": "da544e2938d42bd2a016c4c0ce9db08405c5b0a63822942f92db22a1fa70c4d3"
+        }
+      },
+      {
+        "id": "07-plans-loaded",
+        "capturedAt": "2026-11-17T14:54:10.016015+08:00",
+        "sha256": {
+          "json": "e8ff14293d377f5f279f98f711e565490c4449f214b07e9ec1d9526a6a709a01",
+          "xml": "583f1c6aeeeea5801a7acf36d3ef55e0876e0dd05f3fe062e0289233ea0ebc16",
+          "png": "f1292d6b83fd223aab4b9a21bf60ee3af77b0fd031bc76be717cc2482e79b41d"
+        }
+      },
+      {
+        "id": "08-plan-interested",
+        "capturedAt": "2026-11-17T14:54:28.750910+08:00",
+        "sha256": {
+          "json": "c431b59b7b10c579cd83415db86249ffaadd497bc145aeea7a1500782c4df7ed",
+          "xml": "d1c7b717ff67e0e6189f3bd892e01dea6c2f78e3c836f701fb0322393b15928c",
+          "png": "91e7c6e8294b9a66d520889cb392aadaa70c1c977fd05cbc964de7741de92201"
+        }
+      },
+      {
+        "id": "10-plan-detail-ready",
+        "capturedAt": "2026-11-17T14:55:15.946420+08:00",
+        "sha256": {
+          "json": "cac7c125c8b809b473c66c95c9516cef4e467b5aebad2129a9519f152eaae449",
+          "xml": "829ce84808cd1edcddd04d264787da7fae0fc08b1e551204db45fe59d6a6a2b8",
+          "png": "c2bbc8e9546cd2f6641285ad1ed862c2b5bc08531107bd9563e5b428ff555735"
+        }
+      },
+      {
+        "id": "12-detail-retry-result",
+        "capturedAt": "2026-11-17T14:56:05.589239+08:00",
+        "sha256": {
+          "json": "b829d0fda46609c374c7224e99c08bf6fbfeb48f0c01e84ba7fc6b99184de4f0",
+          "xml": "829ce84808cd1edcddd04d264787da7fae0fc08b1e551204db45fe59d6a6a2b8",
+          "png": "6d60b1243c8499c42542936ded86bfc72931e11287f0b65b40b5113afbfbb16d"
+        }
+      },
+      {
+        "id": "18-interest-save-result",
+        "capturedAt": "2026-11-17T14:58:33.294694+08:00",
+        "sha256": {
+          "json": "f5d19db441a4a1b5ddb979f1edb0dbd5f66d35a5392c00fc0130b7cf2cba0fa6",
+          "xml": "4ffd4c3d55cfee59d99c4c5b90257162b082ca0034ca848909136b24e8504082",
+          "png": "6711d7a6f54c8495c06369fc1ca6094b62f882a242e83c429c87b07485c8a5bc"
+        }
+      },
+      {
+        "id": "20-dance-food-recommendations",
+        "capturedAt": "2026-11-17T14:59:12.124255+08:00",
+        "sha256": {
+          "json": "fc624e21bcfa404a5636144a58b10626a64428cc25a8452296a122ce92b92126",
+          "xml": "18a8372b3ebb334b1b4b305e50f1d5a2b8ee1e5f66a620646723a0c96416c153",
+          "png": "04bf40c28782e4e94afea5252e5428ff8e2a168da9115a5d4b484a5248f43a7c"
+        }
+      },
+      {
+        "id": "21-dance-food-next",
+        "capturedAt": "2026-11-17T14:59:29.189488+08:00",
+        "sha256": {
+          "json": "e1b3698b8b1e2661c2325a3229dbf40408b037cbed4427bf0da4c627a4d1562f",
+          "xml": "732c1e519ad4048a595f5d83989c752be114bd89d9cda30961a48f6f24eb66cb",
+          "png": "e18b579140946ae6146e12d86fe6ae10399635e3a3d3b5c04c08b3cb0324577c"
+        }
+      },
+      {
+        "id": "23-resumed",
+        "capturedAt": "2026-11-17T15:03:05.364378+08:00",
+        "sha256": {
+          "json": "24c896ffc06ef7b640f48a5a9c4c858a83d713ed32b06d919c50b493d9159f65",
+          "xml": "fb5cc5bf25cc68b868296025922ee3953dc3c6f8555fb7c69cdbe112d7485b25",
+          "png": "29f721cc0e6b365be1e530ebdfd28eca146a191002ccbe316999fc145c3c965f"
+        }
+      },
+      {
+        "id": "25-resume-recovered",
+        "capturedAt": "2026-11-17T15:03:40.853659+08:00",
+        "sha256": {
+          "json": "cb9d0e8b0c9310b3bcfcb7c6b595b8a51c62d636f4e0bf4e9140944da9d9edea",
+          "xml": "0bc3a8755267989be2c8c42f6fd4c1f8ec9042d36b83e55cfeaccae2bfa1da4c",
+          "png": "1e93b9e2446a8c86a7e639ab5834aa9c0aefce0114df154e06f236748bcf09a5"
+        }
+      },
+      {
+        "id": "26-offline-interest-read",
+        "capturedAt": "2026-11-17T15:04:35.413399+08:00",
+        "sha256": {
+          "json": "3ad7fdf05ff4891cec640323a8361dae5e7f51d3e2f808d22086ffc66e9b55e7",
+          "xml": "b5ee763e4194dca2c4533a0165cd0a9217afed97b22490f91b6f67dac047483e",
+          "png": "f3b5195da2689bfce251cfe04560f0d96e6d2ae62d8cb448f953f6c739dc9a0b"
+        }
+      },
+      {
+        "id": "27-online-interest-retry",
+        "capturedAt": "2026-11-17T15:11:49.710154+08:00",
+        "sha256": {
+          "json": "5ccbcbe0ec9b77a5d11a204c5b2633c73e0d398d3e3d4df1cb89c74a7616e098",
+          "xml": "fa76b35993b1877f19bb9d0547ed760d711d5d2aa247038c3ac0281d933bac8b",
+          "png": "ac58065706e99a72d747f0c9b154f3b85bd82c4939cbbd312dbc7bcd71c2ea96"
+        }
+      },
+      {
+        "id": "28-offline-read-repeat",
+        "capturedAt": "2026-11-17T15:12:30.605892+08:00",
+        "sha256": {
+          "json": "4a4ac7fa2bbec9f4b159aa00f47490245da8843c4e41d5ea6fa655fc18b8aca7",
+          "xml": "b5ee763e4194dca2c4533a0165cd0a9217afed97b22490f91b6f67dac047483e",
+          "png": "ca0f642722f7c81d05050d1cdbe783b98fba8b47675daeb53140e1fd2be94cfc"
+        }
+      },
+      {
+        "id": "29-network-restored",
+        "capturedAt": "2026-11-17T15:12:36.160160+08:00",
+        "sha256": {
+          "json": "1a92d88b8463a534b45e7d2f7011a7cb57e4c4f48b942171b37af63e2ac8f3c0",
+          "xml": "b5ee763e4194dca2c4533a0165cd0a9217afed97b22490f91b6f67dac047483e",
+          "png": "66bce35d24496b266b2e911c26ebe4deb5a6646493c63b282c7fabbb4b275680"
+        }
+      },
+      {
+        "id": "30-network-retry-result",
+        "capturedAt": "2026-11-17T15:12:46.208121+08:00",
+        "sha256": {
+          "json": "66a843edd9a36464efe9d5596b7ff7f28ea33dffed28ab3d2f17f8e7a28a31d0",
+          "xml": "410f8d15d790647a273c94ed487fe5b64a4375b6c78911a8fc9b6b35d0250c34",
+          "png": "ba9312717dbbba6ddfef77491cbdd40f8522acf33946fe01a2b4a48308d8342c"
+        }
+      },
+      {
+        "id": "31-current",
+        "capturedAt": "2026-11-17T15:20:02.529494+08:00",
+        "sha256": {
+          "json": "3b81707d2e7ed25cd17174d2a5badd58fa68f808039d3e5a81fb07e32055e187",
+          "xml": "2684c7c5092e4479a3515149319582063e5ca1ec818c3ea3e599498a0ac19633",
+          "png": "f0f4a230b003d04a0cf65df26c3e35790fd50108f6e474c4258940fc18417889"
+        }
+      },
+      {
+        "id": "33-original-interest-saved",
+        "capturedAt": "2026-11-17T15:21:13.500387+08:00",
+        "sha256": {
+          "json": "d25951957eaea360a6caaf050225a38dd9335c83087451de0da8cd82d709f66b",
+          "xml": "f9876f4dc5290794f10db2a7b2c609443a5a78c5da91abad1222ba0a4efe5645",
+          "png": "a9c7c9cf3fe9851f216ad06048b945fa769eaa09bce2d5a5cfb43316bef6c01d"
+        }
+      },
+      {
+        "id": "40-plan-detail-final",
+        "capturedAt": "2026-11-17T15:22:57.545648+08:00",
+        "sha256": {
+          "json": "d28688b0f5c46969b2ef6380dd85771b0afce57de876732487cf796fdae967f6",
+          "xml": "f1a48da16cff56e6ce99f55a0282ec33bf3a293cc355c8e076340db3e7e24bce",
+          "png": "3ef2ce8798dea56e2258461bbc8e65ca21e70e47457fd5377c07786dbc09277d"
+        }
+      },
+      {
+        "id": "42-going-return",
+        "capturedAt": "2026-11-17T15:24:23.603711+08:00",
+        "sha256": {
+          "json": "639209257cadacdb04794a51d1306ff7e5f578fcfd024423c5206a35de86c238",
+          "xml": "7649c918bc97ff8b5bdd288dde5fa7d4608fa9aedbf0923136185dfaec245bae",
+          "png": "8e067d42d26356157d11074474f3c7ac6bbff2019ebe2c7294de813d217710e1"
+        }
+      },
+      {
+        "id": "44-going-card-ready",
+        "capturedAt": "2026-11-17T15:24:57.476859+08:00",
+        "sha256": {
+          "json": "23290a1aa78644e162933d654d4ce8eed955fe2adfe9da35334b39990ab9c4b9",
+          "xml": "0407d6ccca2be219f7fe4a3cec690950cc24f23f1bcdb28f815f18f69967785a",
+          "png": "64ce6a9dadc61a25431afcf8d037e241a66b0cd889d3908d34f7c22428f07aa3"
+        }
+      },
+      {
+        "id": "45-restored-interested-detail",
+        "capturedAt": "2026-11-17T15:25:36.930955+08:00",
+        "sha256": {
+          "json": "a5fb45fdff2a74ebb01f736d34117bdc8036a17b2c14e2adf342a2ba04b99e79",
+          "xml": "f1a48da16cff56e6ce99f55a0282ec33bf3a293cc355c8e076340db3e7e24bce",
+          "png": "02208b395ded6479ea638fdbce214bd7ea232221cb07a1dfb51baf18689ebc1c"
+        }
+      },
+      {
+        "id": "47-hidden-with-undo",
+        "capturedAt": "2026-11-17T15:26:18.999251+08:00",
+        "sha256": {
+          "json": "3cc0d4332b62c91ff9223c095f0653b8919cbd6940c29f29a1cbb4e95633e5d8",
+          "xml": "368460ce6588927fd6f1966ddd3585762e5fdfefc0c4c4ce048a0e5b65351442",
+          "png": "92e48181ea435031604704260cb24d529872643712f639269b7d1324d6d174ca"
+        }
+      },
+      {
+        "id": "49-menu-after-undo",
+        "capturedAt": "2026-11-17T15:26:31.260639+08:00",
+        "sha256": {
+          "json": "9cee2c935f2d9a9a163341366605308edd221a2816a3ef4b03ff1d5e0f6fe6a5",
+          "xml": "b1c59a97ae859666bb4d264f55c2db012e40fa3a3d1b40dbb28bee49d6be4f3e",
+          "png": "87f2bbbd570a583637748c00ec2b12403167371244c56c152094aa8336eda750"
+        }
+      },
+      {
+        "id": "51-plan-counts-restored",
+        "capturedAt": "2026-11-17T15:27:35.320999+08:00",
+        "sha256": {
+          "json": "c7bec101791b5b263f8676669f0bf2ac9e875c8a994ab0a7745dd5ee1425cc5a",
+          "xml": "1d1fb403e45fbc07e91223dc3882baeb9b18c9dcd7e269570ef3af4c594bb431",
+          "png": "69bfdac40a1f287f46f9ae4ddedee3a7f214c89bbf624818b342dc7d339c76bc"
+        }
+      },
+      {
+        "id": "52-plan-recents",
+        "capturedAt": "2026-11-17T15:27:39.369368+08:00",
+        "sha256": {
+          "json": "e72b606728dd7a32fc51435ff3032995db9bad6b2239e99ff6b4098124357963",
+          "xml": "e00bbad984d9e035803617ef9c060700ec53562dc180cacba4d44c3bb2668624",
+          "png": "acf3a481da303c9b9ccfb044e664e11aa7df4025b5353f9073f90f4c91466bca"
+        }
+      },
+      {
+        "id": "53-plan-resumed",
+        "capturedAt": "2026-11-17T15:28:03.002588+08:00",
+        "sha256": {
+          "json": "909e5d610cbdb7ead9e339678679f7a421418cb58210e6e789bb307d5cc5223e",
+          "xml": "2e6a6932526c256574f780eee113dd5f7be39a6f07aeb47e38e1880e18891f83",
+          "png": "30429750f132a0c8cc31635552e159a7772040cd9bd56f7657f165f28de0a1f8"
+        }
+      },
+      {
+        "id": "54-plan-resumed-loaded",
+        "capturedAt": "2026-11-17T15:28:14.623761+08:00",
+        "sha256": {
+          "json": "6063e783e44c3d61b205c7067f33e0f4b0c4488a25437945f398e282805aaca0",
+          "xml": "1d1fb403e45fbc07e91223dc3882baeb9b18c9dcd7e269570ef3af4c594bb431",
+          "png": "911f2806ea783040be25e51229d2f8c028613c12485a0c9681c52bedc6fce211"
+        }
+      },
+      {
+        "id": "56-final-events-loaded",
+        "capturedAt": "2026-11-17T15:30:14.109685+08:00",
+        "sha256": {
+          "json": "c8e677882679e9559688c6cf9ad86d45766f36a7a087f1520e54c595508ed4c0",
+          "xml": "8917af62770cca77720f80a1656e4c4a6d63b0a5037922b335d086e897154b6c",
+          "png": "8721244eb8578005a9de7aa8617b2446a0c3722ca239216aba8edb45d3dd7800"
+        }
+      },
+      {
+        "id": "57-final-source-result",
+        "capturedAt": "2026-11-17T15:32:43.784172+08:00",
+        "sha256": {
+          "json": "d67d8dc1fbc0a4a4eed76e6c72f03702db20f7efcc72fc1ee8edd1c56d81309b",
+          "xml": "5d33eb898469337add29365a288f2afd59f1b4be52471846953d348af000f626",
+          "png": "49bb6def181050afaf40b5384e6e4974e007c8efd014ec392bbae32bcabf4d08"
+        }
+      }
+    ]
+  },
+  "fullUatOrLongTermStabilityClaimed": false
+}

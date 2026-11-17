@@ -3,6 +3,11 @@
 Authority: [LI's three selected improvements](../../decisions/2026-11-17-li-activity-plan-flow.md).
 Base: v78 `d544ce6c`. Client implementation: `2925a7f`.
 
+The later [physical acceptance continuation](physical-acceptance.md) records
+the five checks requested after LI confirmed the installed final v79. It
+supersedes the earlier **not run** status only for those bounded observations;
+the packaging history and earlier receipt below are retained.
+
 ## Delivered behavior
 
 - My plans shows source-authorized Singapore event time/range and venue, using
@@ -70,17 +75,19 @@ Home screen and new saved-interest/area summary, with the original three interes
 choices. The command result and observed final installation disagree; installed
 byte comparison is the final-state evidence.
 
-After the rejection report, LI selected “先不安装，只保留安装包”. No subsequent
-installation attempt or interactive phone test was made. No uninstall, data
-clear or sign-out was performed. No interest or participation mutation was
+After the rejection report, LI selected “先不安装，只保留安装包”. At that
+checkpoint, no subsequent installation attempt or interactive phone test was
+made. No uninstall, data clear or sign-out was performed. No interest or
+participation mutation was
 deliberately submitted during phone observations; networking was not changed.
 Account identifiers and raw private phone screens are excluded here.
 
-## Physical acceptance still open
+## Earlier physical acceptance checkpoint (superseded for the named checks)
 
 Only retained launch, installed APK identity, and Home conditions summary were
-observed on the V2405A. Actual interest change/matching, plan save/reopen,
-hide/undo, navigation return, background/foreground and interrupted-network
-recovery on the final APK remain **not run**. Home reported incomplete onePA
-interest searches; this is not full-catalogue acceptance. No full UAT,
-notification, AI-generation or long-term service claim is made.
+observed on the V2405A at the earlier checkpoint. Actual interest
+change/matching, plan save/reopen, hide/undo, navigation return,
+background/foreground and interrupted-network recovery on the final APK were
+**not run** at that point. Home reported incomplete onePA interest searches;
+this is not full-catalogue acceptance. No full UAT, notification, AI-generation
+or long-term service claim is made.
