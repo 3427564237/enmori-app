@@ -1,0 +1,265 @@
+{
+  "startup-regression": {
+    "startedAtUtc": "2026-11-17T16:32:59.523986+00:00",
+    "apkVersion": 88,
+    "backendVersion": 87,
+    "device": "emulator-5556",
+    "physicalPhoneOperated": false,
+    "observations": [
+      {
+        "label": "startup-offline-1",
+        "stem": "startup-offline-1-163302300820",
+        "atUtc": "2026-11-17T16:33:05.352969+00:00",
+        "uptime": 25415.39,
+        "pid": "8098",
+        "home": false,
+        "unavailable": true,
+        "opening": false,
+        "retry": true
+      },
+      {
+        "label": "startup-offline-retry-1",
+        "stem": "startup-offline-retry-1-163307784063",
+        "atUtc": "2026-11-17T16:33:10.712071+00:00",
+        "uptime": 25420.75,
+        "pid": "8098",
+        "home": false,
+        "unavailable": true,
+        "opening": false,
+        "retry": true
+      },
+      {
+        "label": "startup-recovered-1",
+        "stem": "startup-recovered-1-163316305259",
+        "atUtc": "2026-11-17T16:33:21.421297+00:00",
+        "uptime": 25431.45,
+        "pid": "8098",
+        "home": true,
+        "unavailable": false,
+        "opening": false,
+        "retry": false
+      },
+      {
+        "label": "startup-offline-2",
+        "stem": "startup-offline-2-163323634713",
+        "atUtc": "2026-11-17T16:33:26.737832+00:00",
+        "uptime": 25436.77,
+        "pid": "8488",
+        "home": false,
+        "unavailable": true,
+        "opening": false,
+        "retry": true
+      },
+      {
+        "label": "startup-offline-retry-2",
+        "stem": "startup-offline-retry-2-163329175021",
+        "atUtc": "2026-11-17T16:33:32.024854+00:00",
+        "uptime": 25442.06,
+        "pid": "8488",
+        "home": false,
+        "unavailable": true,
+        "opening": false,
+        "retry": true
+      },
+      {
+        "label": "startup-recovered-2",
+        "stem": "startup-recovered-2-163337363846",
+        "atUtc": "2026-11-17T16:33:41.303082+00:00",
+        "uptime": 25451.34,
+        "pid": "8488",
+        "home": true,
+        "unavailable": false,
+        "opening": false,
+        "retry": false
+      },
+      {
+        "label": "startup-back-reopened",
+        "stem": "startup-back-reopened-163348400765",
+        "atUtc": "2026-11-17T16:33:52.061826+00:00",
+        "uptime": 25462.1,
+        "pid": "8488",
+        "home": false,
+        "unavailable": false,
+        "opening": true,
+        "retry": false
+      },
+      {
+        "label": "startup-back-reopened",
+        "stem": "startup-back-reopened-163353063741",
+        "atUtc": "2026-11-17T16:33:56.017177+00:00",
+        "uptime": 25466.05,
+        "pid": "8488",
+        "home": true,
+        "unavailable": false,
+        "opening": false,
+        "retry": false
+      }
+    ],
+    "networkRestored": true,
+    "immediateImages": [
+      {
+        "file": "startup-online-retry-immediate-1-163315673545.png",
+        "atUtc": "2026-11-17T16:33:16.304995+00:00"
+      },
+      {
+        "file": "startup-online-retry-immediate-2-163336724353.png",
+        "atUtc": "2026-11-17T16:33:37.363356+00:00"
+      }
+    ],
+    "pidBeforeBack": "8488",
+    "afterBack": {
+      "label": "startup-after-back",
+      "stem": "startup-after-back-163342342084",
+      "atUtc": "2026-11-17T16:33:46.854790+00:00",
+      "uptime": 25456.89,
+      "pid": "8488"
+    },
+    "pidAfterReopen": "8488",
+    "passed": true,
+    "completedAtUtc": "2026-11-17T16:33:56.165826+00:00"
+  },
+  "detail-expiry-receipt": {
+    "apkVersion": 88,
+    "backendVersion": 87,
+    "before": {
+      "label": "tm-detail-ready",
+      "stem": "tm-detail-ready-163710935062",
+      "atUtc": "2026-11-17T16:37:14.068444+00:00",
+      "uptime": 25664.1,
+      "pid": "8488"
+    },
+    "startedAtUtc": "2026-11-17T16:37:34.424213+00:00",
+    "clockAdvanced": false,
+    "duringWaitNavigation": false,
+    "after": {
+      "label": "tm-detail-expired",
+      "stem": "tm-detail-expired-164224070147",
+      "atUtc": "2026-11-17T16:42:26.964422+00:00",
+      "uptime": 25977.0,
+      "pid": "8488"
+    },
+    "elapsedSeconds": 312.9,
+    "samePid": true,
+    "detailRoute": true,
+    "titleRemoved": true,
+    "plansVisible": true,
+    "officialDisabled": true,
+    "reloadEnabled": true,
+    "unavailable": true,
+    "actualTextPrivate": true,
+    "passed": true
+  },
+  "detail-reload-receipt": {
+    "apkVersion": 88,
+    "backendVersion": 87,
+    "startedAtUtc": "2026-11-17T16:42:36.503270+00:00",
+    "observations": [
+      {
+        "label": "detail-reload",
+        "stem": "detail-reload-164239756060",
+        "atUtc": "2026-11-17T16:42:42.630225+00:00",
+        "uptime": 25992.66,
+        "pid": "8488",
+        "loading": true,
+        "titleVisible": false,
+        "reloadEnabled": false,
+        "officialEnabled": false,
+        "plansVisible": true
+      },
+      {
+        "label": "detail-reload",
+        "stem": "detail-reload-164243631729",
+        "atUtc": "2026-11-17T16:42:46.580527+00:00",
+        "uptime": 25996.61,
+        "pid": "8488",
+        "loading": true,
+        "titleVisible": false,
+        "reloadEnabled": false,
+        "officialEnabled": false,
+        "plansVisible": true
+      },
+      {
+        "label": "detail-reload",
+        "stem": "detail-reload-164247582379",
+        "atUtc": "2026-11-17T16:42:50.866181+00:00",
+        "uptime": 26000.9,
+        "pid": "8488",
+        "loading": false,
+        "titleVisible": true,
+        "reloadEnabled": true,
+        "officialEnabled": true,
+        "plansVisible": true
+      }
+    ],
+    "participationWrites": 0,
+    "immediateImage": "detail-reload-immediate-164239158302.png",
+    "passed": true,
+    "completedAtUtc": "2026-11-17T16:42:50.867881+00:00"
+  },
+  "detail-terminal-receipt": {
+    "startedAtUtc": "2026-11-17T16:42:59.519031+00:00",
+    "apkVersion": 88,
+    "backendVersion": 87,
+    "physicalPhoneOperated": false,
+    "participationWrites": 0,
+    "observations": [
+      {
+        "label": "detail-terminal-before",
+        "stem": "detail-terminal-before-164259519168",
+        "atUtc": "2026-11-17T16:43:02.651530+00:00",
+        "uptime": 26012.69,
+        "pid": "8488",
+        "loading": false,
+        "terminalUnavailable": false,
+        "titleVisible": true,
+        "reloadEnabled": true,
+        "officialEnabled": true,
+        "plansVisible": true
+      },
+      {
+        "label": "detail-terminal-offline",
+        "stem": "detail-terminal-offline-164306212728",
+        "atUtc": "2026-11-17T16:43:09.275983+00:00",
+        "uptime": 26019.31,
+        "pid": "8488",
+        "loading": false,
+        "terminalUnavailable": true,
+        "titleVisible": false,
+        "reloadEnabled": true,
+        "officialEnabled": false,
+        "plansVisible": true
+      },
+      {
+        "label": "detail-terminal-restored",
+        "stem": "detail-terminal-restored-164314580054",
+        "atUtc": "2026-11-17T16:43:17.631940+00:00",
+        "uptime": 26027.67,
+        "pid": "8488",
+        "loading": true,
+        "terminalUnavailable": false,
+        "titleVisible": false,
+        "reloadEnabled": false,
+        "officialEnabled": false,
+        "plansVisible": true
+      },
+      {
+        "label": "detail-terminal-restored",
+        "stem": "detail-terminal-restored-164318634016",
+        "atUtc": "2026-11-17T16:43:24.027034+00:00",
+        "uptime": 26034.06,
+        "pid": "8488",
+        "loading": false,
+        "terminalUnavailable": false,
+        "titleVisible": true,
+        "reloadEnabled": true,
+        "officialEnabled": true,
+        "plansVisible": true
+      }
+    ],
+    "networkRestored": true,
+    "terminalObservedBeforeRestore": true,
+    "immediateImage": "detail-terminal-reload-immediate-164314016700.png",
+    "passed": true,
+    "completedAtUtc": "2026-11-17T16:43:24.131568+00:00"
+  }
+}

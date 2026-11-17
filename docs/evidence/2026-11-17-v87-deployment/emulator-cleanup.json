@@ -1,0 +1,48 @@
+{
+  "startedAtUtc": "2026-11-17T16:43:43.713845+00:00",
+  "device": "emulator-5556",
+  "settingsBefore": {
+    "wifi_on": "1",
+    "mobile_data": "1",
+    "font_scale": "1.0",
+    "screen_off_timeout": "2147483647",
+    "system_locales": "null",
+    "wmSize": "Physical size: 1080x2400",
+    "wmDensity": "Physical density: 420",
+    "persistSysLocale": ""
+  },
+  "settingsAfter": {
+    "wifi_on": "1",
+    "mobile_data": "1",
+    "font_scale": "1.0",
+    "screen_off_timeout": "2147483647",
+    "system_locales": "null",
+    "wmSize": "Physical size: 1080x2400",
+    "wmDensity": "Physical density: 420",
+    "persistSysLocale": ""
+  },
+  "settingsMatch": true,
+  "timezone": "Asia/Singapore",
+  "physicalPhoneOperated": false,
+  "appDataCleared": false,
+  "accountDataRestoredOrChanged": false,
+  "readOnlyAvd": true,
+  "noSnapshotSave": true,
+  "finalInstalledVersion": 88,
+  "temporaryUiDumpRemoved": true,
+  "killSubmittedAtUtc": "2026-11-17T16:43:44.416570+00:00",
+  "emulatorDisconnected": true,
+  "completedAtUtc": "2026-11-17T16:43:47.472828+00:00",
+  "exitObservation": {
+    "atUtc": "2026-11-17T16:44:08.295024+00:00",
+    "device": "emulator-5556",
+    "adbDisconnected": true,
+    "matchingOwnedEmulatorProcesses": [],
+    "originalExecSession": 4476,
+    "execStatusQuery": "Unknown process id 4476",
+    "exitCodeObserved": null,
+    "normalExitNotClaimed": true,
+    "physicalPhoneOperated": false
+  },
+  "scope": "Cleanup actions only; no claim that all account data stayed unchanged during the wider stage. Consent response anomaly remains unresolved."
+}

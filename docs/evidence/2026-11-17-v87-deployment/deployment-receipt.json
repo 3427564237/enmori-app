@@ -1,0 +1,109 @@
+{
+  "backendVersion": 87,
+  "sourceCommit": "9e4c3ca6c44bc243823ee3f0a5d34ae3ec76bb28",
+  "archiveSha256": "357e981363ddc0c5297dd224dabbed288e5c637059d9f9819146cc68fa747102",
+  "archiveBytes": 68086761,
+  "selector": "2026111715442687.zip",
+  "rollbackBaseline": {
+    "version": 85,
+    "selector": "2026111713582385.zip",
+    "sourceCommit": "9fb0e7c9bfc27ca860da66c83e39d9f6245564f4",
+    "archiveSha256": "7b2ffcccbf6c129ccaa839de1fced57125e2c41e33a5f746dc444189fcbe4140"
+  },
+  "clientVersion": 86,
+  "clientSha256": "cedbd33d3538810f4d7a24cadfeb65876c6188f280112f54d6b24027e8bb3270",
+  "preflight": {
+    "passed": true,
+    "state": "Running",
+    "baselineMatches": true,
+    "candidateAbsent": true,
+    "configurationHash": "4e236e33f29ce5bfb5e264320b1e36d6c80d1e97c5f36096513069d5532631ea",
+    "grantUnchangedByOperator": true
+  },
+  "upload": {
+    "atUtc": "2026-11-17T15:45:16.279301+00:00",
+    "name": "2026111715442687.zip",
+    "sha256": "357e981363ddc0c5297dd224dabbed288e5c637059d9f9819146cc68fa747102"
+  },
+  "stop": {
+    "atUtc": "2026-11-17T15:45:51.736188+00:00"
+  },
+  "activation": {
+    "atUtc": "2026-11-17T15:46:58.497626+00:00",
+    "name": "2026111715442687.zip",
+    "sha256": "357e981363ddc0c5297dd224dabbed288e5c637059d9f9819146cc68fa747102"
+  },
+  "start": {
+    "atUtc": "2026-11-17T15:47:05.817323+00:00"
+  },
+  "actualMounted": {
+    "atUtc": "2026-11-17T15:51:26.621279+00:00",
+    "passed": true,
+    "verification": "actual_application_container_ssh_mounted_manifest",
+    "serviceWrites": 0,
+    "configurationWrites": 0,
+    "productWrites": 0,
+    "publicEventSourceCalls": 0,
+    "modelCalls": 0,
+    "manifest": {
+      "sourceCommit": "9e4c3ca6c44bc243823ee3f0a5d34ae3ec76bb28",
+      "demoVersion": 87,
+      "manifestSha256": "78b42c8af4801e24a6b3c9e684479ac908b4d8473b2134cb49ee60710de07692"
+    },
+    "completedAtUtc": "2026-11-17T15:51:36.206102+00:00"
+  },
+  "httpReady": true,
+  "configurationChanged": false,
+  "aiRenewed": false,
+  "modelVerificationRequests": 0,
+  "physicalPhoneOperated": false,
+  "rollbackExecuted": false,
+  "sourceChangesThisStage": false,
+  "operatorValidation": {
+    "atUtc": "2026-11-17T15:50:56.110623+00:00",
+    "files": {
+      "control_base.py": "a76bfcfb8acf09d0cd947a8631a5d0ecb62dcb07c0e0ce32d3df400393a6fc88",
+      "v87_operator.py": "fc2c1765a1d37ffd5820cf8c389eb87fe267b507f52a1d5b80600120f82f9546",
+      "exact_package_remote.py": "4ced903ae903f27ede3b9e5a4b6bc634ae9f4ebd5dc16cb83f1321d0a45f6499",
+      "upgrade.py": "3377ddc5b2ce26ad522413d375d52d0b170788c6935e037cd38cf3f86b92b22e",
+      "rollback.py": "8534ba354d8dbd6ae501e7e4d178d1235a5bff1ed03d41ccd0a87479dfb7a3d1",
+      "verify_current_stop.py": "1464fb81122a59a6b9c55f62fc4c33ab4c6c386e53f2d0e84cf7b440898101f3",
+      "drain_proof.py": "cb402420f8299f5c9d90247db83687ca5b1c4f029ff4dbf302a14a14937d0d47",
+      "owner_config.mjs": "8571e47d789ff5fafba67b27152efb94ab6e21638745d877b149ec1b0fbc03d6",
+      "test_exact_package.py": "f761bed8a37bdd7d0bcdd3a5408ef9fe4490d78c2bddf55b5ddb5d9468eaab25",
+      "test_current_stop.py": "63197b9a80f41f3f0f825050cee8d60fd6dac0aca3db016056e8b14d2895ba56",
+      "restart-baseline.test.mjs": "d013ae850546d8ac02cb96805ddd0c2bd9c3752cd64732311c6a1df9cbcd8898",
+      "mounted_manifest_check.py": "3b3ea7a30dd488a3d6a3fb6c2f14719e6bc871a18ca2032d7ce25a91582c6c80",
+      "api-expiry.mjs": "08bd42876108b3b65634b30bf960181ed9651eb99b2965a5014e50ab046ddf7d"
+    },
+    "localOperatorTests": {
+      "python": 36,
+      "node": 9,
+      "failed": 0
+    },
+    "authority": "docs/decisions/2026-11-17-li-v87-deployment.md",
+    "aiRenewal": false,
+    "phoneOperation": false
+  },
+  "knownIncompleteObservations": {
+    "firstDrainVerification": "ValueError without precise failing condition; no stop resubmission; later fresh read-only drain proof passed",
+    "preReadySshAttempts": 3
+  },
+  "scope": "Exact backend v87 deployment step only; the later v88 client source change is recorded separately.",
+  "laterMountedRecheck": {
+    "atUtc": "2026-11-17T16:40:08.726913+00:00",
+    "passed": true,
+    "verification": "actual_application_container_ssh_mounted_manifest",
+    "serviceWrites": 0,
+    "configurationWrites": 0,
+    "productWrites": 0,
+    "publicEventSourceCalls": 0,
+    "modelCalls": 0,
+    "manifest": {
+      "sourceCommit": "9e4c3ca6c44bc243823ee3f0a5d34ae3ec76bb28",
+      "demoVersion": 87,
+      "manifestSha256": "78b42c8af4801e24a6b3c9e684479ac908b4d8473b2134cb49ee60710de07692"
+    },
+    "completedAtUtc": "2026-11-17T16:40:17.554876+00:00"
+  }
+}

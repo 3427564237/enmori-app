@@ -1,0 +1,60 @@
+{
+  "sizeBytes": 70838168,
+  "sha256": "b49733713eeadc5947b73f5a31197c484408f942e96ba4d7ec517689acc9e8d2",
+  "package": "com.enmori.app.group",
+  "versionCode": 88,
+  "versionName": "1.0.0-rc20261118",
+  "debuggable": false,
+  "certificateSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+  "configSha256": "eff899f2578b9023f3d2d6a9b4d2b5351153c5b3ea98bd09d38c8611b9805404",
+  "compiledAzureEndpointVerified": true,
+  "sourceCommit": "7ed8aa13a3d5b0b71b51670f5a5c4b1212fea5b2",
+  "verifiedAtUtc": "2026-11-17T16:31:43.397399+00:00",
+  "compiledDartLibraries": {
+    "lib/arm64-v8a/libapp.so": {
+      "v86Sha256": "301e3f06d6900c7862bd3606f2ff9b90d52c88636c81ccc1d4d016f43c7fae2b",
+      "v88Sha256": "5eea2bff56a45778de137812fde1c040da7ac55f600de4ed5ba4ea81749a1416"
+    },
+    "lib/armeabi-v7a/libapp.so": {
+      "v86Sha256": "883814df14e23bb207594eb9e6f8be6080a5214c82357c6ab00e503471522cc0",
+      "v88Sha256": "d9bf8b7656e3eddab05a4a5295da0ce038edd4030ace806c00c8bb7f557fe7b3"
+    },
+    "lib/x86_64/libapp.so": {
+      "v86Sha256": "ea1c00496081849ef0c439b821b849c87cef53756819bee127eceb56a92f563e",
+      "v88Sha256": "95707e932dc8d91eec9f674afaa3ca756231e2032d372d0a2abb20745bbe939e"
+    }
+  },
+  "artifactFile": "ENMORI-stable-candidate-v88-release.apk",
+  "installedEvidence": {
+    "atUtc": "2026-11-17T16:31:48.492283+00:00",
+    "apkVersion": 88,
+    "backendVersion": 87,
+    "device": "emulator-5556",
+    "sha256": "b49733713eeadc5947b73f5a31197c484408f942e96ba4d7ec517689acc9e8d2",
+    "replacedVersion": 86,
+    "retainDataInstall": true,
+    "physicalPhoneOperated": false
+  },
+  "testEvidence": {
+    "atUtc": "2026-11-17T16:26:33.441344+00:00",
+    "flutterPassed": 2022,
+    "flutterFailed": 0,
+    "exitCode": 0,
+    "elapsedReported": "05:40",
+    "command": "fvm flutter test --no-pub --concurrency=2 --reporter expanded",
+    "logSha256": "5ecfb8250fbe9e1d6acbbc6f40c749f03b86781a2910df28dce95bda7bad4459",
+    "sourceSha256": {
+      "lib/app/home_introduction.dart": "cb80bb3d6a36717bd1750fcefcf0609f2e35957531dfb2ee8e688455a58d2c02",
+      "test/app/home_today_test.dart": "1fc241d0626019088dcff36a9a0bb8e3b7585e0cb9d276221955b4534b0cd67a",
+      "test/app/home_introduction_date_test.dart": "a3aca6914bd0c7d56859bb742c824b4c1349bf3c01bf304da1322fe122867067"
+    },
+    "productionFilesChanged": [
+      "lib/app/home_introduction.dart"
+    ],
+    "builtApk": false,
+    "installedApk": false,
+    "changedDeviceOrBackend": false,
+    "testProcessesFinished": true,
+    "scope": "Test-time receipt before subsequent APK build/install; historical booleans below apply only to that step."
+  }
+}

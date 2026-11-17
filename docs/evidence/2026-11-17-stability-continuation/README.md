@@ -1,5 +1,7 @@
 # ENMORI v86 客户端与 v87 后端候选：继续稳定性修复
 
+> 后续状态：用户已批准并完成精确 v87 部署，原 v86＋v87 模拟器回归及后续 v88 客户端修补单独记录于 [v87 部署阶段](../2026-11-17-v87-deployment/README.md)。下文是部署前的历史快照，不代表当前线上版本。
+
 2026-11-17，Asia/Singapore。**v86 APK 已生成，重点模拟器回归通过；v87 后端包已修复、回归及独立审查，尚未上传或部署，等待用户单独确认。当前线上仍为 v85，仍不定版。**
 
 依据：[继续修复授权](../../decisions/2026-11-17-li-stable-candidate-continuation.md)、[onePA 身份／拒绝处理批准](../../decisions/2026-11-17-li-onepa-identity-refusal-repair.md)、[共享读取时间边界批准](../../decisions/2026-11-17-li-onepa-pending-time-repair.md)。保留此前 [v85 部署与 v84 验收](../2026-11-17-v85-deployment/README.md)及其未关闭项。
