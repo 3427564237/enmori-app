@@ -1,5 +1,7 @@
 # onePA priority adjustment and two-month AI continuation proposal
 
+> LI subsequently approved implementation, regression and deployment. The [v89 execution record](../2026-11-18-v89-paid-continuation/README.md) reports the resulting state. The proposal below preserves the earlier review checkpoint.
+
 18 November 2026, Asia/Singapore. **Decision and reviewable proposal; AI renewal has not been executed.** Current client/backend remain v88/v87. No backend package, live monetary ledger, configuration, consent or phone state was changed in this stage. [Confirmed scope and supersession](../../decisions/2026-11-18-li-onepa-priority-and-ai-continuation.md).
 
 ## onePA disposition

@@ -1,0 +1,74 @@
+{
+  "version": 89,
+  "client": 88,
+  "sourceCommit": "7f735095519f91acbb2db7180699a5cc8fce48c5",
+  "sha256": "5650dc79c7fc36e5c3aa90b353d2a294c7092b37a2261941d4e3e5cfca66fdc3",
+  "archiveBytes": 68086847,
+  "selector": "2026111800382089.zip",
+  "everyEntryVerified": true,
+  "changedPaths": [
+    "backend/dist/src/ai-runtime/domain/cloud-cost.js.map",
+    "backend/dist/src/ai-runtime/domain/cloud-cost.js",
+    "deployment-manifest.json"
+  ],
+  "actualMounted": {
+    "sourceCommit": "7f735095519f91acbb2db7180699a5cc8fce48c5",
+    "demoVersion": 89,
+    "manifestSha256": "793454600dfa3a76925e6f133f2b94084291ade6194cb53b930bb2754e692f6f"
+  },
+  "mountCheckedAtUtc": "2026-11-18T00:49:45.996098+00:00",
+  "stopSubmittedAtUtc": "2026-11-18T00:40:30.155051+00:00",
+  "startSubmittedAtUtc": "2026-11-18T00:45:24.370334+00:00",
+  "firstAuthChallengeAtUtc": "2026-11-18T00:49:22.791321+00:00",
+  "authenticatedReadStatus": {
+    "status-onboarding": 200,
+    "status-profile": 200
+  },
+  "liveFinancialReadback": {
+    "confirmed": true,
+    "oldAttemptCount": 122,
+    "oldReconciledCount": 120,
+    "oldLiabilitiesPreserved": true,
+    "expectedQuotaRecoveryVerified": true,
+    "paidCapUsd": 3.4,
+    "cutoffUtc": "2027-01-17T23:42:00.000Z",
+    "newAttemptsObserved": 0,
+    "ownerRenewed": true,
+    "observedAtUtc": "2026-11-18T00:50:22.756Z"
+  },
+  "tests": {
+    "full.log": {
+      "passed": 2111,
+      "failed": 0,
+      "logSha256": "e9a9af1065d568cf3dc8e7f70d81bb73c9f8893b45ec0c860accc8551ae337e7"
+    },
+    "test-0.log": {
+      "passed": 21,
+      "failed": 0,
+      "logSha256": "d1ecec020323e41a014cce4b71c7e0401038cd11b94a65422da76ae82cb00748"
+    },
+    "test-1.log": {
+      "passed": 9,
+      "failed": 0,
+      "logSha256": "ffad089846f93c39491c31b0e43d126ec8ea5ea4c19f55fc40a92a581d6aa5ed"
+    }
+  },
+  "transitionGuardTestsPassed": 6,
+  "paidTestModelRequests": 0,
+  "phoneOperated": false,
+  "apkRebuilt": false,
+  "privateReceiptsSha256": {
+    "baseline.json": "7905191b4c488db1eaa1e501c9d569b978c3a4666ee5b8c1fa95c0bbe7efa784",
+    "retired.json": "223dbd446d6ae2d45f473871d43f2762979954ba269faf9e63ddac626a19828f",
+    "install-intent.json": "f7a1589396254e0ef28f972ef5a0fedada96083db707530cc1dea7589707d9ab",
+    "installed.json": "0ceae59d2711a1af45d21b516cfef9e6b548afb5d27988e98ffcae8ba8aea7c8",
+    "restart/config-intent.json": "2a740ff0a9928d862a9341993d63338ffa25fb537e2b9aa718f0586cdb4a491d",
+    "restart/config-receipt.json": "cdafc8c1296543876052269c079cb22816a40dff695b2608be2c662554381a6d",
+    "paid-live-receipt.json": "71897f2991562ed8837b5d5730971e5dd3c4640d2a7a3de2990b1408fdbdfc2e",
+    "plan.json": "b665b57b8cf5cffef714d165486a9511fadf9cbafe490d80c59e6e1634920b44",
+    "http-readiness.json": "79908f4174fdb364fce14ed680d6fd98c777cbb773f7b19f2fb3ea6f72cc42aa",
+    "wrapper-tests.log": "065c7d15facfd20f14fb9182747be315f3349fa1d5e1a0e966047509f4bfa9b1",
+    "money.mjs": "27e2382f4c1efcb9f1fa482767c69fbb0915a444f186ddb5ed8c764aed32210b",
+    "transition.py": "effd9b235a4e4a52681d5e2ab06acaab45e6b7a6a70a41f667d55f54b2b4a90a"
+  }
+}
