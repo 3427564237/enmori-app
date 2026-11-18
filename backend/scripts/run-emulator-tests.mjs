@@ -10,14 +10,17 @@ const controlledProfileDirectory = mkdtempSync(
 );
 
 try {
+  const env = buildControlledEmulatorTestEnvironment(process.env, controlledProfileDirectory);
+  // The Firebase CLI may supply just one alias. Dart probes verify both against
+  // the guarded demo project before accepting a synthetic identity on stdin.
+  const project = env.GCLOUD_PROJECT ?? env.GOOGLE_CLOUD_PROJECT;
+  env.GCLOUD_PROJECT = project;
+  env.GOOGLE_CLOUD_PROJECT = project;
   const result = spawnSync(
     process.execPath,
     ["--test", "--test-concurrency=1", "backend/dist/emulator-test/**/*.test.js"],
     {
-      env: buildControlledEmulatorTestEnvironment(
-        process.env,
-        controlledProfileDirectory,
-      ),
+      env,
       stdio: "inherit",
     },
   );
