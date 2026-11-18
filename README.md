@@ -1,18 +1,20 @@
 # ENMORI
 
+<img src="assets/branding/messenger-bird.png" alt="ENMORI's messenger bird" width="96" height="96">
+
 ENMORI is a social journal for Android. Record a mood or a note in a Check-in and revisit it in Calendar or Footprint. Browse events in Singapore, mark them as Interested or Going, and find them again in My plans. You can add friends by username and choose which Check-ins to include in an AI companion conversation.
 
 ## Install on Android
 
-**[Download ENMORI 1.0.0 for Android (build 90)](https://github.com/3427564237/enmori-app/releases/download/v1.0.0/ENMORI-v90-release.apk)**
+**[Download ENMORI 1.0.0 for Android (build 92)](https://github.com/3427564237/enmori-app/releases/download/v1.0.0/ENMORI-v92-release.apk)**
 
 1. Download the APK to a device running Android 7.0 (API 24) or later.
 2. Open the file and follow Android’s installation prompt. If prompted, allow the browser or file manager that opened the APK to install apps.
-3. If you already have build 88, open the new APK and choose **Update**. Installing over build 88 preserved the signed-in session in the Android emulator.
+3. If you already have build 90, open the new APK and choose **Update** to keep the existing installation and its data.
 
-The signed package is `com.enmori.app.group`. The SHA-256 checksum for `ENMORI-v90-release.apk` is `d1d04ddbe2c8861f662d795648578dcb1c034002fa33c268dc26f23ef5e5a6e0`.
+The signed package is `com.enmori.app.group`. The SHA-256 checksum for `ENMORI-v92-release.apk` is `b55693cad40716290a42dabcad67293c70c541e2b7b1a61bcbc3efcaf0b75168`.
 
-Build 90 fixes profile edits that could erase a previously saved region, keeps the Save action accessible when the landscape keyboard is open, and prevents late search results from replacing the event list after a query is cleared. The release was tested on an Android emulator against the deployed v91 backend. Physical-device, TalkBack and extended-use checks are still open for this build. [Release notes](https://github.com/3427564237/enmori-app/releases/tag/v1.0.0) · [Verification record (Chinese)](docs/evidence/2026-11-18-android-release/README.md)
+Build 92 brings the messenger bird to the Android launcher and splash screen. It includes the build 90 fixes for saved profile regions, profile forms with a landscape keyboard, and late event search results. [Release notes](https://github.com/3427564237/enmori-app/releases/tag/v1.0.0) · [Screenshots and verification (Chinese)](docs/evidence/2026-11-18-android-release/README.md#android-100-构建-92)
 
 ## Develop locally
 

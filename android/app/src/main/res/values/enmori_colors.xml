@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="enmori_paper">#FAF9F5</color>
+    <color name="enmori_bird_sage">#D5E4D4</color>
 </resources>
