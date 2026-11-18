@@ -31,3 +31,7 @@ The new purchased-credit cycle may use an approved allowance `A = 3,400,000,000`
 Prepare a concrete proposal to replace the seven-day balance/price evidence bound with one explicit two-calendar-month authorization window for this continuation. On the current date, 18 November → 18 January is 61 days. Retain actual purchased-credit expiry as a separate fact. Explain the residual risk from unobserved future price changes and shared-funding usage, and identify the exact source/contract/test and deployment/installation consequences.
 
 **This selection requests the rule-change and risk proposal first. It does not yet approve applying that policy patch, deploying a replacement backend, installing a paid ledger, altering live configuration, or making a paid generation.** Keep the current v87/v88 runtime unchanged while preparing the reviewable result. The new A is approved; the proposed long-window mechanics and execution await review of the concrete proposal.
+
+## Implementation and deployment approval
+
+LI subsequently instructed “实施，回归，部署”. This approves implementation, regression and deployment of the reviewed 61-day paid-v2 change and the funded transition with a fixed cutoff of 18 January 2027 at 07:42 SGT and an additional USD 3.40 allowance. Apply the earlier risk, liability, single-owner and verification conditions. Record each actual deployment or installation outcome separately.

@@ -57,7 +57,8 @@ function decodeGiftGrant(value: unknown): CloudGiftCostGrant | undefined {
     priceSnapshot: snapshot });
 }
 
-export const paidCreditReviewWindowMs = 7 * 24 * 60 * 60 * 1000;
+// Maximum per-observation envelope; the reviewed operator packet fixes the earlier absolute cutoff.
+export const paidCreditReviewWindowMs = 61 * 24 * 60 * 60 * 1000;
 /** C=min(A,max(0,min(P,R)-U-D)); no floating-point subtraction or overflow. */
 export function cloudPaidCostCapNanoUsd(purchased: number, spendable: number, approved: number,
   reservedLiability: number, unreflectedSpent: number): number | undefined {

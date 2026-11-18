@@ -294,8 +294,8 @@ the cap. The planned S$10 is not a verified USD receipt.
 
 It has no gift amount or fictitious gift cycle. Extra fields, mixed variants,
 wrong predecessor, malformed timestamps/references, unsafe integers and changed
-cap arithmetic are rejected. Both verification windows end within seven days
-of their respective observation and no later than credit expiry. An earlier
+cap arithmetic are rejected. Under the [18 November continuation decision](../docs/decisions/2026-11-18-li-onepa-priority-and-ai-continuation.md), both paid-v2 verification windows end within 61 days
+of their respective observation. This continuation also ends by 2027-01-17T23:42:00Z, including when installation is delayed. The previous seven-day review policy remains documented in the 11 November proposal. Each deadline must fall no later than credit expiry. An earlier
 known applicable price change shortens the evidence window. This review policy
 does not establish future prices or balances; the approved residual risks and
 operator verification requirements remain explicit in the successor proposal.

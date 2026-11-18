@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { cloudPaidCostCapNanoUsd, decodeCloudCostGrant, decodeOpenAiDeploymentCostGrant, paidCreditReviewWindowMs }
+import { cloudCostGrantCurrent, cloudCostGrantExpiresAt, cloudPaidCostCapNanoUsd, decodeCloudCostGrant, decodeOpenAiDeploymentCostGrant, paidCreditReviewWindowMs }
   from '../../src/ai-runtime/domain/cloud-cost.js';
 import { cloudCostBudgetPath, cloudCostGrantPath, createOfflineCloudCostBudgetSeed, FirestoreCloudCostBudget }
   from '../../src/ai-runtime/infrastructure/firestore-cloud-cost-budget.js';
@@ -51,11 +51,11 @@ test('paid exact schema rejects gift disguises, wrong model, extra fields, alter
     {predecessor: {...grant.predecessor, grantId: grant.grantId}}, {approvedCapNanoUsd: 2_001},
     {balanceValidUntilMs: grant.creditExpiresAtMs + 1}, {priceSnapshot: syntheticCostGrant.priceSnapshot},
     {predecessor: {...grant.predecessor, extra: true}}]) assert.equal(decodeCloudCostGrant({...grant, ...patch}), undefined);
-  const longer = {...grant, creditExpiresAtMs: 2_000_000_000};
+  const longer = {...grant, creditExpiresAtMs: Math.max(grant.balanceVerifiedAtMs, grant.priceSnapshot.verifiedAtMs) + paidCreditReviewWindowMs + 2};
   assert.equal(decodeCloudCostGrant({...longer, balanceValidUntilMs: grant.balanceVerifiedAtMs + paidCreditReviewWindowMs + 1}), undefined);
   assert.equal(decodeCloudCostGrant({...longer, priceSnapshot: {...grant.priceSnapshot,
     validUntilMs: grant.priceSnapshot.verifiedAtMs + paidCreditReviewWindowMs + 1}}), undefined);
-  // v1 retains its original exact decoder; the new seven-day policy is not silently applied to old records.
+  // v1 retains its original exact decoder; the paid-only window policy is not silently applied to old records.
   assert.ok(decodeCloudCostGrant({...syntheticCostGrant, creditExpiresAtMs: 2_000_000_000, balanceValidUntilMs: 900_000_000}));
 });
 
@@ -172,4 +172,71 @@ test('freshness refuses changed attempts and inspect cannot disguise invalid pre
   f.gateway.rows.delete(newRow);
   assert.equal((await op.inspect({...f.packet, predecessorAttempts: []}, expectedLedger)).kind, 'unavailable');
   assert.equal((await op.inspect(f.packet, expectedLedger)).kind, 'confirmed');
+});
+
+// These dates/rates/funding are synthetic policy fixtures, not an operator packet.
+const longWindowDayMs = 24 * 60 * 60 * 1000;
+const longWindowObservedAt = Date.parse('2026-11-18T00:00:00.000+08:00');
+const longWindowCutoff = Date.parse('2027-01-18T00:00:00.000+08:00');
+const longWindowGrant: CloudPaidCostGrant = {
+  ...syntheticPaidCostGrant,
+  creditIssuedAtMs: longWindowObservedAt - longWindowDayMs,
+  creditExpiresAtMs: longWindowCutoff + 10 * longWindowDayMs,
+  balanceVerifiedAtMs: longWindowObservedAt,
+  balanceValidUntilMs: longWindowCutoff,
+  priceSnapshot: {...syntheticPaidCostGrant.priceSnapshot,
+    verifiedAtMs: longWindowObservedAt, validUntilMs: longWindowCutoff},
+};
+
+test('paid evidence accepts exactly 61 days and still accepts a shorter seven-day packet', () => {
+  assert.equal(paidCreditReviewWindowMs, 61 * longWindowDayMs);
+  assert.equal(longWindowCutoff - longWindowObservedAt, paidCreditReviewWindowMs);
+  assert.ok(decodeCloudCostGrant(longWindowGrant));
+  assert.ok(decodeOpenAiDeploymentCostGrant(longWindowGrant));
+  const sevenDayEnd = longWindowObservedAt + 7 * longWindowDayMs;
+  assert.ok(decodeCloudCostGrant({...longWindowGrant, balanceValidUntilMs: sevenDayEnd,
+    priceSnapshot: {...longWindowGrant.priceSnapshot, validUntilMs: sevenDayEnd}}));
+});
+
+for (const excess of [1, longWindowDayMs]) {
+  test(`paid balance/price independently reject 61 days plus ${excess} ms`, () => {
+    assert.equal(decodeCloudCostGrant({...longWindowGrant, balanceValidUntilMs: longWindowCutoff + excess}), undefined);
+    assert.equal(decodeCloudCostGrant({...longWindowGrant,
+      priceSnapshot: {...longWindowGrant.priceSnapshot, validUntilMs: longWindowCutoff + excess}}), undefined);
+  });
+}
+
+test('delayed verification keeps the supplied fixed cutoff and never moves it at admission', () => {
+  const later = {...longWindowGrant, balanceVerifiedAtMs: longWindowObservedAt + longWindowDayMs,
+    priceSnapshot: {...longWindowGrant.priceSnapshot, verifiedAtMs: longWindowObservedAt + 2 * longWindowDayMs}};
+  const grant = decodeCloudCostGrant(later); assert.ok(grant);
+  assert.equal(grant.balanceValidUntilMs, longWindowCutoff);
+  assert.equal(grant.priceSnapshot.validUntilMs, longWindowCutoff);
+  assert.equal(cloudCostGrantExpiresAt(grant), longWindowCutoff);
+  assert.equal(cloudCostGrantCurrent(grant, longWindowCutoff - 1), true);
+  assert.equal(cloudCostGrantCurrent(grant, longWindowCutoff), false);
+  assert.equal(cloudCostGrantCurrent(grant, longWindowCutoff + 1), false);
+  assert.equal(cloudCostGrantCurrent(grant, later.priceSnapshot.verifiedAtMs - 1), false);
+});
+
+test('credit expiry and an earlier balance/price cutoff remain independent hard bounds', () => {
+  const earlier = longWindowCutoff - longWindowDayMs;
+  assert.equal(decodeCloudCostGrant({...longWindowGrant, creditExpiresAtMs: earlier}), undefined);
+  for (const grant of [
+    {...longWindowGrant, balanceValidUntilMs: earlier},
+    {...longWindowGrant, priceSnapshot: {...longWindowGrant.priceSnapshot, validUntilMs: earlier}},
+  ]) {
+    const decoded = decodeCloudCostGrant(grant); assert.ok(decoded);
+    assert.equal(cloudCostGrantExpiresAt(decoded), earlier);
+    assert.equal(cloudCostGrantCurrent(decoded, earlier - 1), true);
+    assert.equal(cloudCostGrantCurrent(decoded, earlier), false);
+  }
+});
+
+test('verification at or after the fixed packet cutoff cannot re-open that packet', () => {
+  for (const at of [longWindowCutoff, longWindowCutoff + 1]) {
+    assert.equal(decodeCloudCostGrant({...longWindowGrant, balanceVerifiedAtMs: at}), undefined);
+    assert.equal(decodeCloudCostGrant({...longWindowGrant,
+      priceSnapshot: {...longWindowGrant.priceSnapshot, verifiedAtMs: at}}), undefined);
+  }
 });
