@@ -6,7 +6,7 @@ ENMORI is a social journal for Android. Record a mood or a note in a Check-in an
 
 ## Install on Android
 
-**[Download ENMORI 1.0.0 for Android (build 92)](https://github.com/3427564237/enmori-app/releases/download/v1.0.0/ENMORI-v92-release.apk)**
+**[Download ENMORI 1.0.0 for Android (build 92)](https://github.com/3427564237/enmori-app/releases/download/v1.0.0%2B92/ENMORI-v92-release.apk)**
 
 1. Download the APK to a device running Android 7.0 (API 24) or later.
 2. Open the file and follow Android’s installation prompt. If prompted, allow the browser or file manager that opened the APK to install apps.
@@ -14,7 +14,7 @@ ENMORI is a social journal for Android. Record a mood or a note in a Check-in an
 
 The signed package is `com.enmori.app.group`. The SHA-256 checksum for `ENMORI-v92-release.apk` is `b55693cad40716290a42dabcad67293c70c541e2b7b1a61bcbc3efcaf0b75168`.
 
-Build 92 brings the messenger bird to the Android launcher and splash screen. It includes the build 90 fixes for saved profile regions, profile forms with a landscape keyboard, and late event search results. [Release notes](https://github.com/3427564237/enmori-app/releases/tag/v1.0.0) · [Screenshots and verification (Chinese)](docs/evidence/2026-11-18-android-release/README.md#android-100-构建-92)
+Build 92 brings the messenger bird to the Android launcher and splash screen. It includes the build 90 fixes for saved profile regions, profile forms with a landscape keyboard, and late event search results. [Release notes](https://github.com/3427564237/enmori-app/releases/tag/v1.0.0%2B92) · [Screenshots and verification (Chinese)](docs/evidence/2026-11-18-android-release/README.md#android-100-构建-92)
 
 ## Develop locally
 
