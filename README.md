@@ -6,7 +6,7 @@ ENMORI is a social journal for Android. Record a mood or a note in a Check-in an
 
 **[Download ENMORI 1.0.0 for Android (build 90)](https://github.com/3427564237/enmori-app/releases/download/v1.0.0/ENMORI-v90-release.apk)**
 
-1. On a device running Android 7.0 (API 24) or later, sign in to GitHub with an account that has access to this repository and download the APK.
+1. Download the APK to a device running Android 7.0 (API 24) or later.
 2. Open the file and follow Android’s installation prompt. If prompted, allow the browser or file manager that opened the APK to install apps.
 3. If you already have build 88, open the new APK and choose **Update**. Installing over build 88 preserved the signed-in session in the Android emulator.
 
