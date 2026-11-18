@@ -22,6 +22,117 @@ import '../support/fakes.dart';
 import '../support/fake_account_preferences.dart';
 
 void main() {
+  const oldRegion = '1.30°, 103.80°';
+  const legacyProfile = OwnProfile(
+    username: 'member_a',
+    displayName: null,
+    visibility: ProfileVisibility.private,
+    revision: 2,
+    details: ProfileDetails(region: oldRegion),
+  );
+
+  testWidgets('opening a legacy profile does not create an unsaved edit', (
+    tester,
+  ) async {
+    final h = await start(tester);
+    h.prefs.profile = legacyProfile;
+    await tap(tester, 'profile-edit');
+    expect(find.text(oldRegion), findsNothing);
+    expect(find.text('Unsaved changes'), findsNothing);
+    await tester.pageBack();
+    await frames(tester);
+    expect(find.byKey(const Key('route-own-profile')), findsOneWidget);
+    expect(h.prefs.profileRevisions, isEmpty);
+  });
+
+  testWidgets('saving a nickname preserves a hidden legacy region', (
+    tester,
+  ) async {
+    final h = await start(tester);
+    h.prefs.profile = legacyProfile;
+    await tap(tester, 'profile-edit');
+    final name = find.byKey(const Key('profile-display-name'));
+    await tester.ensureVisible(name);
+    await tester.enterText(name, 'Updated name');
+    await tap(tester, 'profile-save');
+    expect(h.prefs.profile.displayName, 'Updated name');
+    expect(h.prefs.profile.details.region, oldRegion);
+    expect(h.prefs.profileRevisions, [2]);
+    expect(find.text(oldRegion), findsNothing);
+  });
+
+  testWidgets('the landscape keyboard leaves room to edit and save a profile', (
+    tester,
+  ) async {
+    final h = await start(tester);
+    await tap(tester, 'profile-edit');
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(720, 360);
+    tester.view.viewInsets = const FakeViewPadding(bottom: 220);
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await frames(tester);
+    final name = find.byKey(const Key('profile-display-name'));
+    await tester.ensureVisible(name);
+    await frames(tester);
+    final form = tester.getRect(find.byKey(const Key('route-profile-edit')));
+    final field = tester.getRect(name);
+    expect(form.intersect(field).height, greaterThanOrEqualTo(48));
+    expect(find.byKey(const Key('profile-save')).hitTestable(), findsOneWidget);
+    await tester.enterText(name, 'Landscape name');
+    await tap(tester, 'profile-save');
+    expect(h.prefs.profile.displayName, 'Landscape name');
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'editing a bio preserves the latest hidden region after a conflict',
+    (tester) async {
+      final h = await start(tester);
+      h.prefs.profile = legacyProfile;
+      await tap(tester, 'profile-edit');
+      final bio = find.byKey(const Key('profile-bio'));
+      await tester.ensureVisible(bio);
+      await tester.enterText(bio, 'An updated bio');
+      h.prefs.saveFailure = const AppFailure(
+        kind: AppFailureKind.profileRevisionPreconditionFailed,
+        message: 'conflict',
+      );
+      await tap(tester, 'profile-save');
+      const updatedRegion = '1.31°, 103.81°';
+      h.prefs.profile = const OwnProfile(
+        username: 'member_a',
+        displayName: null,
+        visibility: ProfileVisibility.private,
+        revision: 3,
+        details: ProfileDetails(region: updatedRegion),
+      );
+      h.prefs.saveFailure = null;
+      await tap(tester, 'preferences-review');
+      expect(find.textContaining(updatedRegion), findsNothing);
+      expect(find.textContaining('Also changed elsewhere:'), findsNothing);
+      await tap(tester, 'profile-save');
+      expect(h.prefs.profile.details.bio, 'An updated bio');
+      expect(h.prefs.profile.details.region, updatedRegion);
+      expect(h.prefs.profileRevisions, [2, 3]);
+    },
+  );
+
+  testWidgets('on a tablet the save action lines up with the profile form', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1024, 768);
+    addTearDown(tester.view.reset);
+    await start(tester);
+    await tap(tester, 'profile-edit');
+    final field = tester.getRect(find.byKey(const Key('profile-display-name')));
+    final save = tester.getRect(find.byKey(const Key('profile-save')));
+    expect(save.left, closeTo(field.left, 1));
+    expect(save.right, closeTo(field.right, 1));
+  });
+
   testWidgets(
     'OpenAI disclosure requires a new choice and withdrawal preserves its version',
     (tester) async {

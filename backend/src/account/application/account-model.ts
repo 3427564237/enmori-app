@@ -1,5 +1,5 @@
 import type { CloudAiConsent } from '../domain/cloud-ai-consent.js';
-import type { ProfileDetails, FieldPrivacy } from '../domain/profile-details.js';
+import type { ProfileDetails, ProfileDetailsChange, FieldPrivacy } from '../domain/profile-details.js';
 import type { ProfileVisibility } from "../domain/profile-values.js";
 import type { OptionalProcessingConsent, CheckInVisibility } from "../../onboarding/domain/initial-choice.js";
 
@@ -22,5 +22,8 @@ export interface OwnSettings {
   readonly revision: number;
 }
 
-export type ProfileChange = Omit<OwnProfile, "username" | "revision"> & { readonly expectedRevision: number };
+export type ProfileChange = Omit<OwnProfile, "username" | "revision" | "details"> & {
+  readonly details?: ProfileDetailsChange;
+  readonly expectedRevision: number;
+};
 export type SettingsChange = Omit<OwnSettings, "revision"> & { readonly expectedRevision: number };

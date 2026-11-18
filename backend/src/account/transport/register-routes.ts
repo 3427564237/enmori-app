@@ -18,8 +18,17 @@ export async function registerAccountPreferencesRoutes(app: FastifyInstance, ide
     const result = await preferences.getSettings(requirePrincipal(request));
     return result.ok ? reply.send({ settings: result.value }) : sendFailure(request, reply, result.failure);
   });
-  app.put<{ Body: { displayName: string | null; profileVisibility: string; expectedRevision: number } }>(
-    "/v1/me/profile", { onRequest: authenticate, schema: structuredClone(putProfileSchema) }, async (request, reply) => {
+  app.put<{ Body: { displayName: string | null; profileVisibility: string; expectedRevision: number; details?: unknown } }>(
+    "/v1/me/profile", { onRequest: authenticate, schema: structuredClone(putProfileSchema),
+      preValidation: async (request, reply) => {
+        // Keep a malformed region from being coerced into a stored string or null.
+        const details = request.body?.details;
+        if (details && typeof details === "object" && "region" in details &&
+            details.region !== null && typeof details.region !== "string") {
+          return sendFailureCode(request, reply, "REQUEST_INVALID");
+        }
+      },
+    }, async (request, reply) => {
       const result = await preferences.saveProfile({ principal: requirePrincipal(request), ...request.body });
       return result.ok ? reply.send({ profile: result.value }) : sendFailure(request, reply, result.failure);
     });

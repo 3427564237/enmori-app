@@ -10,6 +10,7 @@ import { createAuthBindingDocumentId } from "../src/shared/infrastructure/fireba
 import { FirebaseIdentityVerifier } from "../src/shared/infrastructure/firebase/firebase-identity-verifier.js";
 import { FirestoreAccountPreferencesRepository } from "../src/account/infrastructure/firestore-account-preferences-repository.js";
 import { OwnAccountPreferences } from "../src/account/application/own-account-preferences.js";
+import { emptyProfileDetails } from "../src/account/domain/profile-details.js";
 import { buildApp } from "../src/bootstrap/build-app.js";
 import { appFailure } from "../src/shared/application/app-failure.js";
 import { err } from "../src/shared/domain/result.js";
@@ -63,8 +64,23 @@ test("real transaction races commit once, preserve independent resources and iso
     assert.equal((await write("/v1/me/settings", { checkInVisibility: "private", optionalProcessingConsent: "rejected", expectedRevision: 0 })).statusCode, 412);
     assert.equal(JSON.stringify((await firestore.doc("accounts/owner-a").get()).data()), before);
     const other = await app.inject({ url: "/v1/me/profile", headers: { authorization: `Bearer ${tokens[1]!}` } });
-    assert.deepEqual(other.json(), { profile: { username: "member_b", displayName: null, profileVisibility: "private", revision: 0 } });
+    assert.deepEqual(other.json(), { profile: { username: "member_b", displayName: null, profileVisibility: "private", revision: 0, details: emptyProfileDetails } });
     assert.deepEqual((await firestore.doc("accounts/owner-b").get()).data(), { ...base, username: "member_b" });
+    const identity = { displayName: "Canonical", profileVisibility: "friends_only" };
+    const location = "Previously stored region";
+    const detailFields = { bio: "New bio", affiliationType: "school", affiliationName: "Example" };
+    assert.equal((await write("/v1/me/profile", { ...identity, details: { ...detailFields, region: location }, expectedRevision: 2 })).statusCode, 200);
+    const edits = await Promise.all(["First", "Second"].map(bio => write("/v1/me/profile", {
+      ...identity, expectedRevision: 3, details: { ...detailFields, bio },
+    })));
+    assert.deepEqual(edits.map(r => r.statusCode).sort(), [200, 412]);
+    assert.equal(edits.find(r => r.statusCode === 200)!.json().profile.details.region, location);
+    const current = (await firestore.doc("accounts/owner-a").get()).data()!;
+    assert.equal(current.profileDetails.region, location);
+    assert.equal(current.settingsRevision, stored.settingsRevision);
+    const clear = await write("/v1/me/profile", { ...identity, details: { ...detailFields, region: null }, expectedRevision: 4 });
+    assert.equal(clear.statusCode, 200);
+    assert.equal((await firestore.doc("accounts/owner-a").get()).get("profileDetails.region"), null);
     assert.equal((await app.inject({ url: "/v1/me/settings" })).statusCode, 401);
     await auth.updateUser("s3-account-b", { disabled: true });
     assert.equal((await app.inject({ url: "/v1/me/profile", headers: { authorization: `Bearer ${tokens[1]!}` } })).statusCode, 403);

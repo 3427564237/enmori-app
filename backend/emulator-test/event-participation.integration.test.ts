@@ -18,7 +18,11 @@ import { friendPairKey } from '../src/friends/infrastructure/firestore-friend-re
 
 const env=requireControlledEmulatorEnvironment(process.env);
 assert.equal(env.projectId,'demo-enmori-rmvp01a-r10');
-assert.equal(env.authHost,'127.0.0.1:19099');assert.equal(env.firestoreHost,'127.0.0.1:18080');
+assert.ok(
+  (env.authHost === '127.0.0.1:19099' && env.firestoreHost === '127.0.0.1:18080') ||
+  (env.authHost === '127.0.0.1:9099' && env.firestoreHost === '127.0.0.1:8080'),
+  'Use the dedicated participation or repository-suite loopback emulator pair',
+);
 const firebase=initializeApp({projectId:env.projectId},'shi-ep1-isolated'),auth=getAuth(firebase),db=getFirestore(firebase);
 const at='2026-10-20T00:00:00.000Z',event=sourceEventId('tm_YQ');
 let sourceAvailable=true;

@@ -201,7 +201,10 @@ test("Emulator Check-in snapshots Settings in the same transaction and retains o
   }
   for(const [id,visibility] of Object.entries(originalRecords)) {const read=await api.inject({url:`/v1/check-ins/${id}`,headers});assert.equal(read.json().checkIn.checkInVisibility,visibility);assert.equal((await firestore.doc(`check_ins/${id}`).get()).data()!.checkInVisibility,visibility);}
   await firestore.doc("check_ins/legacy").create({ownerAccountId:"a",note:"Legacy",createdAt:instant});const legacy=await api.inject({url:"/v1/check-ins/legacy",headers});assert.equal(Object.hasOwn(legacy.json().checkIn,"checkInVisibility"),false);
-  const extra=await api.inject({method:"POST",url:"/v1/check-ins",headers:{...headers,"idempotency-key":randomUUID()},payload:{note:"Extra",checkInVisibility:"public"}});assert.equal(extra.statusCode,400);
+  const override=await api.inject({method:"POST",url:"/v1/check-ins",headers:{...headers,"idempotency-key":randomUUID()},payload:{note:"Override",checkInVisibility:"public"}});
+  assert.equal(override.statusCode,201);assert.equal(override.json().checkIn.checkInVisibility,"public");
+  assert.equal((await firestore.doc(`check_ins/${override.json().checkIn.checkInId}`).get()).data()?.checkInVisibility,"public");
+  const extra=await api.inject({method:"POST",url:"/v1/check-ins",headers:{...headers,"idempotency-key":randomUUID()},payload:{note:"Extra",unknownField:true}});assert.equal(extra.statusCode,400);
  }finally{await api.close();}
 });
 test("Emulator overlapping Settings/save takes one consistent value, leaves each old snapshot stable",async()=>{

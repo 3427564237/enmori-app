@@ -499,8 +499,9 @@ test("explicit demo joins saved Note AI, canonical provenance, real history/soci
     const after = await db.doc(`check_ins/${created.checkIn.checkInId}`).get();
     assert.deepEqual(after.data(), { ...before.data(), checkInVisibility: "public" });
     assert(before.createTime!.isEqual(after.createTime!));
-    await c.call("DELETE", `/v1/check-ins/${created.checkIn.checkInId}`, 404);
-    await c.call("PUT", `/v1/check-ins/${created.checkIn.checkInId}`, 404, { note: "not allowed" });
+    await c.call("DELETE", `/v1/check-ins/${created.checkIn.checkInId}`, 400);
+    await c.call("PUT", `/v1/check-ins/${created.checkIn.checkInId}`, 400, { note: "Missing precondition" });
+    assert.deepEqual((await after.ref.get()).data(), after.data());
   } finally {
     await cleanup(service);
     assert.equal((await db.listCollections()).length, 0);
@@ -511,7 +512,7 @@ test("explicit demo joins saved Note AI, canonical provenance, real history/soci
 test("v2 registers only the reserved primary journey, isolates two verified identities, saves interests and completes real Friend handoff; exact cleanup preserves unrelated data", async () => {
   let sourceReads = 0;
   const service = await createControlledPhoneService({ ...options, demoFeatures: true, dualAccounts: true, eventBrowse: { source: {
-    firstBatch: async () => { sourceReads++; return [{ browseId: browseId("sponsor_real_source_shape")!, title: "Source projection test", startAt: "2026-11-10T00:00:00Z", externalSourceUrl: "https://ticketmaster.sg/event/synthetic", musicSegment: true as const }]; },
+    firstBatch: async () => { sourceReads++; return [{ browseId: browseId("sponsor_real_source_shape")!, title: "Source projection test", startAt: new Date(Date.now() + 7 * 86400000).toISOString(), externalSourceUrl: "https://ticketmaster.sg/event/synthetic", musicSegment: true as const }]; },
     detail: async () => { throw new Error("same projection must serve detail"); },
   } } });
   const env = requireControlledEmulatorEnvironment(process.env);

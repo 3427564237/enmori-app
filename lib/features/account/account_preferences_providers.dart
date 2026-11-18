@@ -57,6 +57,7 @@ final class _UnavailablePreferences implements AccountPreferencesRepository {
   @override
   Future<Result<OwnProfile>> saveProfile({
     ProfileDetails? details,
+    bool preserveRegion = false,
     required String? displayName,
     required ProfileVisibility visibility,
     required int expectedRevision,

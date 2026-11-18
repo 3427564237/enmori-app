@@ -23,6 +23,7 @@ final class BackendAccountPreferencesRepository
   @override
   Future<Result<OwnProfile>> saveProfile({
     ProfileDetails? details,
+    bool preserveRegion = false,
     required String? displayName,
     required ProfileVisibility visibility,
     required int expectedRevision,
@@ -35,7 +36,7 @@ final class BackendAccountPreferencesRepository
             'bio': details.bio,
             'affiliationType': details.affiliationType?.name,
             'affiliationName': details.affiliationName,
-            'region': details.region,
+            if (!preserveRegion) 'region': details.region,
           },
         'displayName': displayName,
         'profileVisibility': _profileVisibility(visibility),

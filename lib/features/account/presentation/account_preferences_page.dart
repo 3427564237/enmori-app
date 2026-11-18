@@ -107,6 +107,13 @@ final class _AccountPreferencesPageState
   @override
   Widget build(BuildContext context) {
     final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final availableHeight =
+        MediaQuery.sizeOf(context).height -
+        MediaQuery.viewPaddingOf(context).top -
+        keyboardInset;
+    final saveInToolbar =
+        keyboardInset > 0 &&
+        availableHeight < kToolbarHeight + 3 * kMinInteractiveDimension;
     final cloudProvider = ref
         .watch(aiClientProcessingProvider)
         .disclosureProvider;
@@ -148,12 +155,14 @@ final class _AccountPreferencesPageState
     final controller = ref.read(provider.notifier);
     final details = state.profile?.details ?? const ProfileDetails();
     final privacy = state.settings?.fieldPrivacy ?? const FieldPrivacy();
+    final detailsEdited =
+        _bio.text != (details.bio ?? '') ||
+        _affiliationType != details.affiliationType ||
+        _affiliation.text != (details.affiliationName ?? '') ||
+        _regionEdited(details);
     final dirty = profile
         ? _name.text != (state.profile?.displayName ?? '') ||
-              _bio.text != (details.bio ?? '') ||
-              _affiliationType != details.affiliationType ||
-              _affiliation.text != (details.affiliationName ?? '') ||
-              _region.text != (details.region ?? '') ||
+              detailsEdited ||
               _profileVisibility !=
                   (state.profile?.visibility ?? ProfileVisibility.private)
         : _cloudConsent != state.settings?.cloudAiConsent ||
@@ -183,14 +192,10 @@ final class _AccountPreferencesPageState
                 controller.saveProfile(
                   _name.text.trim().isEmpty ? null : _name.text,
                   _profileVisibility,
-                  details: ProfileDetails(
-                    bio: _nullable(_bio.text),
-                    affiliationType: _affiliationType,
-                    affiliationName: _affiliationType == null
-                        ? null
-                        : _nullable(_affiliation.text),
-                    region: _nullable(_region.text),
-                  ),
+                  details: detailsEdited
+                      ? _draftDetails(_nullable(_region.text))
+                      : null,
+                  preserveRegion: !_regionEdited(details),
                 );
               } else {
                 controller.saveSettings(
@@ -230,50 +235,81 @@ final class _AccountPreferencesPageState
               ? context.tr('AI settings', "AI 设置")
               : context.tr('Settings', "设置"),
         ),
+        actions: [
+          if (saveInToolbar)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: 16),
+              child: saveButton,
+            ),
+        ],
       ),
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.only(bottom: keyboardInset),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (keyboardInset == 0)
-                  Semantics(
-                    liveRegion: true,
-                    child: Text(
-                      state.phase == PreferencesPhase.saving
-                          ? context.tr(
-                              'Saving and checking your changes…',
-                              "正在保存并核对更改…",
-                            )
-                          : state.phase == PreferencesPhase.loading
-                          ? context.tr('Reading latest values…', "正在读取最新设置…")
-                          : state.message != null
-                          ? context.tr('Changes need attention', "请处理更改中的问题")
-                          : dirty
-                          ? context.tr('Unsaved changes', "有未保存的更改")
-                          : state.saved
-                          ? (profile
-                                ? context.tr('Profile saved.', "资料已保存。")
-                                : context.tr('Settings saved.', "设置已保存。"))
-                          : context.tr('Your saved preferences', "当前已保存的偏好"),
-                      key: state.saved && !dirty
-                          ? const Key('preferences-save-success')
-                          : const Key('preferences-save-status'),
-                      style: Theme.of(context).textTheme.bodySmall,
-                      textAlign: TextAlign.center,
+      bottomNavigationBar: saveInToolbar
+          ? null
+          : Padding(
+              padding: EdgeInsets.only(bottom: keyboardInset),
+              child: SafeArea(
+                top: false,
+                child: Center(
+                  heightFactor: 1,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 640),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (keyboardInset == 0)
+                            Semantics(
+                              liveRegion: true,
+                              child: Text(
+                                state.phase == PreferencesPhase.saving
+                                    ? context.tr(
+                                        'Saving and checking your changes…',
+                                        "正在保存并核对更改…",
+                                      )
+                                    : state.phase == PreferencesPhase.loading
+                                    ? context.tr(
+                                        'Reading latest values…',
+                                        "正在读取最新设置…",
+                                      )
+                                    : state.message != null
+                                    ? context.tr(
+                                        'Changes need attention',
+                                        "请处理更改中的问题",
+                                      )
+                                    : dirty
+                                    ? context.tr('Unsaved changes', "有未保存的更改")
+                                    : state.saved
+                                    ? (profile
+                                          ? context.tr(
+                                              'Profile saved.',
+                                              "资料已保存。",
+                                            )
+                                          : context.tr(
+                                              'Settings saved.',
+                                              "设置已保存。",
+                                            ))
+                                    : context.tr(
+                                        'Your saved preferences',
+                                        "当前已保存的偏好",
+                                      ),
+                                key: state.saved && !dirty
+                                    ? const Key('preferences-save-success')
+                                    : const Key('preferences-save-status'),
+                                style: Theme.of(context).textTheme.bodySmall,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          if (keyboardInset == 0) const SizedBox(height: 8),
+                          saveButton,
+                        ],
+                      ),
                     ),
                   ),
-                if (keyboardInset == 0) const SizedBox(height: 8),
-                saveButton,
-              ],
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -919,7 +955,7 @@ final class _AccountPreferencesPageState
     final value = switch (field) {
       'Display name' => profile?.displayName,
       'BIO' => profile?.details.bio,
-      'Region' => profile?.details.region,
+      'Region' => _visibleRegion(profile?.details.region),
       'School / company' =>
         profile?.details.affiliationName == null
             ? null
@@ -969,14 +1005,27 @@ final class _AccountPreferencesPageState
     revision: base.revision,
     displayName: _nullable(_name.text),
     visibility: _profileVisibility,
-    details: ProfileDetails(
-      bio: _nullable(_bio.text),
-      affiliationType: _affiliationType,
-      affiliationName: _affiliationType == null
-          ? null
-          : _nullable(_affiliation.text),
-      region: _nullable(_region.text),
+    details: _draftDetails(
+      _regionEdited(base.details)
+          ? _nullable(_region.text)
+          : base.details.region,
     ),
+  );
+
+  bool _regionEdited(ProfileDetails base) =>
+      widget.recommendationSection == null &&
+      _region.text != (_visibleRegion(base.region) ?? '');
+
+  String? _visibleRegion(String? region) =>
+      region != null && isCoordinateRegion(region) ? null : region;
+
+  ProfileDetails _draftDetails(String? region) => ProfileDetails(
+    bio: _nullable(_bio.text),
+    affiliationType: _affiliationType,
+    affiliationName: _affiliationType == null
+        ? null
+        : _nullable(_affiliation.text),
+    region: region,
   );
 
   OwnSettings _settingsDraft(OwnSettings base) => OwnSettings(
@@ -994,8 +1043,7 @@ final class _AccountPreferencesPageState
     _name.text = profile?.displayName ?? '';
     _bio.text = profile?.details.bio ?? '';
     _affiliation.text = profile?.details.affiliationName ?? '';
-    final region = profile?.details.region ?? '';
-    _region.text = isCoordinateRegion(region) ? '' : region;
+    _region.text = _visibleRegion(profile?.details.region) ?? '';
     _affiliationType = profile?.details.affiliationType;
     _profileVisibility = profile?.visibility ?? ProfileVisibility.private;
     _defaultLocation = settings?.defaultCheckInLocation ?? false;

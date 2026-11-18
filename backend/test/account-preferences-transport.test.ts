@@ -42,6 +42,19 @@ test("authenticated transport serializes only owner fields and classifies malfor
   const saved = await request(payload); assert.equal(saved.statusCode, 200);
   assert.deepEqual(saved.json(), { profile: { details: emptyProfileDetails, username: "member_a", displayName: "Alex", profileVisibility: "public", revision: 1 } });
   const stale = await request(payload); assert.equal(stale.statusCode, 412); assert.equal(stale.json().error.code, "PROFILE_REVISION_PRECONDITION_FAILED");
+  const details = { bio: "First bio", affiliationType: "school", affiliationName: "Example School" };
+  const full = await request({ ...payload, details: { ...details, region: "Old region" }, expectedRevision: 1 });
+  assert.equal(full.statusCode, 200);
+  const retained = await request({ ...payload, details: { ...details, bio: "New bio" }, expectedRevision: 2 });
+  assert.equal(retained.statusCode, 200);
+  assert.deepEqual(retained.json().profile.details, { ...details, bio: "New bio", region: "Old region" });
+  assert.equal((await request({ ...payload, details, expectedRevision: 2 })).statusCode, 412);
+  for (const malformed of [{ bio: null }, { ...details, region: 0 }, { ...details, unknown: true }]) {
+    assert.equal((await request({ ...payload, details: malformed, expectedRevision: 3 })).statusCode, 400);
+  }
+  const cleared = await request({ ...payload, details: { ...details, region: null }, expectedRevision: 3 });
+  assert.equal(cleared.statusCode, 200);
+  assert.equal(cleared.json().profile.details.region, null);
   const settings = await app.inject({ method: "PUT", url: "/v1/me/settings", headers, payload: { checkInVisibility: "friends_only", optionalProcessingConsent: "accepted", defaultCheckInLocation: true, defaultCheckInWeather: false, homeWeatherAuto: true, expectedRevision: 0 } });
   assert.equal(settings.statusCode, 200); assert.equal(settings.json().settings.checkInVisibility, "friends_only");
   assert.equal(settings.json().settings.defaultCheckInLocation, true); assert.equal(settings.json().settings.defaultCheckInWeather, false); assert.equal(settings.json().settings.homeWeatherAuto, true);

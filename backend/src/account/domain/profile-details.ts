@@ -6,6 +6,7 @@ export interface ProfileDetails {
   readonly affiliationName: string | null;
   readonly region: string | null;
 }
+export type ProfileDetailsChange = Omit<ProfileDetails, 'region'> & { readonly region?: string | null };
 export interface FieldPrivacy {
   readonly interests: ProfileVisibility;
   readonly location: ProfileVisibility;
@@ -22,14 +23,21 @@ function text(value: unknown, limit: number): string | null | undefined {
   return [...trimmed].length > limit ? undefined : trimmed || null;
 }
 export function parseProfileDetails(value: unknown): ProfileDetails | undefined {
+  const details = parseProfileDetailsChange(value);
+  if (details?.region === undefined) return undefined;
+  return { ...details, region: details.region };
+}
+
+export function parseProfileDetailsChange(value: unknown): ProfileDetailsChange | undefined {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return undefined;
   const v = value as Record<string, unknown>;
-  if (Object.keys(v).length !== 4 || !['bio', 'affiliationType', 'affiliationName', 'region'].every(k => Object.hasOwn(v, k))) return undefined;
-  const bio = text(v.bio, 500), affiliationName = text(v.affiliationName, 120), region = text(v.region, 120);
+  const hasRegion = Object.hasOwn(v, 'region');
+  if (Object.keys(v).length !== (hasRegion ? 4 : 3) || !['bio', 'affiliationType', 'affiliationName'].every(k => Object.hasOwn(v, k))) return undefined;
+  const bio = text(v.bio, 500), affiliationName = text(v.affiliationName, 120), region = hasRegion ? text(v.region, 120) : null;
   if (bio === undefined || affiliationName === undefined || region === undefined ||
       (v.affiliationType !== null && v.affiliationType !== 'school' && v.affiliationType !== 'company') ||
       (v.affiliationType === null && affiliationName !== null)) return undefined;
-  return { bio, affiliationName, region, affiliationType: v.affiliationType };
+  return { bio, affiliationName, affiliationType: v.affiliationType, ...(hasRegion ? { region } : {}) };
 }
 export function parseFieldPrivacy(value: unknown): FieldPrivacy | undefined {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return undefined;

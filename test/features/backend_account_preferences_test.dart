@@ -9,8 +9,34 @@ import 'package:enmori/features/account/data/backend_account_preferences_reposit
 import 'package:enmori/features/account/data/backend_account_repository.dart';
 import 'package:enmori/features/account/domain/account_preferences_repository.dart';
 import 'package:enmori/features/account/domain/account_repository.dart';
+import 'package:enmori/features/account/domain/profile_details.dart';
 
 void main() {
+  test('profile writes distinguish a preserved region from an explicit clear', () async {
+    final requests = <Map<String, dynamic>>[];
+    final client = BackendApiClient(
+      Uri.parse('https://example.invalid'),
+      () async => const Success('synthetic'),
+      httpClient: MockClient((request) async {
+        requests.add(jsonDecode(request.body) as Map<String, dynamic>);
+        return http.Response(jsonEncode({'profile': {
+          'username': 'member_a', 'displayName': null,
+          'profileVisibility': 'private', 'revision': 2,
+        }}), 200);
+      }),
+    );
+    addTearDown(client.close);
+    final repository = BackendAccountPreferencesRepository(client);
+    for (final retain in [true, false]) {
+      await repository.saveProfile(
+        displayName: null, visibility: ProfileVisibility.private, expectedRevision: 1,
+        details: ProfileDetails(bio: 'Edited', region: retain ? '1.30°, 103.80°' : null),
+        preserveRegion: retain,
+      );
+    }
+    expect((requests.first['details'] as Map).containsKey('region'), isFalse);
+    expect(requests.last['details'], {...requests.first['details'] as Map, 'region': null});
+  });
   test('cloud consent is explicit, version-bound and omitted by legacy-style saves', () async {
     final settings = <String, dynamic>{
       'checkInVisibility': 'private',

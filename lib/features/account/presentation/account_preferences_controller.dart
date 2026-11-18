@@ -127,12 +127,14 @@ final class AccountPreferencesController extends Notifier<PreferencesState> {
     String? name,
     ProfileVisibility visibility, {
     ProfileDetails? details,
+    bool preserveRegion = false,
   }) async {
     final profile = state.profile;
     if (state.phase != PreferencesPhase.ready || profile == null) return;
     await _save(
       () => _repository.saveProfile(
         details: details,
+        preserveRegion: preserveRegion,
         displayName: name,
         visibility: visibility,
         expectedRevision: profile.revision,

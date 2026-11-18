@@ -248,20 +248,17 @@ final class _ParticipationEventsPageState
                           icon: const Icon(Icons.arrow_forward),
                         ),
                       ),
-                      onChanged: (value) {
-                        if (_searching) _stopSearch();
-                        setState(() => _query = value);
-                      },
+                      onChanged: _changeQuery,
                       onSubmitted: (_) => unawaited(_searchAvailable()),
                     ),
                     if (_query.isNotEmpty)
                       Align(
                         alignment: Alignment.centerLeft,
                         child: TextButton(
-                          onPressed: () => setState(() {
+                          onPressed: () {
                             _search.clear();
-                            _query = '';
-                          }),
+                            _changeQuery('');
+                          },
                           child: Text(context.tr('Clear search', '清除搜索')),
                         ),
                       ),
@@ -347,6 +344,7 @@ final class _ParticipationEventsPageState
                               ),
                               initialValue: _category,
                               onSelected: (category) {
+                                if (_searching) _stopSearch();
                                 setState(() => _category = category);
                                 unawaited(_searchAvailable());
                               },
@@ -382,17 +380,19 @@ final class _ParticipationEventsPageState
                             ),
                             if (_category != null)
                               TextButton(
-                                onPressed: () =>
-                                    setState(() => _category = null),
+                                onPressed: () {
+                                  if (_searching) _stopSearch();
+                                  setState(() => _category = null);
+                                },
                                 child: Text(context.tr('Clear filter', '清除筛选')),
                               ),
                           ],
                         ),
                     ],
                     const SizedBox(height: 12),
-                    if (_query.isNotEmpty ||
-                        _category != null ||
-                        _timeFilter != EventTimeFilter.all)
+                    if (_timeFilter != EventTimeFilter.all ||
+                        (_category != null &&
+                            (!_filtersExpanded || _query.isNotEmpty)))
                       Align(
                         alignment: Alignment.centerLeft,
                         child: TextButton.icon(
@@ -608,6 +608,11 @@ final class _ParticipationEventsPageState
       },
       child: page,
     );
+  }
+
+  void _changeQuery(String value) {
+    if (_searching) _stopSearch();
+    setState(() => _query = value);
   }
 
   void _clearFilters() {

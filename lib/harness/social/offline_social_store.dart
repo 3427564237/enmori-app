@@ -223,6 +223,7 @@ final class OfflinePreferencesRepository
   @override
   Future<Result<OwnProfile>> saveProfile({
     ProfileDetails? details,
+    bool preserveRegion = false,
     required String? displayName,
     required ProfileVisibility visibility,
     required int expectedRevision,
@@ -235,6 +236,11 @@ final class OfflinePreferencesRepository
     }
     store.profile = OwnProfile(
       username: store.profile.username,
+      details: details == null
+          ? store.profile.details
+          : preserveRegion
+          ? details.withRegion(store.profile.details.region)
+          : details,
       displayName: displayName,
       visibility: visibility,
       revision: expectedRevision + 1,

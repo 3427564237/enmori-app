@@ -17987,8 +17987,7 @@
             "required": [
               "bio",
               "affiliationType",
-              "affiliationName",
-              "region"
+              "affiliationName"
             ],
             "properties": {
               "bio": {

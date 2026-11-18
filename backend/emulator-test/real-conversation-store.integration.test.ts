@@ -1,3 +1,4 @@
+import { checkInSourceVersion } from "../src/ai-conversation/infrastructure/source-use-v2.js";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { before, after, test } from "node:test";
@@ -522,22 +523,31 @@ test("open history: a historical Note authorization loss cannot be treated as em
     const note=(await firestore.doc(notePath).get());
     const sourced=new FirestoreConversationStore(gateway,process.env,Date.now,{gateway,sourceReferences:["owned immutable history fixture"],
       completeCanonicalUtcInventory:true,immutableOwnerNoteAndTime:true,permanentDeletion:true,noRestoreOrIdReuse:true});
-    const a:OriginalWriteAuthority={...authority(),dependencies:{...authority().dependencies,sources:[{sourceType:"check_in",sourceId:noteId,
-      observedVersion:{seconds:note.updateTime!.seconds,nanoseconds:note.updateTime!.nanoseconds}}]}};
+    const stamp = { seconds: note.updateTime!.seconds, nanoseconds: note.updateTime!.nanoseconds };
+    const sourceVersion = checkInSourceVersion({ id: noteId, data: note.data()!, createTime: note.createTime!, updateTime: stamp });
+    assert.ok(sourceVersion);
+    const a: OriginalWriteAuthority = { ...authority(), dependencies: { ...authority().dependencies,
+      sources: [{ sourceType: "check_in", sourceId: noteId, observedVersion: stamp }],
+      selectedReply: { processing: "local", asOf: stamp, permittedCheckInIds: [noteId], excludedCheckInIds: [],
+        sources: [{ kind: "check_in", id: noteId, version: sourceVersion }] },
+    } };
     const first=target(),op=confirmed(await sourced.initializeOperation(first,epoch,a));
     confirmed(await sourced.saveUser(op,()=>"Historical user",a));
     const assistantId=randomUUID();confirmed(await sourced.saveAssistant(op,()=>({messageId:assistantId,text:"Historical reply",presentation:{presentationMode:"default"}}),a));
     confirmed(await sourced.settleAcknowledgedAssistant(op,a));
     const next:OperationTarget={...first,targetKind:"existing",userMessageId:randomUUID(),operationId:randomUUID()};targets.push(next);
-    const capture=confirmed(await sourced.readHistory(next,authority()));
+    assert.equal((await sourced.readHistory(next,authority())).kind,"selection_conflict");
+    const capture=confirmed(await sourced.readHistory(next,a));
     assert.equal(capture.pairs.length,1);assert.equal(capture.sources[0]!.sourceId,noteId);
-    const descendant:OriginalWriteAuthority={...authority(),dependencies:{...authority().dependencies,sources:capture.sources,history:capture.pairs.map(p=>p.identity)}};
+    const descendant:OriginalWriteAuthority={...a,dependencies:{...a.dependencies,sources:capture.sources,history:capture.pairs.map(p=>p.identity)}};
     const open=confirmed(await sourced.initializeOperation(next,epoch,descendant));
     confirmed(await sourced.saveUser(open,()=>"Refer to the earlier Note",descendant));
     await firestore.doc(notePath).delete();
-    assert.equal((await sourced.readHistory(next,descendant,capture.pairs.map(p=>p.identity))).kind,"denied");
-    assert.equal((await sourced.saveAssistant(open,()=>({messageId:randomUUID(),text:"Unauthorized descendant",presentation:{presentationMode:"default"}}),descendant)).kind,"denied");
-    const fresh=confirmed(await sourced.readHistory(next,authority()));assert.deepEqual(fresh.pairs,[]);
+    assert.equal((await sourced.readHistory(next,descendant,capture.pairs.map(p=>p.identity))).kind,"source_unavailable");
+    let borrowed = false;
+    assert.equal((await sourced.saveAssistant(open,()=>{borrowed=true;return {messageId:randomUUID(),text:"Unauthorized descendant",presentation:{presentationMode:"default"}};},descendant)).kind,"source_unavailable");
+    assert.equal(borrowed,false);
+    assert.equal((await sourced.readHistory(next,a)).kind,"source_unavailable");
   } finally {await firestore.doc(notePath).delete();assert.equal((await firestore.doc(notePath).get()).exists,false);}
 });
 

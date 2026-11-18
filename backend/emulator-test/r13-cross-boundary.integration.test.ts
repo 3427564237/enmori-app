@@ -248,7 +248,7 @@ test("R13 accept create, exact retry, changed-Note conflict and later owner read
   assert.equal(onboarding.response.status, 201);
   const account = accountFrom(onboarding.body);
   assert.equal(account.optionalProcessingConsent, "accepted");
-  assert.equal(account.checkInVisibility, "public");
+  assert.equal(account.checkInVisibility, "private");
   assert.equal("accountId" in account, false);
   assert.equal("firebaseUid" in account, false);
 

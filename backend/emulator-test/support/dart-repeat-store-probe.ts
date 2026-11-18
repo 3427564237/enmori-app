@@ -9,7 +9,7 @@ export async function dartRepeatStoreProbe(baseUri: string, token: string, befor
   const version = spawnSync(executable, ["--version"], { encoding: "utf8", windowsHide: true, timeout: 10_000, maxBuffer: 4096 });
   assert(version.status === 0 && !version.error && /^Dart SDK version: 3\.13\.2(?:\s|$)/.test(`${version.stdout}${version.stderr}`.trim()),
     "Existing pinned Dart 3.13.2 must be supplied on the controlled runtime PATH");
-  const child = spawn(executable, ["run", "test/support/ai_repeat_store_probe.dart", `--base-uri=${baseUri}`],
+  const child = spawn(executable, ["--packages=.dart_tool/package_config.json", "test/support/ai_repeat_store_probe.dart", `--base-uri=${baseUri}`],
     { cwd: process.cwd(), env: process.env, windowsHide: true, stdio: ["pipe", "pipe", "pipe"] });
   let pending = "", outputBytes = 0, stderrBytes = 0, invalid = false, timedOut = false;
   let checkpointSeen = false, checkpointPassed = false, finalSeen = false, output: unknown;

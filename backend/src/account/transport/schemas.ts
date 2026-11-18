@@ -27,7 +27,7 @@ export const settingsSchema = {
 } as const;
 export const saveProfileBody = {
   type: "object", additionalProperties: false, required: ["displayName", "profileVisibility", "expectedRevision"],
-  properties: { details: profileDetailsSchema, displayName: name, profileVisibility: visibility, expectedRevision: revision },
+  properties: { details: { ...profileDetailsSchema, required: ["bio", "affiliationType", "affiliationName"] }, displayName: name, profileVisibility: visibility, expectedRevision: revision },
 } as const;
 export const saveSettingsBody = {
   type: "object", additionalProperties: false, required: ["checkInVisibility", "optionalProcessingConsent", "expectedRevision"],

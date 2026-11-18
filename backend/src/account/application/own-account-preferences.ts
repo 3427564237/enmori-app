@@ -1,6 +1,6 @@
 import type { CloudConsentFence } from "./cloud-consent-fence.js";
 import { parseCloudAiConsent } from '../domain/cloud-ai-consent.js';
-import { parseProfileDetails, parseFieldPrivacy } from '../domain/profile-details.js';
+import { parseProfileDetailsChange, parseFieldPrivacy } from '../domain/profile-details.js';
 import { appFailure, type AppFailure } from "../../shared/application/app-failure.js";
 import { err, ok, type Result } from "../../shared/domain/result.js";
 import type { AuthPrincipal } from "../../shared/ports/identity-verifier.js";
@@ -42,7 +42,7 @@ export class OwnAccountPreferences {
   public async saveProfile(input: { readonly principal: AuthPrincipal; readonly displayName: unknown;
     readonly profileVisibility: unknown; readonly details?: unknown; readonly expectedRevision: unknown }): Promise<Result<OwnProfile, AppFailure>> {
     const displayName = normalizeDisplayName(input.displayName);
-    const details = input.details === undefined ? undefined : parseProfileDetails(input.details);
+    const details = input.details === undefined ? undefined : parseProfileDetailsChange(input.details);
     if (input.details !== undefined && details === undefined) return err(appFailure("PROFILE_INVALID"));
     if (displayName === undefined || !isVisibility(input.profileVisibility) || !isRevision(input.expectedRevision)) {
       return err(appFailure("PROFILE_INVALID"));

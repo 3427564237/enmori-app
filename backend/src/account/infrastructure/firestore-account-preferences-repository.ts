@@ -70,8 +70,9 @@ export class FirestoreAccountPreferencesRepository implements AccountPreferences
   }
 
   public saveProfile(uid: string, change: ProfileChange): Promise<AccountSave<OwnProfile>> {
-    return this.save(uid, change.expectedRevision, parseOwnProfile, (revision) => ({
-      ...(change.details === undefined ? {} : { profileDetails: change.details }), displayName: change.displayName, profileVisibility: change.profileVisibility, profileRevision: revision,
+    return this.save(uid, change.expectedRevision, parseOwnProfile, (revision, current) => ({
+      ...(change.details === undefined ? {} : { profileDetails: { region: current.details?.region ?? null, ...change.details } }),
+      displayName: change.displayName, profileVisibility: change.profileVisibility, profileRevision: revision,
     }));
   }
   public saveSettings(uid: string, change: SettingsChange): Promise<AccountSave<OwnSettings>> {
@@ -81,7 +82,7 @@ export class FirestoreAccountPreferencesRepository implements AccountPreferences
       ...(change.defaultCheckInWeather === undefined ? {} : { defaultCheckInWeather: change.defaultCheckInWeather }),
       ...(change.homeWeatherAuto === undefined ? {} : { homeWeatherAuto: change.homeWeatherAuto }),
       ...(change.fieldPrivacy === undefined ? {} : { fieldPrivacy: change.fieldPrivacy }), checkInVisibility: change.checkInVisibility, optionalProcessingConsent: change.optionalProcessingConsent, settingsRevision: revision,
-    }));
+    }), change.cloudAiConsent === undefined ? undefined : { maxAttempts: 1 });
   }
 
   private async read<T>(uid: string, project: (data: StoredDocument) => T | undefined): Promise<AccountRead<T>> {
@@ -96,7 +97,8 @@ export class FirestoreAccountPreferencesRepository implements AccountPreferences
   }
 
   private async save<T extends { readonly revision: number }>(uid: string, expected: number,
-    project: (data: StoredDocument) => T | undefined, fields: (revision: number) => StoredDocument): Promise<AccountSave<T>> {
+    project: (data: StoredDocument) => T | undefined, fields: (revision: number, current: T) => StoredDocument,
+    options?: { readonly maxAttempts: 1 }): Promise<AccountSave<T>> {
     try {
       return await this.firestore.runTransaction(async (transaction) => {
         const account = await resolveAccount(transaction, uid);
@@ -105,7 +107,7 @@ export class FirestoreAccountPreferencesRepository implements AccountPreferences
         if (current === undefined || !isRevision(expected)) return dependencyUnavailable;
         if (current.revision !== expected) return { kind: "revision_precondition_failed" };
         if (current.revision >= Number.MAX_SAFE_INTEGER) return dependencyUnavailable;
-        const next = { ...account.data, ...fields(current.revision + 1) };
+        const next = { ...account.data, ...fields(current.revision + 1, current) };
         // A legacy writer must not bypass the selected producer on an opted-in
         // Account. It may still preserve independent Profile/visibility fields.
         if (!this.isolatedAiPurpose && Object.hasOwn(account.data, "purposeRevocationGeneration") &&
@@ -131,7 +133,7 @@ export class FirestoreAccountPreferencesRepository implements AccountPreferences
         if (value === undefined) return dependencyUnavailable;
         transaction.set(account.path, next);
         return { kind: "saved", value };
-      }, {maxAttempts:1});
+      }, options);
     } catch { return dependencyUnavailable; }
   }
 }

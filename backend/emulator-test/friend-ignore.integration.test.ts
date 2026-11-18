@@ -16,6 +16,7 @@ import { registerSocialModule } from "../src/bootstrap/register-social-module.js
 import { FirebaseAdminCheckInHistoryGateway } from "../src/check-ins/infrastructure/firebase-admin-check-in-history-gateway.js";
 import { AesGcmHistoryCursorCodec } from "../src/check-ins/infrastructure/aes-gcm-history-cursor-codec.js";
 import { ok } from "../src/shared/domain/result.js";
+import { emptyRecommendationProfile } from "../src/recommendation-profile/domain/recommendation-profile.js";
 const environment = requireControlledEmulatorEnvironment(process.env);
 assert.equal(environment.projectId, "demo-enmori-rmvp01a-r10");
 test("isolated actual Auth/HTTP/Firestore ignore, reread, competing restore, privacy and owned deletion seam", async t => {
@@ -54,6 +55,7 @@ test("isolated actual Auth/HTTP/Firestore ignore, reread, competing restore, pri
       await seed(`auth_bindings/${createAuthBindingDocumentId(id)}`, { accountId: id });
       await seed(`accounts/${id}`, { username: names[index], displayName: "Synthetic", profileVisibility: "public", profileRevision: 1,
         optionalProcessingConsent: "accepted", checkInVisibility: "private", onboardingCompletedAt: instant,
+        recommendationProfile: { ...emptyRecommendationProfile, discoverable: true, matchInterests: true, revision: 1 },
         fieldPrivacy: { interests: "public", location: "private", participation: "private", mapSharedWithFriends: false } });
       await seed(`friend_access/${id}`, { eligibilityState: "eligible" });
       await seed(`username_reservations/${names[index]}`, { accountId: id });
@@ -89,13 +91,13 @@ test("isolated actual Auth/HTTP/Firestore ignore, reread, competing restore, pri
       assert.equal(ignored.statusCode, 200); savedVersion = ignored.json().version;
     });
     await t.test("privacy revoke hides list/state and refuses stale Undo while durable fact remains", async () => {
-      await store.doc(`accounts/${target}`).update({ profileVisibility: "private" });
+      await store.doc(`accounts/${target}`).update({ profileVisibility: "private", "recommendationProfile.discoverable": false });
       const list = await http.inject({ url: "/v1/me/friend-recommendation-ignores", headers });
       assert.equal(list.statusCode, 200, list.body); assert.deepEqual(list.json().people, []);
       assert.equal((await http.inject({ url: path, headers })).statusCode, 404);
       assert.equal((await http.inject({ method: "PUT", url: path, headers, payload: { ignored: false, expectedVersion: savedVersion } })).statusCode, 404);
       assert.equal((await store.doc(prefPath).get()).data()?.ignored, true);
-      await store.doc(`accounts/${target}`).update({ profileVisibility: "public", displayName: "Current synthetic" });
+      await store.doc(`accounts/${target}`).update({ profileVisibility: "public", "recommendationProfile.discoverable": true, displayName: "Current synthetic" });
       const restoredList = await http.inject({ url: "/v1/me/friend-recommendation-ignores", headers });
       assert.equal(restoredList.json().people[0].displayName, "Current synthetic");
     });

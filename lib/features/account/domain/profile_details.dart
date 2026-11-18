@@ -13,6 +13,13 @@ final class ProfileDetails {
   final AffiliationType? affiliationType;
   final String? affiliationName;
   final String? region;
+
+  ProfileDetails withRegion(String? value) => ProfileDetails(
+    bio: bio,
+    affiliationType: affiliationType,
+    affiliationName: affiliationName,
+    region: value,
+  );
 }
 
 final class FieldPrivacy {

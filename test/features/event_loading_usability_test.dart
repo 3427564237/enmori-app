@@ -68,6 +68,33 @@ Future<void> _mount(
 );
 
 void main() {
+  testWidgets('clearing a search stops its late pages and keeps current rows', (
+    tester,
+  ) async {
+    final pending = Completer<Result<ActivityRead>>();
+    final repo = _Repo()..next = pending;
+    await _mount(tester, repo);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('events-search')), 'Garden');
+    await tester.tap(find.byTooltip('Search available events'));
+    await tester.pump();
+    expect(repo.nextReads, 1);
+    await tester.tap(find.text('Clear search'));
+    await tester.pump();
+    pending.complete(
+      Success(_batch('Old search result', nextCursor: 'another')),
+    );
+    await tester.pump();
+    expect(repo.nextReads, 1);
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(ParticipationEventsPage)),
+    );
+    final batch = container.read(eventBatchesProvider).batch!;
+    expect(batch.items.map((item) => item.title), ['Garden walk']);
+    expect(batch.nextCursor, 'next-page');
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets(
     'stopping a pulled refresh dismisses its spinner before HTTP finishes',
     (tester) async {

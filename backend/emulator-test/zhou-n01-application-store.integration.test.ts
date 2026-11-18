@@ -272,7 +272,7 @@ async function dartProbe(baseUri: string): Promise<{ readonly code: number | nul
   check(version.status===0&&!version.error&&/^Dart SDK version: 3\.13\.2(?:\s|$)/.test(`${version.stdout}${version.stderr}`.trim()),
     "Existing pinned Dart3.13.2 must be supplied on the controlled runtime PATH");
   const child = spawn(executable,
-    ["run", "tool/ai_wire_controlled_probe.dart", "--isolated-loopback", `--base-uri=${baseUri}`, "--fixture-source=actual-N01-Auth-store-probe"],
+    ["--packages=.dart_tool/package_config.json", "tool/ai_wire_controlled_probe.dart", "--isolated-loopback", `--base-uri=${baseUri}`, "--fixture-source=actual-N01-Auth-store-probe"],
     { cwd: process.cwd(), env: process.env, windowsHide: true, stdio: ["pipe", "pipe", "pipe"] });
   let stdout = "", stderrBytes = 0;
   child.stdout.setEncoding("utf8"); child.stdout.on("data", (value: string) => {

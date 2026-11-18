@@ -43,6 +43,7 @@ final class FakeAccountPreferences implements AccountPreferencesRepository {
   @override
   Future<Result<OwnProfile>> saveProfile({
     ProfileDetails? details,
+    bool preserveRegion = false,
     required String? displayName,
     required ProfileVisibility visibility,
     required int expectedRevision,
@@ -52,7 +53,11 @@ final class FakeAccountPreferences implements AccountPreferencesRepository {
     if (saveFailure case final failure?) return Failure(failure);
     if (pendingSave case final pending?) return pending.future;
     profile = OwnProfile(
-      details: details ?? profile.details,
+      details: details == null
+          ? profile.details
+          : preserveRegion
+          ? details.withRegion(profile.details.region)
+          : details,
       username: profile.username,
       displayName: displayName?.trim(),
       visibility: visibility,
